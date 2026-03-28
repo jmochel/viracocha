@@ -3,6 +3,8 @@ package org.saltations;
 import io.micronaut.configuration.picocli.PicocliRunner;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigCommand;
+import org.saltations.pattern.PatternCommand;
+import org.saltations.publisher.PublisherCommand;
 import picocli.CommandLine.Command;
 
 import java.util.concurrent.Callable;
@@ -17,7 +19,9 @@ import java.util.concurrent.Callable;
     description = "Workspace manager for AI-assisted development.",
     mixinStandardHelpOptions = true,
     subcommands = {
-        ConfigCommand.class
+        ConfigCommand.class,
+        PublisherCommand.class,
+        PatternCommand.class
     }
 )
 @Singleton
