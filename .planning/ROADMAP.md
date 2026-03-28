@@ -45,7 +45,12 @@ Plans:
   3. User can register a pattern, and its Freemarker variable names are automatically extracted and stored without manual enumeration
   4. User can run `vira pattern show --name <name>` and see the list of extracted parameter names alongside the path
   5. Registering a publisher or pattern with a non-existent path prints a clear error and does not modify config
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md — Add freemarker dep, create PublisherEntry + PatternEntry POJOs, upgrade ViracochaConfig typed lists, wire PublisherCommand + PatternCommand stubs into ViracochaCommand
+- [ ] 02-02-PLAN.md — Implement all four publisher leaf commands (register/list/show/unregister) with tests (PUB-01 to PUB-05)
+- [ ] 02-03-PLAN.md — Implement FreemarkerVariableExtractor and all four pattern leaf commands with tests (PAT-01 to PAT-06)
 
 ### Phase 3: Projects and Mappings
 **Goal**: Users can define projects and attach pattern mappings with per-mapping parameter values, fully specifying what a workspace generate will produce
@@ -79,6 +84,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-28 |
-| 2. Publishers and Patterns | 0/? | Not started | - |
+| 2. Publishers and Patterns | 0/3 | Not started | - |
 | 3. Projects and Mappings | 0/? | Not started | - |
 | 4. Workspace Generation | 0/? | Not started | - |
