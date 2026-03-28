@@ -9,7 +9,7 @@
 
 ### Config
 
-- [ ] **CONF-01**: User can run `vira config init` to create the XDG config directory and an empty central `config.yaml`
+- [x] **CONF-01**: User can run `vira config init` to create the XDG config directory and an empty central `config.yaml`
 - [ ] **CONF-02**: User can run `vira config show` to display the current config file path and its contents
 - [ ] **CONF-03**: All commands other than `config init` check that config exists and print a clear error if not ("Config not initialized. Run 'vira config init' first.")
 
@@ -52,8 +52,8 @@
 
 ### Logging
 
-- [ ] **LOG-01**: Structured log output is written in JSONL format to `~/.local/share/viracocha/vira.jsonl` (XDG data home)
-- [ ] **LOG-02**: Log output does not appear on stdout or stderr during normal command execution (stdout reserved for user-facing output; JSONL log goes to file only)
+- [x] **LOG-01**: Structured log output is written in JSONL format to `~/.local/share/viracocha/vira.jsonl` (XDG data home)
+- [x] **LOG-02**: Log output does not appear on stdout or stderr during normal command execution (stdout reserved for user-facing output; JSONL log goes to file only)
 
 ---
 
@@ -98,11 +98,11 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONF-01 | Phase 1 | Pending |
+| CONF-01 | Phase 1 | Complete |
 | CONF-02 | Phase 1 | Pending |
 | CONF-03 | Phase 1 | Pending |
-| LOG-01 | Phase 1 | Pending |
-| LOG-02 | Phase 1 | Pending |
+| LOG-01 | Phase 1 | Complete |
+| LOG-02 | Phase 1 | Complete |
 | PUB-01 | Phase 2 | Pending |
 | PUB-02 | Phase 2 | Pending |
 | PUB-03 | Phase 2 | Pending |

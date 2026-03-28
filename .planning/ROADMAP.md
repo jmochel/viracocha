@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Add pom.xml deps, replace logback.xml, create XdgPaths + ViracochaConfig model with tests
+- [x] 01-01-PLAN.md — Add pom.xml deps, replace logback.xml, create XdgPaths + ViracochaConfig model with tests
 - [ ] 01-02-PLAN.md — Build ConfigService, ConfigNotInitializedException, full command hierarchy, and all integration tests
 
 ### Phase 2: Publishers and Patterns
