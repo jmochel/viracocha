@@ -12,7 +12,7 @@ Build a personal CLI workspace manager (`vira`) from an existing Micronaut + pic
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Foundation** - Config model, ConfigService, command hierarchy scaffold, JSONL logging, exit code wiring
+- [x] **Phase 1: Foundation** - Config model, ConfigService, command hierarchy scaffold, JSONL logging, exit code wiring (completed 2026-03-28)
 - [ ] **Phase 2: Publishers and Patterns** - Register/list/show/unregister for publishers and patterns, Freemarker param extraction
 - [ ] **Phase 3: Projects and Mappings** - Project CRUD, mapping addition with pattern validation and param values
 - [ ] **Phase 4: Workspace Generation** - PathExpander, GeneratorService, skip-existing, dry-run, verbose, JSONL events
@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 Plans:
 - [x] 01-01-PLAN.md — Add pom.xml deps, replace logback.xml, create XdgPaths + ViracochaConfig model with tests
-- [ ] 01-02-PLAN.md — Build ConfigService, ConfigNotInitializedException, full command hierarchy, and all integration tests
+- [x] 01-02-PLAN.md — Build ConfigService, ConfigNotInitializedException, full command hierarchy, and all integration tests
 
 ### Phase 2: Publishers and Patterns
 **Goal**: Users can register named publishers and patterns, with Freemarker variables automatically extracted at registration time
@@ -78,7 +78,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/2 | Not started | - |
+| 1. Foundation | 2/2 | Complete   | 2026-03-28 |
 | 2. Publishers and Patterns | 0/? | Not started | - |
 | 3. Projects and Mappings | 0/? | Not started | - |
 | 4. Workspace Generation | 0/? | Not started | - |

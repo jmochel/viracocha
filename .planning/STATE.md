@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
-stopped_at: Completed 01-foundation/01-01-PLAN.md
-last_updated: "2026-03-28T14:03:13.473Z"
+status: verifying
+stopped_at: Completed 01-foundation/01-02-PLAN.md
+last_updated: "2026-03-28T14:10:46.328Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 4
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: .planning/PROJECT.md (updated 2026-03-27)
 
 Phase: 01 (foundation) — EXECUTING
 Plan: 2 of 2
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-03-28
 
 Progress: [░░░░░░░░░░] 0%
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 
 *Updated after each plan completion*
 | Phase 01-foundation P01 | 2 | 2 tasks | 7 files |
+| Phase 01-foundation P02 | 5 | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -68,6 +69,9 @@ Recent decisions affecting current work:
 - [Phase 01-foundation]: logstash-logback-encoder pinned at 7.4 (not BOM-managed) — Micronaut BOM does not include it
 - [Phase 01-foundation]: ViracochaConfig uses List<Object> for Phase 1 lists — typed entries added in Phase 2
 - [Phase 01-foundation]: logback.xml uses ${user.home} system property for log path; XdgPaths.logFile() used at runtime by ConfigService to create dir
+- [Phase 01-foundation]: Use @Spec CommandSpec for picocli output — required so tests can capture output via CommandLine.setOut(PrintWriter)
+- [Phase 01-foundation]: InitCommand checks Files.exists before configService.init() to distinguish new vs already-initialized messaging
+- [Phase 01-foundation]: ShowConfigCommand calls configService.load() for not-initialized guard then re-reads raw YAML bytes for display
 
 ### Pending Todos
 
@@ -81,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T14:03:13.470Z
-Stopped at: Completed 01-foundation/01-01-PLAN.md
+Last session: 2026-03-28T14:10:46.325Z
+Stopped at: Completed 01-foundation/01-02-PLAN.md
 Resume file: None

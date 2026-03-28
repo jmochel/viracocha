@@ -10,8 +10,8 @@
 ### Config
 
 - [x] **CONF-01**: User can run `vira config init` to create the XDG config directory and an empty central `config.yaml`
-- [ ] **CONF-02**: User can run `vira config show` to display the current config file path and its contents
-- [ ] **CONF-03**: All commands other than `config init` check that config exists and print a clear error if not ("Config not initialized. Run 'vira config init' first.")
+- [x] **CONF-02**: User can run `vira config show` to display the current config file path and its contents
+- [x] **CONF-03**: All commands other than `config init` check that config exists and print a clear error if not ("Config not initialized. Run 'vira config init' first.")
 
 ### Publisher
 
@@ -99,8 +99,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CONF-01 | Phase 1 | Complete |
-| CONF-02 | Phase 1 | Pending |
-| CONF-03 | Phase 1 | Pending |
+| CONF-02 | Phase 1 | Complete |
+| CONF-03 | Phase 1 | Complete |
 | LOG-01 | Phase 1 | Complete |
 | LOG-02 | Phase 1 | Complete |
 | PUB-01 | Phase 2 | Pending |
