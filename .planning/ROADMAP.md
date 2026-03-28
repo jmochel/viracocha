@@ -48,7 +48,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Add freemarker dep, create PublisherEntry + PatternEntry POJOs, upgrade ViracochaConfig typed lists, wire PublisherCommand + PatternCommand stubs into ViracochaCommand
+- [x] 02-01-PLAN.md — Add freemarker dep, create PublisherEntry + PatternEntry POJOs, upgrade ViracochaConfig typed lists, wire PublisherCommand + PatternCommand stubs into ViracochaCommand
 - [ ] 02-02-PLAN.md — Implement all four publisher leaf commands (register/list/show/unregister) with tests (PUB-01 to PUB-05)
 - [ ] 02-03-PLAN.md — Implement FreemarkerVariableExtractor and all four pattern leaf commands with tests (PAT-01 to PAT-06)
 

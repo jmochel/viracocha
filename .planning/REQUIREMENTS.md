@@ -15,17 +15,17 @@
 
 ### Publisher
 
-- [ ] **PUB-01**: User can run `vira publisher register --name <name> --path <path>` to register a named publisher in central config
+- [x] **PUB-01**: User can run `vira publisher register --name <name> --path <path>` to register a named publisher in central config
 - [ ] **PUB-02**: `vira publisher register` validates that the specified path exists on disk before registering
-- [ ] **PUB-03**: User can run `vira publisher list` to display all registered publishers (name, path)
+- [x] **PUB-03**: User can run `vira publisher list` to display all registered publishers (name, path)
 - [ ] **PUB-04**: User can run `vira publisher show --name <name>` to display details of a specific publisher
 - [ ] **PUB-05**: User can run `vira publisher unregister --name <name>` to remove a publisher from central config
 
 ### Pattern
 
-- [ ] **PAT-01**: User can run `vira pattern register --name <name> --path <path>` to register a named pattern in central config
+- [x] **PAT-01**: User can run `vira pattern register --name <name> --path <path>` to register a named pattern in central config
 - [ ] **PAT-02**: `vira pattern register` validates that the specified path exists on disk before registering
-- [ ] **PAT-03**: `vira pattern register` extracts Freemarker variable names from the pattern source (scanning file content and file/folder name path segments) and stores them in the config entry
+- [x] **PAT-03**: `vira pattern register` extracts Freemarker variable names from the pattern source (scanning file content and file/folder name path segments) and stores them in the config entry
 - [ ] **PAT-04**: User can run `vira pattern list` to display all registered patterns (name, path, parameter count)
 - [ ] **PAT-05**: User can run `vira pattern show --name <name>` to display pattern details including the list of extracted parameter names
 - [ ] **PAT-06**: User can run `vira pattern unregister --name <name>` to remove a pattern from central config
@@ -103,14 +103,14 @@
 | CONF-03 | Phase 1 | Complete |
 | LOG-01 | Phase 1 | Complete |
 | LOG-02 | Phase 1 | Complete |
-| PUB-01 | Phase 2 | Pending |
+| PUB-01 | Phase 2 | Complete |
 | PUB-02 | Phase 2 | Pending |
-| PUB-03 | Phase 2 | Pending |
+| PUB-03 | Phase 2 | Complete |
 | PUB-04 | Phase 2 | Pending |
 | PUB-05 | Phase 2 | Pending |
-| PAT-01 | Phase 2 | Pending |
+| PAT-01 | Phase 2 | Complete |
 | PAT-02 | Phase 2 | Pending |
-| PAT-03 | Phase 2 | Pending |
+| PAT-03 | Phase 2 | Complete |
 | PAT-04 | Phase 2 | Pending |
 | PAT-05 | Phase 2 | Pending |
 | PAT-06 | Phase 2 | Pending |
