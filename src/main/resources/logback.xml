@@ -1,0 +1,14 @@
+<configuration>
+
+    <!-- Ensure the log directory exists at startup -->
+    <appender name="JSONL" class="ch.qos.logback.core.FileAppender">
+        <file>${user.home}/.local/share/viracocha/vira.jsonl</file>
+        <append>true</append>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+    </appender>
+
+    <root level="info">
+        <appender-ref ref="JSONL" />
+    </root>
+
+</configuration>
