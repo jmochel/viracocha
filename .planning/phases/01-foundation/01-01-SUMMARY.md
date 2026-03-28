@@ -123,3 +123,17 @@ None — no external service configuration required.
 ---
 *Phase: 01-foundation*
 *Completed: 2026-03-28*
+
+## Self-Check: PASSED
+
+- FOUND: pom.xml
+- FOUND: logback.xml
+- FOUND: XdgPaths.java
+- FOUND: ViracochaConfig.java
+- FOUND: XdgPathsTest.java
+- FOUND: ViracochaConfigTest.java
+- FOUND: logback-test.xml
+- FOUND: 01-01-SUMMARY.md
+- FOUND commit: 3fc1edb (Task 1)
+- FOUND commit: b3188f9 (Task 2)
+- 6/6 tests pass
