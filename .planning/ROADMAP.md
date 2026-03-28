@@ -29,7 +29,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Running any non-init command before `vira config init` prints "Config not initialized. Run 'vira config init' first." and exits cleanly
   4. Every subcommand responds to `--help` with correct usage information
   5. Structured log output appears in `~/.local/share/viracocha/vira.jsonl` without polluting stdout or stderr
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Add pom.xml deps, replace logback.xml, create XdgPaths + ViracochaConfig model with tests
+- [ ] 01-02-PLAN.md — Build ConfigService, ConfigNotInitializedException, full command hierarchy, and all integration tests
 
 ### Phase 2: Publishers and Patterns
 **Goal**: Users can register named publishers and patterns, with Freemarker variables automatically extracted at registration time
@@ -74,7 +78,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation | 0/? | Not started | - |
+| 1. Foundation | 0/2 | Not started | - |
 | 2. Publishers and Patterns | 0/? | Not started | - |
 | 3. Projects and Mappings | 0/? | Not started | - |
 | 4. Workspace Generation | 0/? | Not started | - |
