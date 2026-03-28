@@ -13,7 +13,7 @@ import java.util.List;
 public class ViracochaConfig {
 
     private int version = 1;
-    private List<Object> publishers = new ArrayList<>();
-    private List<Object> patterns = new ArrayList<>();
+    private List<PublisherEntry> publishers = new ArrayList<>();
+    private List<PatternEntry> patterns = new ArrayList<>();
     private List<Object> projects = new ArrayList<>();
 }
