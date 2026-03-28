@@ -1,0 +1,7 @@
+<configuration>
+    <!-- Suppress all log output during tests; JSONL goes to /dev/null -->
+    <appender name="NULL" class="ch.qos.logback.core.helpers.NOPAppender"/>
+    <root level="off">
+        <appender-ref ref="NULL"/>
+    </root>
+</configuration>
