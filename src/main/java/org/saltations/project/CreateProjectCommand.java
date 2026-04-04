@@ -56,7 +56,7 @@ public class CreateProjectCommand implements Callable<Integer> {
                 return 1;
             }
 
-            config.getProjects().add(new ProjectEntry(name, path, new ArrayList<>(), new LinkedHashMap<>()));
+            config.getProjects().add(new ProjectEntry(name, path, new ArrayList<>(), new LinkedHashMap<>(), new ArrayList<>()));
             configService.save(config);
             spec.commandLine().getOut().println("Project '" + name + "' created.");
             return 0;

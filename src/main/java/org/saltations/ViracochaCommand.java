@@ -7,6 +7,7 @@ import org.saltations.pattern.PatternCommand;
 import org.saltations.project.ProjectCommand;
 import org.saltations.publisher.PublisherCommand;
 import org.saltations.generate.GenerateCommand;
+import org.saltations.subscription.SubscriptionCommand;
 import picocli.CommandLine.Command;
 
 import java.util.concurrent.Callable;
@@ -31,6 +32,7 @@ import java.util.concurrent.Callable;
         PublisherCommand.class,
         PatternCommand.class,
         ProjectCommand.class,
+        SubscriptionCommand.class,
         GenerateCommand.class
     }
 )

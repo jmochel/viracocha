@@ -72,7 +72,7 @@ class GenerateCommandTest {
         ViracochaConfig cfg = new ViracochaConfig();
         cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
         cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>()));
+            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
         configService.save(cfg);
     }
 

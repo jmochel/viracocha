@@ -65,7 +65,7 @@ class GeneratorServiceTest {
         LinkedHashMap<String, String> mParams = new LinkedHashMap<>();
         mParams.put("name", "World");
         cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", mParams)), new LinkedHashMap<>()));
+            List.of(new MappingEntry("pat1", ".", mParams)), new LinkedHashMap<>(), new java.util.ArrayList<>()));
         configService.save(cfg);
 
         GenerationResult r = generatorService.generate("p1", false, false);
@@ -87,7 +87,7 @@ class GeneratorServiceTest {
         ViracochaConfig cfg = new ViracochaConfig();
         cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
         cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>()));
+            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
         configService.save(cfg);
 
         assertEquals(0, generatorService.generate("p1", false, false).skipped());
@@ -105,7 +105,7 @@ class GeneratorServiceTest {
         ViracochaConfig cfg = new ViracochaConfig();
         cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
         cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>()));
+            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
         configService.save(cfg);
 
         long before = fileCount(workspace);
@@ -124,7 +124,7 @@ class GeneratorServiceTest {
         ViracochaConfig cfg = new ViracochaConfig();
         cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
         cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>()));
+            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
         configService.save(cfg);
 
         GenerationResult r = generatorService.generate("p1", true, true);
@@ -143,7 +143,7 @@ class GeneratorServiceTest {
         ViracochaConfig cfg = new ViracochaConfig();
         cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
         cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", "out", new LinkedHashMap<>())), new LinkedHashMap<>()));
+            List.of(new MappingEntry("pat1", "out", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
         configService.save(cfg);
 
         GenerationResult r = generatorService.generate("p1", false, false);
@@ -160,7 +160,7 @@ class GeneratorServiceTest {
         ViracochaConfig cfg = new ViracochaConfig();
         cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
         cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>()));
+            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
         configService.save(cfg);
 
         Files.createDirectory(workspace.resolve("foo.txt"));

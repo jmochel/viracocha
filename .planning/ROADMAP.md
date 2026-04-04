@@ -82,10 +82,10 @@
 | 2. Publishers and Patterns | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 3. Projects and Mappings | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 4. Workspace Generation | v1.0 | 3/3 | Complete | 2026-04-04 |
-| 5. Subscription model & CLI | v2.0 | 0/? | Pending | — |
+| 5. Subscription model & CLI | v2.0 | 3/3 | Complete | 2026-04-04 |
 | 6. Sync engine | v2.0 | 0/? | Pending | — |
 | 7. `vira sync` & docs | v2.0 | 0/? | Pending | — |
 
 ## Next step
 
-**Phase 5 — Subscription model & CLI** — `/gsd-discuss-phase 5` then `/gsd-plan-phase 5`
+**Phase 6 — Sync engine** — `/gsd-discuss-phase 6` then `/gsd-plan-phase 6`

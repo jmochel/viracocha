@@ -23,7 +23,7 @@ class ViracochaConfigProjectTypedListTest {
         Map<String, String> params = new LinkedHashMap<>();
         params.put("k1", "v1");
         MappingEntry mapping = new MappingEntry("pat-a", "out/dir", params);
-        config.getProjects().add(new ProjectEntry("proj1", "/tmp/ws", List.of(mapping), new LinkedHashMap<>()));
+        config.getProjects().add(new ProjectEntry("proj1", "/tmp/ws", List.of(mapping), new LinkedHashMap<>(), new java.util.ArrayList<>()));
 
         String serialized = yaml.writeValueAsString(config);
         ViracochaConfig deserialized = yaml.readValue(serialized, ViracochaConfig.class);
@@ -42,7 +42,7 @@ class ViracochaConfigProjectTypedListTest {
     @Test
     void emptyParametersMappingRoundTrips() throws Exception {
         ViracochaConfig config = new ViracochaConfig();
-        config.getProjects().add(new ProjectEntry("p", "/ws", List.of(new MappingEntry("pat", "dest", new LinkedHashMap<>())), new LinkedHashMap<>()));
+        config.getProjects().add(new ProjectEntry("p", "/ws", List.of(new MappingEntry("pat", "dest", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
         String serialized = yaml.writeValueAsString(config);
         ViracochaConfig deserialized = yaml.readValue(serialized, ViracochaConfig.class);
         assertTrue(deserialized.getProjects().get(0).getMappings().get(0).getParameters().isEmpty());
@@ -53,7 +53,7 @@ class ViracochaConfigProjectTypedListTest {
         LinkedHashMap<String, String> projParams = new LinkedHashMap<>();
         projParams.put("env", "prod");
         ViracochaConfig config = new ViracochaConfig();
-        config.getProjects().add(new ProjectEntry("proj1", "/tmp/ws", List.of(), projParams));
+        config.getProjects().add(new ProjectEntry("proj1", "/tmp/ws", List.of(), projParams, new java.util.ArrayList<>()));
 
         String serialized = yaml.writeValueAsString(config);
         assertTrue(serialized.contains("parameters:"));
