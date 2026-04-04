@@ -167,5 +167,46 @@
     </plugins>
   </build>
 
+  <!--
+    GraalVM native image: requires a GraalVM JDK (JAVA_HOME / GRAALVM_HOME with native-image).
+    Build: ./mvnw -DskipTests -Pgraalvm-native package
+    Binary: target/vira (see native-maven-plugin imageName below)
+  -->
+  <profiles>
+    <profile>
+      <id>graalvm-native</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.graalvm.buildtools</groupId>
+            <artifactId>native-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>vira-native-image</id>
+                <phase>package</phase>
+                <goals>
+                  <goal>compile</goal>
+                </goals>
+              </execution>
+            </executions>
+            <configuration>
+              <imageName>vira</imageName>
+              <mainClass>${exec.mainClass}</mainClass>
+              <buildArgs combine.children="append">
+                <buildArg>--no-fallback</buildArg>
+                <buildArg>--initialize-at-run-time=freemarker</buildArg>
+                <buildArg>--initialize-at-run-time=ch.qos.logback</buildArg>
+                <buildArg>--initialize-at-run-time=net.logstash.logback</buildArg>
+                <buildArg>--initialize-at-run-time=org.yaml.snakeyaml</buildArg>
+              </buildArgs>
+              <metadataRepository>
+                <enabled>true</enabled>
+              </metadataRepository>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

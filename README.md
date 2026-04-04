@@ -1,7 +1,19 @@
 # Read Me
 
+vira (Viracocha): A CLI that maps both AI configuration artifacts and template folders and files into a project. Allows AI configuration artifacts to be synced back to their source.
 
+## GraalVM native image
 
+Prerequisites: [GraalVM for JDK 21](https://www.graalvm.org/) (or another distribution) with `native-image` installed (`gu install native-image` on older GraalVM bundles).
+
+Build a standalone binary named `vira` in `target/`:
+
+```bash
+./mvnw -DskipTests -Pgraalvm-native package
+./target/vira --help
+```
+
+JVM workflow is unchanged: `./mvnw -DskipTests package` then `java -jar target/viracocha-0.1.jar`, or use `scripts/vira` from the repo root.
 
 # Tech Stack
 
