@@ -22,7 +22,7 @@
 | # | Phase | Goal | Requirements | Success criteria (observable) |
 |---|-------|------|--------------|------------------------------|
 | 5 | Subscription model & CLI | Persist subscriptions in YAML; CRUD via CLI | CFG-01, CFG-02, SUB-01–SUB-07 | User can add/list/show/remove subscriptions; validation errors are clear; config round-trips |
-| 6 | Sync engine | 1/3 | In Progress|  |
+| 6 | Sync engine | Filesystem sync with direction + conflict detection | SYN-01–SYN-05 | Unit/integration tests pass for pub→ws, ws→pub, bidirectional conflict; hidden-path behavior documented |
 | 7 | `vira sync` & docs | User-facing sync command, flags, tests, README | SYN-06–SYN-09, X-01, X-02 | `vira sync --project` works with `--dry-run` / `--verbose`; summary line; README updated |
 
 #### Phase 5: Subscription model & CLI
@@ -83,9 +83,9 @@
 | 3. Projects and Mappings | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 4. Workspace Generation | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 5. Subscription model & CLI | v2.0 | 3/3 | Complete | 2026-04-04 |
-| 6. Sync engine | v2.0 | 0/3 | Planned | — |
+| 6. Sync engine | v2.0 | 1/3 | In progress | — |
 | 7. `vira sync` & docs | v2.0 | 0/? | Pending | — |
 
 ## Next step
 
-**Phase 6 — Sync engine** — `/gsd-execute-phase 6` (3 plans: 06-01 … 06-03)
+**Phase 6 — Sync engine** — `/gsd-execute-phase 6` (2 plans remaining: 06-02, 06-03; 06-01 complete)

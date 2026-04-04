@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Subscriptions & sync
-status: completed
+status: executing
 stopped_at: Phase 6 context gathered
-last_updated: "2026-04-04T21:41:28.033Z"
-last_activity: 2026-04-04 — Phase 5 executed
+last_updated: "2026-04-04T21:48:04.643Z"
+last_activity: 2026-04-04 -- Phase 06 execution started
 progress:
   total_phases: 3
   completed_phases: 1
-  total_plans: 3
+  total_plans: 6
   completed_plans: 3
 ---
 
@@ -21,14 +21,14 @@ See: `.planning/PROJECT.md`
 
 **Core value:** A developer can register patterns and publishers once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
 
-**Current focus:** Milestone v2.0 — Phase 6 (sync engine)
+**Current focus:** Phase 06 — Sync engine
 
 ## Current Position
 
-Phase: 6 — Sync engine
-Plan: —
-Status: Phase 5 complete (3/3 plans). Ready to discuss or plan Phase 6.
-Last activity: 2026-04-04 — Phase 5 executed
+Phase: 06 (Sync engine) — EXECUTING
+Plan: 2 of 3 next (06-02)
+Status: Plan 06-01 complete; Wave 1 done
+Last activity: 2026-04-04 — completed plan 06-01 (sync API types)
 
 ## Performance Metrics
 
@@ -68,5 +68,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-04T21:41:28.031Z
-Stopped at: Phase 6 context gathered
-Resume file: .planning/phases/06-sync-engine/06-CONTEXT.md
+Stopped at: plan 06-02 (DefaultSyncService one-way)
+Resume file: .planning/phases/06-sync-engine/06-02-PLAN.md
