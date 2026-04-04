@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.concurrent.Callable;
 
 /**
@@ -55,7 +56,7 @@ public class CreateProjectCommand implements Callable<Integer> {
                 return 1;
             }
 
-            config.getProjects().add(new ProjectEntry(name, path, new ArrayList<>()));
+            config.getProjects().add(new ProjectEntry(name, path, new ArrayList<>(), new LinkedHashMap<>()));
             configService.save(config);
             spec.commandLine().getOut().println("Project '" + name + "' created.");
             return 0;
