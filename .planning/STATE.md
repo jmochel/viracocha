@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Subscriptions & sync
-status: Roadmap ready — start Phase 5
+status: Phase 5 context ready — plan next
 stopped_at: ""
 last_updated: "2026-04-04T00:00:00.000Z"
 last_activity: 2026-04-04
@@ -25,10 +25,10 @@ See: `.planning/PROJECT.md`
 
 ## Current Position
 
-Phase: 5 — Subscription model & CLI (next)
+Phase: 5 — Subscription model & CLI
 Plan: —
-Status: Roadmap defined; ready for `/gsd-discuss-phase 5`
-Last activity: 2026-04-04 — Milestone v2.0 roadmap created
+Status: `05-CONTEXT.md` gathered — ready for `/gsd-plan-phase 5`
+Last activity: 2026-04-04 — Phase 5 discuss-phase completed
 
 ## Performance Metrics
 
