@@ -45,7 +45,7 @@ public class FreemarkerVariableExtractor {
 
         try (Stream<Path> stream = Files.walk(root)) {
             List<Path> paths = stream
-                .filter(p -> !hasHiddenPathSegment(root, p))
+                .filter(p -> !PatternPathUtils.hasHiddenPathSegment(root, p))
                 .collect(Collectors.toList());
 
             for (Path p : paths) {
@@ -64,20 +64,6 @@ public class FreemarkerVariableExtractor {
         List<String> sorted = new ArrayList<>(vars);
         Collections.sort(sorted);
         return sorted;
-    }
-
-    /**
-     * True if any path segment under {@code root} (including {@code path}'s filename) starts with ".".
-     * Skips entire subtrees under hidden directories (e.g. {@code .git/config}).
-     */
-    private static boolean hasHiddenPathSegment(Path root, Path path) {
-        Path rel = root.relativize(path);
-        for (int i = 0; i < rel.getNameCount(); i++) {
-            if (rel.getName(i).toString().startsWith(".")) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private void extractFromString(String text, Set<String> vars) {
