@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: Subscriptions & sync
-status: Phase 5 context ready — plan next
+status: Phase 5 planned — execute next
 stopped_at: ""
 last_updated: "2026-04-04T00:00:00.000Z"
 last_activity: 2026-04-04
@@ -27,8 +27,8 @@ See: `.planning/PROJECT.md`
 
 Phase: 5 — Subscription model & CLI
 Plan: —
-Status: `05-CONTEXT.md` gathered — ready for `/gsd-plan-phase 5`
-Last activity: 2026-04-04 — Phase 5 discuss-phase completed
+Status: 3 plans (05-01..05-03) — ready for `/gsd-execute-phase 5`
+Last activity: 2026-04-04 — Phase 5 plan-phase completed
 
 ## Performance Metrics
 
