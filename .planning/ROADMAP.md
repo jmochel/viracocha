@@ -83,9 +83,9 @@
 | 3. Projects and Mappings | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 4. Workspace Generation | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 5. Subscription model & CLI | v2.0 | 3/3 | Complete | 2026-04-04 |
-| 6. Sync engine | v2.0 | 0/? | Pending | — |
+| 6. Sync engine | v2.0 | 0/3 | Planned | — |
 | 7. `vira sync` & docs | v2.0 | 0/? | Pending | — |
 
 ## Next step
 
-**Phase 6 — Sync engine** — `/gsd-discuss-phase 6` then `/gsd-plan-phase 6`
+**Phase 6 — Sync engine** — `/gsd-execute-phase 6` (3 plans: 06-01 … 06-03)
