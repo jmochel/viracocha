@@ -15,5 +15,5 @@ public class ViracochaConfig {
     private int version = 1;
     private List<PublisherEntry> publishers = new ArrayList<>();
     private List<PatternEntry> patterns = new ArrayList<>();
-    private List<Object> projects = new ArrayList<>();
+    private List<ProjectEntry> projects = new ArrayList<>();
 }
