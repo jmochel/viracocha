@@ -18,7 +18,13 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "vira",
-    description = "Workspace manager for AI-assisted development.",
+    description = { 
+        "Workspace manager for AI-assisted development.", 
+        "   - Syncs project's AI config artifacts FROM 'Publisher' folders",
+        "   - Syncs project's AI config artifacts TO 'Publisher' folders (if desired)",
+        "   - Generates folders/files FROM 'Pattern' folders/files into a project folder", 
+        "   - Mapping between 'Patterns' and 'Publishers' is defined in a 'Project' file"
+    },
     mixinStandardHelpOptions = true,
     subcommands = {
         ConfigCommand.class,
