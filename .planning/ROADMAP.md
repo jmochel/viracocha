@@ -13,7 +13,7 @@ Build a personal CLI workspace manager (`vira`) from an existing Micronaut + pic
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Foundation** - Config model, ConfigService, command hierarchy scaffold, JSONL logging, exit code wiring (completed 2026-03-28)
-- [ ] **Phase 2: Publishers and Patterns** - Register/list/show/unregister for publishers and patterns, Freemarker param extraction
+- [x] **Phase 2: Publishers and Patterns** - Register/list/show/unregister for publishers and patterns, Freemarker param extraction (completed 2026-04-04)
 - [ ] **Phase 3: Projects and Mappings** - Project CRUD, mapping addition with pattern validation and param values
 - [ ] **Phase 4: Workspace Generation** - PathExpander, GeneratorService, skip-existing, dry-run, verbose, JSONL events
 
@@ -49,8 +49,8 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md — Add freemarker dep, create PublisherEntry + PatternEntry POJOs, upgrade ViracochaConfig typed lists, wire PublisherCommand + PatternCommand stubs into ViracochaCommand
-- [ ] 02-02-PLAN.md — Implement all four publisher leaf commands (register/list/show/unregister) with tests (PUB-01 to PUB-05)
-- [ ] 02-03-PLAN.md — Implement FreemarkerVariableExtractor and all four pattern leaf commands with tests (PAT-01 to PAT-06)
+- [x] 02-02-PLAN.md — Implement all four publisher leaf commands (register/list/show/unregister) with tests (PUB-01 to PUB-05)
+- [x] 02-03-PLAN.md — Implement FreemarkerVariableExtractor and all four pattern leaf commands with tests (PAT-01 to PAT-06)
 
 ### Phase 3: Projects and Mappings
 **Goal**: Users can define projects and attach pattern mappings with per-mapping parameter values, fully specifying what a workspace generate will produce
@@ -84,6 +84,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-28 |
-| 2. Publishers and Patterns | 0/3 | Not started | - |
+| 2. Publishers and Patterns | 3/3 | Complete   | 2026-04-04 |
 | 3. Projects and Mappings | 0/? | Not started | - |
 | 4. Workspace Generation | 0/? | Not started | - |
