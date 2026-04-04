@@ -15,7 +15,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 1: Foundation** - Config model, ConfigService, command hierarchy scaffold, JSONL logging, exit code wiring (completed 2026-03-28)
 - [x] **Phase 2: Publishers and Patterns** - Register/list/show/unregister for publishers and patterns, Freemarker param extraction (completed 2026-04-04)
 - [x] **Phase 3: Projects and Mappings** - Project CRUD, mapping addition with pattern validation and param values (completed 2026-04-04)
-- [ ] **Phase 4: Workspace Generation** - PathExpander, GeneratorService, skip-existing, dry-run, verbose, JSONL events
+- [x] **Phase 4: Workspace Generation** - PathExpander, GeneratorService, skip-existing, dry-run, verbose, JSONL events (completed 2026-04-04)
 
 ## Phase Details
 
@@ -83,8 +83,8 @@ Plans:
 
 Plans:
 - [x] 04-01-PLAN.md — ProjectEntry parameters, PathExpander + unit tests (GEN-02, GEN-03)
-- [ ] 04-02-PLAN.md — GeneratorService: merge model, walk pattern tree, skip-existing, dry-run (GEN-01–GEN-05, GEN-07)
-- [ ] 04-03-PLAN.md — `vira generate` command, summary/verbose output, integration tests (GEN-06, GEN-07, GEN-08)
+- [x] 04-02-PLAN.md — GeneratorService: merge model, walk pattern tree, skip-existing, dry-run (GEN-01–GEN-05, GEN-07)
+- [x] 04-03-PLAN.md — `vira generate` command, summary/verbose output, integration tests (GEN-06, GEN-07, GEN-08)
 
 ## Progress
 
@@ -96,4 +96,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation | 2/2 | Complete   | 2026-03-28 |
 | 2. Publishers and Patterns | 3/3 | Complete   | 2026-04-04 |
 | 3. Projects and Mappings | 3/3 | Complete    | 2026-04-04 |
-| 4. Workspace Generation | 1/3 | In progress | - |
+| 4. Workspace Generation | 3/3 | Complete   | 2026-04-04 |

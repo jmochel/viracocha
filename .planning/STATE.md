@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: executing
+status: milestone complete
 stopped_at: ""
-last_updated: "2026-04-04T16:00:00.000Z"
-last_activity: 2026-04-04 — Phase 4 plan 04-01 complete
+last_updated: "2026-04-04T17:10:00.000Z"
+last_activity: 2026-04-04 — Phase 4 complete (generate + GeneratorService)
 progress:
   total_phases: 4
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 11
-  completed_plans: 9
+  completed_plans: 11
 ---
 
 # Project State
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** A developer can register patterns and publishers once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
-**Current focus:** Phase 04 — Workspace Generation
+**Current focus:** v1.0 milestone — all planned phases complete
 
 ## Current Position
 
-Phase: 04 (Workspace Generation) — EXECUTING
-Plan: 2 of 3 next (04-02)
-Status: Phase 4 in progress — 04-01 complete; next `/gsd-execute-phase 4` (or Wave 2)
-Last activity: 2026-04-04 — completed 04-01 (ProjectEntry parameters + PathExpander)
+Phase: 4 of 4 (Workspace Generation) — COMPLETE
+Plan: 3/3 plans done
+Status: Phase 4 execution finished; `vira generate` available
+Last activity: 2026-04-04 — completed 04-02 (GeneratorService) and 04-03 (GenerateCommand)
 
-Progress: Phase 3 complete (3/3 plans). Phase 4: 1/3 plans complete.
+Progress: All four phases complete (11/11 plans in roadmap).
 
 ## Performance Metrics
 
@@ -81,10 +81,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- [Phase 4]: Freemarker does NOT expand path variables — PathExpander utility must be built and tested independently before any file-output code
+None — PathExpander and generation pipeline implemented in Phase 4.
 
 ## Session Continuity
 
-Last session: 2026-04-04T21:15:00.000Z
-Stopped at: Phase 4 context gathered
-Resume file: `.planning/phases/04-workspace-generation/04-CONTEXT.md`
+Last session: 2026-04-04T17:10:00.000Z
+Stopped at: Phase 4 complete
+Resume file: —
