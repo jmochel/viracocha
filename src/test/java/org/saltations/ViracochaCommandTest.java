@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import picocli.CommandLine;
 
 import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -27,8 +26,11 @@ public class ViracochaCommandTest {
             commandLine.setOut(new PrintWriter(stdout, true));
             int exitCode = commandLine.execute("--help");
             assertEquals(0, exitCode, "--help must exit 0");
-            assertTrue(stdout.toString().contains("config"),
+            String help = stdout.toString();
+            assertTrue(help.contains("config"),
                 "--help output must list 'config' subcommand");
+            assertTrue(help.contains("generate"),
+                "--help output must list 'generate' subcommand");
         }
     }
 }

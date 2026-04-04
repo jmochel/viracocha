@@ -3,6 +3,7 @@ package org.saltations;
 import io.micronaut.configuration.picocli.PicocliRunner;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigCommand;
+import org.saltations.generate.GenerateCommand;
 import org.saltations.pattern.PatternCommand;
 import org.saltations.project.ProjectCommand;
 import org.saltations.publisher.PublisherCommand;
@@ -23,7 +24,8 @@ import java.util.concurrent.Callable;
         ConfigCommand.class,
         PublisherCommand.class,
         PatternCommand.class,
-        ProjectCommand.class
+        ProjectCommand.class,
+        GenerateCommand.class
     }
 )
 @Singleton
