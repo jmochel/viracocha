@@ -21,6 +21,8 @@ public class SyncSubscriptionResult {
     private int filesFailed;
     private int conflicts;
     private List<SyncConflictRecord> conflictRecords = new ArrayList<>();
+    /** Human-readable lines when {@code --verbose} (same role as {@link org.saltations.generate.GenerationResult#verboseLines()}). */
+    private List<String> verboseLines = new ArrayList<>();
     /**
      * {@code true} when this subscription applied with no blocking conflicts
      * (planner: success when {@code conflicts == 0} after analyze).

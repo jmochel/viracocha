@@ -110,6 +110,34 @@ class DefaultSyncServiceOneWayTest {
     }
 
     @Test
+    void dryRun_doesNotCopyButCountsWouldCopy() throws Exception {
+        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+        Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
+        Files.createDirectories(pubRoot.resolve("src/sub"));
+        Files.writeString(pubRoot.resolve("src/sub/dry.txt"), "dry-run", StandardCharsets.UTF_8);
+
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, "src", "out");
+
+        SyncEngineResult r = syncService.syncProject("proj1", null, true, false);
+        SyncSubscriptionResult sub = single(r);
+        assertTrue(sub.isSuccess());
+        assertTrue(sub.getFilesCopied() >= 1);
+        assertFalse(Files.exists(wsRoot.resolve("out/sub/dry.txt")));
+    }
+
+    @Test
+    void unknownSubscriptionId_throwsIllegalArgument() throws Exception {
+        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+        Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, "src", "out");
+
+        IllegalArgumentException ex = assertThrows(
+            IllegalArgumentException.class,
+            () -> syncService.syncProject("proj1", "99999999-9999-9999-9999-999999999999", false, false));
+        assertTrue(ex.getMessage().contains("not found"));
+    }
+
+    @Test
     void hiddenPathSegment_isNotPropagated() throws Exception {
         Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));

@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v2.0
 milestone_name: — Subscriptions & sync
-status: planning
-stopped_at: Phase 7 planned
-last_updated: "2026-04-04T22:09:14.488Z"
-last_activity: 2026-04-04 — Phase 7 plan-phase
+status: complete
+stopped_at: Milestone v2.0 complete — Phase 7 shipped
+last_updated: "2026-04-04T22:35:00.000Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 9
 ---
 
 # Project State
@@ -21,20 +21,20 @@ See: `.planning/PROJECT.md`
 
 **Core value:** A developer can register patterns and publishers once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
 
-**Current focus:** Phase 7 — `vira sync` & docs
+**Current focus:** Milestone v2.0 complete (Phases 5–7)
 
 ## Current Position
 
-Phase: 7 — `vira sync` & documentation
-Plan: 07-01, 07-02, 07-03 (ready to execute)
-Status: Phase 7 planned — 3 plans in 3 waves
-Last activity: 2026-04-04 — Phase 7 plan-phase
+Phase: 07 — complete
+Plan: 07-01, 07-02, 07-03 (all SUMMARY.md)
+Status: Phase 7 complete — v2.0 milestone shipped
+Last activity: 2026-04-04
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 6
+- Total plans completed: 9
 - Average duration: -
 - Total execution time: -
 
@@ -44,10 +44,11 @@ Last activity: 2026-04-04 — Phase 7 plan-phase
 |-------|-------|-------|----------|
 | 5 | 3 | - | - |
 | 6 | 3 | - | - |
+| 7 | 3 | - | - |
 
 **Recent Trend:**
 
-- Last 5 plans: 06-01, 06-02, 06-03, 05-02, 05-03
+- Last 5 plans: 07-03, 07-02, 07-01, 06-03, 06-02
 - Trend: -
 
 *Updated after each plan completion*
@@ -69,5 +70,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-04T22:09:14.485Z
-Stopped at: Phase 7 planned
-Resume file: .planning/phases/07-vira-sync-documentation/07-01-PLAN.md
+Stopped at: v2.0 milestone complete
+Resume file: —

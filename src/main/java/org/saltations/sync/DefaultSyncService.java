@@ -35,24 +35,50 @@ public class DefaultSyncService implements SyncService {
     }
 
     @Override
-    public SyncEngineResult syncProject(String projectName) throws IOException {
+    public SyncEngineResult syncProject(String projectName, String subscriptionIdOrNull, boolean dryRun, boolean verbose)
+        throws IOException {
         ViracochaConfig config = configService.load();
         ProjectEntry project = config.getProjects().stream()
             .filter(p -> p.getName().equals(projectName))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException("Project '" + projectName + "' not found."));
 
+        List<SubscriptionEntry> toProcess = resolveSubscriptions(project, projectName, subscriptionIdOrNull);
+
         SyncEngineResult engine = new SyncEngineResult();
         List<SyncSubscriptionResult> results = new ArrayList<>();
-        for (SubscriptionEntry sub : project.getSubscriptions()) {
-            results.add(syncSubscription(config, project, sub));
+        for (SubscriptionEntry sub : toProcess) {
+            results.add(syncSubscription(config, project, sub, dryRun, verbose));
         }
         engine.setSubscriptionResults(results);
         return engine;
     }
 
-    private SyncSubscriptionResult syncSubscription(ViracochaConfig config, ProjectEntry project, SubscriptionEntry sub)
-        throws IOException {
+    private static List<SubscriptionEntry> resolveSubscriptions(
+        ProjectEntry project,
+        String projectName,
+        String subscriptionIdOrNull
+    ) {
+        if (subscriptionIdOrNull == null) {
+            return project.getSubscriptions();
+        }
+        List<SubscriptionEntry> filtered = project.getSubscriptions().stream()
+            .filter(s -> subscriptionIdOrNull.equals(s.getId()))
+            .toList();
+        if (filtered.isEmpty()) {
+            throw new IllegalArgumentException(
+                "Subscription '" + subscriptionIdOrNull + "' not found for project '" + projectName + "'.");
+        }
+        return filtered;
+    }
+
+    private SyncSubscriptionResult syncSubscription(
+        ViracochaConfig config,
+        ProjectEntry project,
+        SubscriptionEntry sub,
+        boolean dryRun,
+        boolean verbose
+    ) throws IOException {
         PublisherEntry pub = config.getPublishers().stream()
             .filter(p -> p.getName().equals(sub.getPublisherName()))
             .findFirst()
@@ -61,9 +87,9 @@ public class DefaultSyncService implements SyncService {
         ResolvedRoots roots = resolveRoots(pub, project, sub);
 
         return switch (sub.getDirection()) {
-            case BIDIRECTIONAL -> syncBidirectional(sub.getId(), roots);
-            case PUBLISH_TO_WORKSPACE -> syncOneWay(sub.getId(), roots.publisherSubtree(), roots.workspaceSubtree());
-            case WORKSPACE_TO_PUBLISH -> syncOneWay(sub.getId(), roots.workspaceSubtree(), roots.publisherSubtree());
+            case BIDIRECTIONAL -> syncBidirectional(sub.getId(), roots, dryRun, verbose);
+            case PUBLISH_TO_WORKSPACE -> syncOneWay(sub.getId(), roots.publisherSubtree(), roots.workspaceSubtree(), dryRun, verbose);
+            case WORKSPACE_TO_PUBLISH -> syncOneWay(sub.getId(), roots.workspaceSubtree(), roots.publisherSubtree(), dryRun, verbose);
         };
     }
 
@@ -78,7 +104,13 @@ public class DefaultSyncService implements SyncService {
     /**
      * One-way sync: copy from {@code sourceRoot} to {@code destRoot} for every regular file under source.
      */
-    private SyncSubscriptionResult syncOneWay(String subscriptionId, Path sourceRoot, Path destRoot) throws IOException {
+    private SyncSubscriptionResult syncOneWay(
+        String subscriptionId,
+        Path sourceRoot,
+        Path destRoot,
+        boolean dryRun,
+        boolean verbose
+    ) throws IOException {
         SyncSubscriptionResult result = baseResult(subscriptionId);
         if (!Files.exists(sourceRoot)) {
             result.setSuccess(true);
@@ -91,7 +123,7 @@ public class DefaultSyncService implements SyncService {
             Path destPath = destRoot.resolve(rel).normalize();
 
             if (Files.isSymbolicLink(sourcePath)) {
-                addConflict(result, subscriptionId, rel, SyncConflictKind.SYMLINK_UNSUPPORTED);
+                addConflict(result, subscriptionId, rel, SyncConflictKind.SYMLINK_UNSUPPORTED, verbose, "BLOCKED ");
                 continue;
             }
             if (!Files.isRegularFile(sourcePath)) {
@@ -99,19 +131,22 @@ public class DefaultSyncService implements SyncService {
             }
 
             if (Files.isSymbolicLink(destPath)) {
-                addConflict(result, subscriptionId, rel, SyncConflictKind.SYMLINK_UNSUPPORTED);
+                addConflict(result, subscriptionId, rel, SyncConflictKind.SYMLINK_UNSUPPORTED, verbose, "BLOCKED ");
                 continue;
             }
 
             if (!Files.exists(destPath)) {
-                Files.createDirectories(destPath.getParent());
-                Files.copy(sourcePath, destPath, StandardCopyOption.COPY_ATTRIBUTES);
+                if (!dryRun) {
+                    Files.createDirectories(destPath.getParent());
+                    Files.copy(sourcePath, destPath, StandardCopyOption.COPY_ATTRIBUTES);
+                }
                 result.setFilesCopied(result.getFilesCopied() + 1);
+                verboseLine(result, verbose, "COPY " + rel);
                 continue;
             }
 
             if (Files.isDirectory(destPath)) {
-                addConflict(result, subscriptionId, rel, SyncConflictKind.TYPE_MISMATCH);
+                addConflict(result, subscriptionId, rel, SyncConflictKind.TYPE_MISMATCH, verbose, "CONFLICT ");
                 continue;
             }
 
@@ -119,8 +154,9 @@ public class DefaultSyncService implements SyncService {
                 long mismatch = Files.mismatch(sourcePath, destPath);
                 if (mismatch == -1L) {
                     result.setFilesSkipped(result.getFilesSkipped() + 1);
+                    verboseLine(result, verbose, "SKIP " + rel);
                 } else {
-                    addConflict(result, subscriptionId, rel, SyncConflictKind.CONTENT_MISMATCH);
+                    addConflict(result, subscriptionId, rel, SyncConflictKind.CONTENT_MISMATCH, verbose, "CONFLICT ");
                 }
             }
         }
@@ -129,7 +165,8 @@ public class DefaultSyncService implements SyncService {
         return result;
     }
 
-    private SyncSubscriptionResult syncBidirectional(String subscriptionId, ResolvedRoots roots) throws IOException {
+    private SyncSubscriptionResult syncBidirectional(String subscriptionId, ResolvedRoots roots, boolean dryRun, boolean verbose)
+        throws IOException {
         Path pubRoot = roots.publisherSubtree();
         Path wsRoot = roots.workspaceSubtree();
 
@@ -149,6 +186,9 @@ public class DefaultSyncService implements SyncService {
             result.getConflictRecords().addAll(analyzeConflicts);
             result.setConflicts(analyzeConflicts.size());
             result.setSuccess(false);
+            for (SyncConflictRecord rec : analyzeConflicts) {
+                verboseLine(result, verbose, "CONFLICT " + rec.getRelativePath() + " " + rec.getKind());
+            }
             return result;
         }
 
@@ -162,11 +202,15 @@ public class DefaultSyncService implements SyncService {
                 continue;
             }
             if (!Files.exists(pWs)) {
-                Files.createDirectories(pWs.getParent());
-                Files.copy(pPub, pWs, StandardCopyOption.COPY_ATTRIBUTES);
+                if (!dryRun) {
+                    Files.createDirectories(pWs.getParent());
+                    Files.copy(pPub, pWs, StandardCopyOption.COPY_ATTRIBUTES);
+                }
                 result.setFilesCopied(result.getFilesCopied() + 1);
+                verboseLine(result, verbose, "COPY " + rel);
             } else if (Files.isRegularFile(pWs) && Files.mismatch(pPub, pWs) == -1L) {
                 result.setFilesSkipped(result.getFilesSkipped() + 1);
+                verboseLine(result, verbose, "SKIP " + rel);
             }
         }
 
@@ -180,9 +224,12 @@ public class DefaultSyncService implements SyncService {
             if (Files.exists(pPub)) {
                 continue;
             }
-            Files.createDirectories(pPub.getParent());
-            Files.copy(pWs, pPub, StandardCopyOption.COPY_ATTRIBUTES);
+            if (!dryRun) {
+                Files.createDirectories(pPub.getParent());
+                Files.copy(pWs, pPub, StandardCopyOption.COPY_ATTRIBUTES);
+            }
             result.setFilesCopied(result.getFilesCopied() + 1);
+            verboseLine(result, verbose, "COPY " + rel);
         }
 
         finalizeResult(result);
@@ -259,6 +306,7 @@ public class DefaultSyncService implements SyncService {
         SyncSubscriptionResult r = new SyncSubscriptionResult();
         r.setSubscriptionId(subscriptionId);
         r.setConflictRecords(new ArrayList<>());
+        r.setVerboseLines(new ArrayList<>());
         r.setFilesCopied(0);
         r.setFilesSkipped(0);
         r.setFilesFailed(0);
@@ -266,9 +314,23 @@ public class DefaultSyncService implements SyncService {
         return r;
     }
 
-    private static void addConflict(SyncSubscriptionResult result, String subscriptionId, String rel, SyncConflictKind kind) {
+    private static void verboseLine(SyncSubscriptionResult result, boolean verbose, String line) {
+        if (verbose) {
+            result.getVerboseLines().add(line);
+        }
+    }
+
+    private static void addConflict(
+        SyncSubscriptionResult result,
+        String subscriptionId,
+        String rel,
+        SyncConflictKind kind,
+        boolean verbose,
+        String prefix
+    ) {
         result.getConflictRecords().add(new SyncConflictRecord(subscriptionId, rel, kind, null));
         result.setConflicts(result.getConflicts() + 1);
+        verboseLine(result, verbose, prefix + rel + " " + kind);
     }
 
     private static void finalizeResult(SyncSubscriptionResult result) {

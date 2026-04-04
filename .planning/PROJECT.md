@@ -34,9 +34,14 @@ A developer can register patterns and publishers once, then generate a correctly
 
 - ✓ Subscription rows in central YAML (`SubscriptionEntry` under `ProjectEntry`); `vira subscription` add, list, show, remove with plain + JSON output (Phase 5)
 
+### Validated (v2.0 — 2026-04-04)
+
+- ✓ Sync engine (`DefaultSyncService`) with direction, conflict detection, hidden-path parity (Phase 6)
+- ✓ `vira sync --project-name` with `--subscription`, `--dry-run`, `--verbose`, `--json`; README subscriptions/sync section; integration tests (Phase 7)
+
 ### Active (v2.0)
 
-See `.planning/REQUIREMENTS.md` for remaining **SYN-** requirements and any open **SUB-** traceability.
+See `.planning/REQUIREMENTS.md` for traceability and any follow-up items.
 
 ### Out of Scope
 
@@ -48,7 +53,7 @@ See `.planning/REQUIREMENTS.md` for remaining **SYN-** requirements and any open
 
 **Shipped v1.0 (2026-04-04):** Full CLI per roadmap — config init/show, publishers, patterns with Freemarker params, projects and mappings, and `vira generate` with skip-existing, dry-run, and verbose output. Requirements archive: `.planning/milestones/v1.0-REQUIREMENTS.md`.
 
-**Current:** v2.0 — Phase 5 shipped (subscription model + CLI). Next: sync engine (Phase 6) and `vira sync` (Phases 6–7). Roadmap: `.planning/ROADMAP.md`.
+**Current:** v2.0 milestone shipped (Phases 5–7): subscriptions, sync engine, `vira sync`, and docs. Roadmap: `.planning/ROADMAP.md`.
 
 The project is named "viracocha" (package: `org.saltations`). The CLI binary is `vira`. The existing skeleton uses Micronaut for dependency injection alongside picocli — this is intentional and should be preserved.
 
@@ -92,4 +97,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 — Phase 5 complete (subscription CLI); sync engine not started*
+*Last updated: 2026-04-04 — v2.0 milestone complete (`vira sync`, engine, README)*

@@ -33,6 +33,8 @@ public class ViracochaCommandTest {
                 "--help output must list 'generate' subcommand");
             assertTrue(help.contains("subscription"),
                 "--help output must list 'subscription' subcommand");
+            assertTrue(help.contains("sync"),
+                "--help output must list 'sync' subcommand");
         }
     }
 }

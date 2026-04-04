@@ -8,6 +8,7 @@ import org.saltations.project.ProjectCommand;
 import org.saltations.publisher.PublisherCommand;
 import org.saltations.generate.GenerateCommand;
 import org.saltations.subscription.SubscriptionCommand;
+import org.saltations.sync.SyncCommand;
 import picocli.CommandLine.Command;
 
 import java.util.concurrent.Callable;
@@ -33,7 +34,8 @@ import java.util.concurrent.Callable;
         PatternCommand.class,
         ProjectCommand.class,
         SubscriptionCommand.class,
-        GenerateCommand.class
+        GenerateCommand.class,
+        SyncCommand.class
     }
 )
 @Singleton

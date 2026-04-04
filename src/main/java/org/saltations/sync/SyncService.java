@@ -8,21 +8,24 @@ import java.io.IOException;
 public interface SyncService {
 
     /**
-     * Runs sync for every subscription on the named project.
-     * <p>
-     * The implementation loads configuration (typically via {@code ConfigService}), resolves
-     * publishers and workspaces, and processes <strong>all</strong> subscriptions for that project.
-     * Phase 7 may add filtering (e.g. by subscription id).
-     * </p>
-     * <p>
-     * Per {@code 06-CONTEXT.md} D-12: processing is best-effort <strong>per subscription</strong> —
-     * each subscription yields a {@link SyncSubscriptionResult}; one subscription's conflicts do not
-     * necessarily stop others from being analyzed; the aggregate {@link SyncEngineResult} lists each outcome.
-     * </p>
+     * Runs sync for a project with optional subscription filter and execution mode.
+     *
+     * @param projectName project name in config
+     * @param subscriptionIdOrNull when non-null, only the subscription with this id; when null, all subscriptions
+     * @param dryRun when true, analyze only — no {@link java.nio.file.Files#copy} and no mutating creates
+     * @param verbose when true, append human-readable lines to each result's {@link SyncSubscriptionResult#getVerboseLines()}
+     */
+    SyncEngineResult syncProject(String projectName, String subscriptionIdOrNull, boolean dryRun, boolean verbose)
+        throws IOException;
+
+    /**
+     * Runs sync for every subscription on the named project (same as {@code syncProject(name, null, false, false)}).
      *
      * @param projectName project key as in configuration
      * @return aggregated per-subscription results
      * @throws IOException if configuration or filesystem access fails in a way that aborts the run
      */
-    SyncEngineResult syncProject(String projectName) throws IOException;
+    default SyncEngineResult syncProject(String projectName) throws IOException {
+        return syncProject(projectName, null, false, false);
+    }
 }

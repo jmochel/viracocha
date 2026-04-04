@@ -3,7 +3,7 @@
 ## Milestones
 
 - ✅ **v1.0 MVP** — Phases 1–4 (shipped 2026-04-04) — [`milestones/v1.0-ROADMAP.md`](milestones/v1.0-ROADMAP.md)
-- 🎯 **v2.0 Subscriptions & sync** — Phases 5–7 (in planning)
+- ✅ **v2.0 Subscriptions & sync** — Phases 5–7 (shipped 2026-04-04)
 
 ## Phases
 
@@ -84,8 +84,8 @@
 | 4. Workspace Generation | v1.0 | 3/3 | Complete | 2026-04-04 |
 | 5. Subscription model & CLI | v2.0 | 3/3 | Complete | 2026-04-04 |
 | 6. Sync engine | v2.0 | 3/3 | Complete | 2026-04-04 |
-| 7. `vira sync` & docs | v2.0 | 0/? | Pending | — |
+| 7. `vira sync` & docs | v2.0 | 3/3 | Complete | 2026-04-04 |
 
 ## Next step
 
-**Phase 7 — `vira sync` & docs** — `/gsd-discuss-phase 7` or `/gsd-plan-phase 7` then `/gsd-execute-phase 7`
+**Milestone v2.0 complete** — all planned phases shipped. Use `/gsd-new-milestone` or `/gsd-progress` to plan further work.
