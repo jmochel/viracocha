@@ -62,7 +62,12 @@ Plans:
   3. Adding a mapping that references a pattern name not in central config prints a clear error and does not modify config
   4. User can run `vira project show --name <name>` and see workspace path plus all mappings with their parameter values
   5. User can unregister a project and it is removed from central config
-**Plans**: TBD
+**Plans**: 3 plans
+
+Plans:
+- [ ] 03-01-PLAN.md — Typed `ProjectEntry`/`MappingEntry`, `ViracochaConfig.projects`, `ProjectCommand` + stub leaf commands, round-trip test
+- [ ] 03-02-PLAN.md — `project create` / `list` / `unregister` + tests (PROJ-01, PROJ-02, PROJ-06)
+- [ ] 03-03-PLAN.md — `project add-mapping` / `show` + tests (PROJ-03, PROJ-04, PROJ-05)
 
 ### Phase 4: Workspace Generation
 **Goal**: Users can generate a correctly-structured workspace from project mappings in a single command, with safe skip-existing semantics and actionable output
@@ -85,5 +90,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 |-------|----------------|--------|-----------|
 | 1. Foundation | 2/2 | Complete   | 2026-03-28 |
 | 2. Publishers and Patterns | 3/3 | Complete   | 2026-04-04 |
-| 3. Projects and Mappings | 0/? | Not started | - |
+| 3. Projects and Mappings | 0/3 | Planned | - |
 | 4. Workspace Generation | 0/? | Not started | - |
