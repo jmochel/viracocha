@@ -1,5 +1,6 @@
 package org.saltations.generate;
 
+import jakarta.inject.Singleton;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -17,6 +18,7 @@ import java.util.Map;
  * {@link org.saltations.pattern.FreemarkerVariableExtractor}; full Freemarker template syntax
  * in the segment is supported via Freemarker processing.
  */
+@Singleton
 public final class PathExpander {
 
     private static final Version FM_VERSION = Configuration.VERSION_2_3_34;
