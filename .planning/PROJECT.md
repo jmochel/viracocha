@@ -14,6 +14,7 @@ A developer can register patterns and publishers once, then generate a correctly
 
 - ✓ CLI scaffold with Micronaut DI + picocli running — existing
 - ✓ Maven build pipeline with JUnit 5 test infrastructure — existing
+- ✓ **Phase 3 — Project management:** create/list/show/unregister project; add-mapping with pattern validation and params; persists in central YAML (`PROJ-01`..`PROJ-06`)
 
 ### Active
 
@@ -28,11 +29,6 @@ A developer can register patterns and publishers once, then generate a correctly
 - [ ] `vira pattern register -name <name> -path <path>` registers a named pattern in central config and extracts its Freemarker parameters
 - [ ] `vira pattern list` displays all registered patterns with their required parameters
 - [ ] `vira pattern show -name <name>` displays pattern details including extracted parameter names
-
-**Project Management**
-- [ ] `vira project create -name <name> -path <path>` creates a named project entry in central config
-- [ ] `vira project list` displays all registered projects
-- [ ] `vira project add-mapping -project <name> -pattern <name> -destination <rel-path> [-param key=value ...]` adds a mapping to a project
 
 **Workspace Generation**
 - [ ] `vira generate -project-name <name>` expands all project mappings using Freemarker, resolving pattern + project-level params, writing files to workspace path
@@ -98,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-27 after initialization*
+*Last updated: 2026-04-04 — Phase 3 (projects/mappings) validated*

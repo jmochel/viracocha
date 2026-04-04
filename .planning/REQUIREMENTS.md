@@ -32,12 +32,12 @@
 
 ### Project
 
-- [ ] **PROJ-01**: User can run `vira project create --name <name> --path <path>` to create a named project entry in central config
-- [ ] **PROJ-02**: User can run `vira project list` to display all registered projects (name, workspace path)
-- [ ] **PROJ-03**: User can run `vira project add-mapping --project <name> --pattern <pattern-name> --destination <rel-path> [--param key=value ...]` to add a mapping to a project
-- [ ] **PROJ-04**: `vira project add-mapping` validates that the referenced pattern exists in central config before adding the mapping
-- [ ] **PROJ-05**: User can run `vira project show --name <name>` to display project details including workspace path and all mappings with their parameter values
-- [ ] **PROJ-06**: User can run `vira project unregister --name <name>` to remove a project from central config
+- [x] **PROJ-01**: User can run `vira project create --name <name> --path <path>` to create a named project entry in central config
+- [x] **PROJ-02**: User can run `vira project list` to display all registered projects (name, workspace path)
+- [x] **PROJ-03**: User can run `vira project add-mapping --project <name> --pattern <pattern-name> --destination <rel-path> [--param key=value ...]` to add a mapping to a project
+- [x] **PROJ-04**: `vira project add-mapping` validates that the referenced pattern exists in central config before adding the mapping
+- [x] **PROJ-05**: User can run `vira project show --name <name>` to display project details including workspace path and all mappings with their parameter values
+- [x] **PROJ-06**: User can run `vira project unregister --name <name>` to remove a project from central config
 
 ### Generation
 
@@ -114,12 +114,12 @@
 | PAT-04 | Phase 2 | Pending |
 | PAT-05 | Phase 2 | Pending |
 | PAT-06 | Phase 2 | Pending |
-| PROJ-01 | Phase 3 | Pending |
-| PROJ-02 | Phase 3 | Pending |
-| PROJ-03 | Phase 3 | Pending |
-| PROJ-04 | Phase 3 | Pending |
-| PROJ-05 | Phase 3 | Pending |
-| PROJ-06 | Phase 3 | Pending |
+| PROJ-01 | Phase 3 | Complete |
+| PROJ-02 | Phase 3 | Complete |
+| PROJ-03 | Phase 3 | Complete |
+| PROJ-04 | Phase 3 | Complete |
+| PROJ-05 | Phase 3 | Complete |
+| PROJ-06 | Phase 3 | Complete |
 | GEN-01 | Phase 4 | Pending |
 | GEN-02 | Phase 4 | Pending |
 | GEN-03 | Phase 4 | Pending |
@@ -136,4 +136,4 @@
 
 ---
 *Requirements defined: 2026-03-27*
-*Last updated: 2026-03-27 after roadmap creation — all 30 requirements mapped*
+*Last updated: 2026-04-04 — PROJ-01..PROJ-06 marked complete (Phase 3)*
