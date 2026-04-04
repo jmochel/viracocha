@@ -1,0 +1,11 @@
+---
+globs: **/*.java
+alwaysApply: false
+---
+
+
+## String Creation
+
+* Use **StringBuffer** for Multi-threaded environment	
+* Use **StringBuilder** For General-purpose string concatenation (e.g., loops, builders) and Single threaded environment
+  

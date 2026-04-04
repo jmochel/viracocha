@@ -1,0 +1,241 @@
+---
+description: Java Object-Oriented Design
+alwaysApply: false
+---
+
+# Java Object-Oriented Design (.mdc)
+**Scope:** Everyday OOD for Java apps/libs. Opinionated. Use **MUST/SHOULD/MAY**.
+
+---
+
+## 1) Objects & Immutability
+- Value objects **MUST** be immutable (final fields, no setters). Validate in constructors/factories.
+- Entities may be mutable but **SHOULD** minimize mutability and expose intent-revealing methods (not setters).
+- Collections **MUST** be unmodifiable on exposure (`List.copyOf`, `Collections.unmodifiableX`).
+- Provide **defensive copies** for date/time and arrays.
+
+**Example — Value Object**
+```java
+public final class Money {
+  private final Currency currency;
+  private final long minorUnits; // cents
+
+  private Money(Currency c, long u) {
+    if (u < 0) throw new IllegalArgumentException("negative");
+    this.currency = Objects.requireNonNull(c);
+    this.minorUnits = u;
+  }
+  public static Money of(Currency c, long u) { return new Money(c, u); }
+  public Money plus(Money other) {
+    requireSameCurrency(other);
+    return new Money(currency, Math.addExact(minorUnits, other.minorUnits));
+  }
+  private void requireSameCurrency(Money other) {
+    if (!currency.equals(other.currency)) throw new IllegalArgumentException("currency mismatch");
+  }
+}
+```
+
+---
+
+## 2) Types & Hierarchies
+- Prefer **composition over inheritance**. Inherit only for true is-a relationships with substitutability.
+- For closed polymorphic families, use **sealed hierarchies** (Java 17+). For pure data carriers, consider **records**.
+- Interfaces **MUST NOT** grow breaking default methods; add new sub-interfaces or adapters.
+
+**Example — Sealed**
+```java
+public sealed interface Shape permits Circle, Rectangle {}
+public record Circle(double r) implements Shape {}
+public record Rectangle(double w, double h) implements Shape {}
+```
+
+---
+
+## 3) API Design
+- Use **static factories** when names/validation/caching/subtyping help; otherwise **constructors** are fine.
+- Avoid telescoping ctors; use **Builder** for 4+ optional params or when validation spans combos.
+- Inputs **MUST** be validated at boundaries. Nulls rejected unless explicitly allowed.
+- Favor **domain terms** in names (ubiquitous language).
+
+**Factory naming**: `of(...)` (aggregate), `from(...)` (conversion), `valueOf(...)` (string/primitive), `parse(...)` (string w/ errors), `getInstance()` (lookup), `newInstance()` (always new).
+
+---
+
+## 4) Equality & Identity
+- For value objects, implement **`equals`/`hashCode`/`toString`**. Avoid including **volatile/mutable** fields.
+- For entities, use **surrogate identity** equality once persisted; prior to persistence use business key or object identity—be explicit.
+- Records already provide correct value semantics; do not override unless justified.
+
+**Example — Equality (value object)**
+```java
+public final class EmailAddress {
+  private final String value;
+  private EmailAddress(String v) { this.value = v.toLowerCase(Locale.ROOT); }
+  public static EmailAddress parse(String raw) {
+    Objects.requireNonNull(raw);
+    // Basic validation omitted
+    return new EmailAddress(raw.trim());
+  }
+  @Override public boolean equals(Object o){ return o instanceof EmailAddress e && value.equals(e.value); }
+  @Override public int hashCode(){ return value.hashCode(); }
+  @Override public String toString(){ return value; }
+}
+```
+
+---
+
+## 5) Nulls, Optional, Collections
+- Public APIs **MUST NOT** return null collections/arrays; return empty instead.
+- Use `Optional` **only** for return types signaling absence; **do not** use for fields, parameters, or collections of Optional.
+- Validate and normalize inputs at boundaries; internal code may assume non-null after checks/`requireNonNull`.
+
+---
+
+## 6) Modules, Packages & Dependencies
+- **Package by feature** (domain verticals), not by layer. Keep `api` vs `internal` packages explicit.
+- Enforce **acyclic dependencies** between packages/modules. Inbound deps high, outbound deps low at domain core.
+- Domain layer **MUST NOT** depend on frameworks. Use ports/adapters; generate infrastructure at the edges.
+
+**Example — Package layout**
+```
+com.acme.orders
+  ├─ api/            // DTOs + interfaces exposed
+  ├─ domain/         // Entities, VOs, Services (pure Java)
+  ├─ app/            // Use cases / orchestrations
+  └─ infra/          // DB, HTTP, messaging adapters
+```
+
+---
+
+## 7) Exceptions & Errors
+- Use **checked** exceptions for **recoverable, caller-actionable** cases; otherwise **runtime**.
+- **Never** swallow exceptions. Preserve cause (`throw new X(msg, cause)`).
+- Do **not** use exceptions for normal control flow; return types or `Optional` instead.
+
+**Example — Domain exception**
+```java
+public class InsufficientFundsException extends RuntimeException {
+  public InsufficientFundsException(Money balance, Money debit) {
+    super("Balance " + balance + " < debit " + debit);
+  }
+}
+```
+
+---
+
+## 8) Aggregates & Invariants (DDD)
+- Aggregate roots **MUST** enforce invariants; external code mutates via methods on root only.
+- Transactions **SHOULD** commit per aggregate (eventual consistency across aggregates via domain events).
+- Emit domain events from roots; handle in app/services layers.
+
+**Example — Aggregate invariant**
+```java
+public final class Order {
+  private final List<OrderLine> lines = new ArrayList<>();
+  private OrderStatus status = OrderStatus.NEW;
+
+  public void addLine(ProductId id, int qty) {
+    if (status != OrderStatus.NEW) throw new IllegalStateException("immutable once submitted");
+    if (qty <= 0) throw new IllegalArgumentException("qty>0");
+    lines.add(new OrderLine(id, qty));
+  }
+  public void submit() {
+    if (lines.isEmpty()) throw new IllegalStateException("no lines");
+    status = OrderStatus.SUBMITTED;
+    // emit DomainEvent.orderSubmitted(...)
+  }
+}
+```
+
+---
+
+## 9) Concurrency & Time
+- Prefer **immutable data** and **confined mutability**. Use `java.util.concurrent` primitives; avoid low-level `wait/notify` unless necessary.
+- Inject `Clock` for time; **do not** call `Instant.now()` directly in domain logic.
+- Use `Duration`, `Instant`, `ZonedDateTime` with UTC internally; convert at edges.
+
+---
+
+## 10) I/O, Serialization & Boundaries
+- DTOs **SHOULD** be records when feasible. Map DTO↔Domain in app layer (not entities directly).
+- Use **serialization proxies** for invariant-heavy value types if Java serialization is unavoidable.
+- Validate external input strictly; normalize before reaching domain.
+
+**Example — DTO as record**
+```java
+public record CreateUserRequest(String email, String locale) {}
+```
+
+---
+
+## 11) Builders & Fluent APIs
+- Use Builders for complex construction, especially when many optionals or cross-field validation exists.
+- Fluent APIs **MUST** keep methods side-effect-free except for the builder state.
+
+---
+
+## 12) Testing Rules
+- Unit tests focus on public behavior; test **observables**, not internals.
+- Use **test data builders** (Object Mothers) for readability.
+- Stable equals/hashCode/toString for VOs should be covered once; don’t retest library behavior.
+
+---
+
+## 13) Naming & Documentation
+- Names reflect **intent** and **domain**. Avoid abbreviations except universal ones (id, url).
+- Javadoc **SHOULD** describe invariants, nullability, ranges, and concurrency expectations.
+- Keep comments minimal; self-explanatory code first.
+
+---
+
+## 14) Performance & Memory
+- Do not pre-optimize. Measure first. For hot paths: prefer allocation-free operations, primitive collections, and caching with clear lifetimes.
+- Beware of boxing in streams; consider for-loops on critical paths.
+
+---
+
+## Quick Pattern Cheatsheet
+- **Value Object**: immutable, equals by state, small methods.
+- **Entity**: identity + lifecycle, methods enforce invariants.
+- **Domain Service**: stateless operations that don’t fit an entity/VO.
+- **Factory**: complex creation/validation, may return subtypes.
+- **Repository (Port)**: persistence boundary; interface in domain, impl in infra.
+
+---
+
+## Mini PlantUML (Optional)
+```plantuml
+@startuml
+package orders {
+  interface OrderRepository
+  class Order {
+    - List<OrderLine> lines
+    - OrderStatus status
+    + addLine(pid, qty)
+    + submit()
+  }
+  class OrderLine
+  enum OrderStatus { NEW; SUBMITTED }
+  Order --> OrderLine : aggregates >
+  Order ..> OrderRepository : persists via
+}
+@enduml
+```
+
+---
+
+## Lintable Rules (for static checks)
+- Ban public setters in `domain` packages.
+- Disallow `new Date()` / `System.currentTimeMillis()` in domain (enforce `Clock`).
+- Disallow public mutable collections in APIs (return copies/unmodifiable).
+- Enforce package cycles = 0.
+- Forbid `Optional` fields.
+
+---
+
+## Appendix: Small Anti-patterns
+- **God classes**, **anemic domain models**, **feature envy**, **inappropriate intimacy**.
+- Overuse of reflection in domain.
+- DTOs leaking into domain and vice versa.
+- Mutating parameters and returning `this` from non-builders.

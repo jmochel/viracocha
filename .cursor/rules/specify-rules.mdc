@@ -1,0 +1,38 @@
+---
+description: Project Development Guidelines
+globs: ["**/*"]
+alwaysApply: true
+---
+
+# ptah Development Guidelines
+
+Auto-generated from all feature plans. Last updated: 2026-03-05
+
+## Active Technologies
+- Java 21 + Micronaut 4.x, Picocli, Micronaut TOML, Logback (001-rules-mapping)
+- Single TOML file under `${XDG_CONFIG_HOME}/ptah/`; no database (001-rules-mapping)
+
+- Java 21, Micronaut 4 CLI + Micronaut Framework, Micronaut CLI, Maven, Logback, Lombok (001-rules-mapping)
+
+## Project Structure
+
+```text
+src/
+tests/
+```
+
+## Commands
+
+# Add commands for Java 21, Micronaut 4 CLI
+
+## Code Style
+
+Java 21, Micronaut 4 CLI: Follow standard conventions
+
+## Recent Changes
+- 001-rules-mapping: Added Java 21 + Micronaut 4.x, Picocli, Micronaut TOML, Logback
+
+- 001-rules-mapping: Added Java 21, Micronaut 4 CLI + Micronaut Framework, Micronaut CLI, Maven, Logback, Lombok
+
+<!-- MANUAL ADDITIONS START -->
+<!-- MANUAL ADDITIONS END -->

@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: milestone complete
+status: v1.0 milestone complete (archived)
 stopped_at: ""
-last_updated: "2026-04-04T17:10:00.000Z"
-last_activity: 2026-04-04 — Phase 4 complete (generate + GeneratorService)
+last_updated: "2026-04-04T15:16:01.581Z"
+last_activity: 2026-04-04
 progress:
   total_phases: 4
   completed_phases: 4
@@ -17,19 +17,19 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-27)
+See: .planning/PROJECT.md (updated 2026-04-04)
 
 **Core value:** A developer can register patterns and publishers once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
-**Current focus:** v1.0 milestone — all planned phases complete
+**Current focus:** Planning next milestone (`/gsd-new-milestone`)
 
 ## Current Position
 
-Phase: 4 of 4 (Workspace Generation) — COMPLETE
-Plan: 3/3 plans done
-Status: Phase 4 execution finished; `vira generate` available
-Last activity: 2026-04-04 — completed 04-02 (GeneratorService) and 04-03 (GenerateCommand)
+Phase: v1.0 shipped (all 4 phases complete)
+Plan: 11/11 plans done (milestone archived)
+Status: v1.0 MVP archived; requirements snapshot: `milestones/v1.0-REQUIREMENTS.md`
+Last activity: 2026-04-04
 
-Progress: All four phases complete (11/11 plans in roadmap).
+Progress: v1.0 complete — see `.planning/MILESTONES.md`.
 
 ## Performance Metrics
 
@@ -85,6 +85,6 @@ None — PathExpander and generation pipeline implemented in Phase 4.
 
 ## Session Continuity
 
-Last session: 2026-04-04T17:10:00.000Z
-Stopped at: Phase 4 complete
+Last session: 2026-04-04T15:16:01.581Z
+Stopped at: v1.0 milestone archived
 Resume file: —

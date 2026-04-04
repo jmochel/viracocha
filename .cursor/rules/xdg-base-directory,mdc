@@ -1,0 +1,55 @@
+# xdg-base-directory.mdc
+
+## Scope
+- Applies to: repository-managed dotfiles, developer environment configuration, CLI tooling config, and app config checked into this repo.
+- Does not apply to: system-wide configuration under `/etc`, OS package-managed files, or secrets.
+
+## Definitions
+- XDG Base Directory Model → convention using XDG environment variables to locate per-user config/data/cache/state/runtime.
+- AppName → canonical application identifier used for folder naming (lowercase, no spaces).
+- Durable → must be backed up (config/data/state).
+- Regenerable → safe to delete and recreate (cache/runtime).
+
+## Hard Constraints (MUST / MUST NOT)
+
+### Base directories
+- MUST treat these as authoritative when set:
+  - `XDG_CONFIG_HOME` (default `~/.config`)
+  - `XDG_DATA_HOME` (default `~/.local/share`)
+  - `XDG_STATE_HOME` (default `~/.local/state`)
+  - `XDG_CACHE_HOME` (default `~/.cache`)
+  - `XDG_RUNTIME_DIR` (no default; system-provided)
+- MUST implement defaults exactly as listed when env vars are unset.
+
+### Placement rules
+- MUST place user-editable configuration under: `${XDG_CONFIG_HOME}/{AppName}/`
+- MUST place durable application data under: `${XDG_DATA_HOME}/{AppName}/`
+- MUST place persistent state under: `${XDG_STATE_HOME}/{AppName}/`
+- MUST place cache under: `${XDG_CACHE_HOME}/{AppName}/`
+- MUST place ephemeral runtime artifacts under: `${XDG_RUNTIME_DIR}/{AppName}/` when `XDG_RUNTIME_DIR` is set.
+- MUST NOT write application-specific files directly into `$HOME` for new config.
+- MUST NOT place top-level app files directly in `~/.config`, `~/.cache`, `~/.local/share`, or `~/.local/state`; use an `{AppName}` subdirectory.
+
+### Data class semantics
+- Config MUST be user-editable settings.
+- Data MUST be durable app-owned content (dbs, indexes, assets).
+- State MUST be durable but mutable operational state (history, logs, last-run markers).
+- Cache MUST be regenerable (safe to delete).
+- Runtime MUST be ephemeral (sockets, PID files, locks) and MUST NOT be relied on for durability.
+
+### Version control and secrets
+- MUST NOT commit secrets (tokens, keys, passwords) in any XDG path.
+- MUST provide `.env.local` / `.local` / untracked override patterns for secrets and machine-specific values.
+- MUST set restrictive permissions for sensitive user-local files where applicable (e.g., `0600`).
+
+### Legacy dotfiles
+- SHOULD support reading legacy `~/.{app}` or `~/.{app}rc` only for backward compatibility.
+- If legacy is supported, MUST define precedence:
+  - Project-specific > XDG > legacy `$HOME` dotfile
+- MUST NOT introduce new legacy `$HOME` dotfiles.
+
+## Recommended Practices (SHOULD / SHOULD NOT)
+- SHOULD use one directory per app and keep config modular via includes.
+- SHOULD keep repository dotfiles organized by app (e.g., `dotfiles/{app}/...`) and deploy via symlinks/stow.
+- SHOULD document any required env vars and expected XDG paths in `README.md`.
+

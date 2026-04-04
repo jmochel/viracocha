@@ -1,0 +1,227 @@
+---
+globs: *.java
+alwaysApply: false
+title: "Java Exception Handling"
+version: "1.0.0"
+status: "stable"
+tags:
+  - "java"
+  - "exceptions"
+  - "error-handling"
+  - "api"
+applies_to:
+  - "Java 17+"
+  - "Maven"
+lintable: true
+---
+
+# Java Exception Handling (.mdc)
+
+**Scope:** Practical, opinionated rules for throwing, catching, translating, and logging exceptions in Java (apps, libs, REST, CLI, batch).  
+**Normative language:** **MUST / SHOULD / MAY**.
+
+---
+
+## 1) Philosophy & Where to Handle
+- Handle errors **at the boundary** (controller, message handler, CLI main, batch step). Core/domain code **MUST NOT** log; it throws.
+- Each exception should be **logged once** (at your boundary). No duplicate logging up the stack.
+- Prefer **fail fast** with clear messages and preserved causes.
+
+---
+
+## 2) Checked vs Unchecked
+- Use **checked** exceptions for **caller-actionable** and **recoverable** conditions (e.g., business rule conflicts, retryable IO with alternatives).
+- Use **unchecked** (`RuntimeException`) for **programming errors** (precondition violations, illegal state, NPE-ish conditions) and non-recoverable failures.
+- Public APIs **MUST NOT** declare `throws Exception`; list specific checked types or use unchecked.
+
+**Decision cheat-sheet**
+```
+Caller can reasonably fix or choose an alternative now? → checked
+Bug/contract violation/unexpected system failure?       → unchecked
+```
+
+---
+
+## 3) Define Exceptions Deliberately
+- Domain-specific errors **SHOULD** have **specific types** (`InsufficientFunds`, `OverdraftLimitExceeded`). Keep them small and immutable.
+- Use **exception translation** at boundaries (DB/HTTP/SDK → domain or app-specific exceptions).
+- Preserve the cause: `new X("context: " + id, cause)` — ALWAYS include meaningful context.
+
+**Small base type (optional)**
+```java
+public abstract class DomainException extends RuntimeException {
+  protected DomainException(String msg){ super(msg); }
+  protected DomainException(String msg, Throwable cause){ super(msg, cause); }
+}
+```
+
+---
+
+## 4) Messages & Context
+- Messages **MUST** include identifiers and key fields (ids, sizes, state) but **MUST NOT** leak secrets/PII.
+- Standardize wording: `"{operation} failed for {entityId}: {short reason}"`.
+- Prefer structured logging fields at boundary rather than concatenating JSON into messages.
+
+---
+
+## 5) Throwing & Validation
+- Validate inputs at API edges; throw `IllegalArgumentException`/`NullPointerException` for precondition violations.
+- Do **not** use exceptions for normal control flow; use `Optional`, result types, or booleans where appropriate.
+- For bulk operations, consider **partial failures** via per-item results + summary exception at boundary.
+
+---
+
+## 6) Catching & Rethrowing
+- Catch only what you can handle or **translate**; otherwise let it propagate.
+- When rethrowing, **wrap and preserve**: `throw new AppException("fetch order " + id, e)`.
+- Avoid blanket `catch (Exception e)`; prefer specific types. If you must, rethrow after tagging context.
+
+**Example — translation**
+```java
+try {
+  repo.save(order);
+} catch (DataIntegrityViolationException e) {
+  throw new DuplicateOrderException(order.id(), e);
+}
+```
+
+---
+
+## 7) Try-with-Resources & Cleanup
+- Use **try-with-resources** for anything `AutoCloseable` (streams, JDBC, files).
+- If manual cleanup is required, use `finally` and guard against secondary failures (log-and-suppress at boundary).
+
+**Example — try-with-resources**
+```java
+try (var in = Files.newInputStream(path);
+     var out = Files.newOutputStream(dst)) {
+  in.transferTo(out);
+}
+```
+
+---
+
+## 8) Logging Rules
+- **Log once** at boundary. Inside domain/services, **do not log**; throw with context.
+- Logging levels at boundary:
+  - **ERROR**: uncaught/terminal failure of the request/task.
+  - **WARN**: handled but notable issue (fallback used, partial success).
+  - **INFO**: expected validation rejects (if noisy, downgrade to DEBUG).
+- Never `printStackTrace`; use logger with cause.
+
+**Example — boundary logging (REST)**
+```java
+@ExceptionHandler(DomainException.class)
+ResponseEntity<?> handle(DomainException ex) {
+  log.warn("domain error: {}", ex.getMessage()); // cause retained in logs
+  return ResponseEntity.status(BAD_REQUEST).body(Map.of("error", ex.getMessage()));
+}
+```
+
+---
+
+## 9) REST/HTTP Mapping
+- Map exceptions to precise HTTP codes:
+  - `IllegalArgumentException`, validation → **400 Bad Request**
+  - Not found → **404**
+  - Conflict (unique key, state transition) → **409**
+  - Unauthorized/Forbidden → **401/403**
+  - Rate limit/backpressure → **429**
+  - Unexpected/system → **500**
+- Return stable **error contracts** (code, message, correlationId, details[]). Avoid leaking stack traces to clients.
+
+**Error DTO**
+```java
+public record ApiError(String code, String message, String correlationId, List<String> details) {}
+```
+
+---
+
+## 10) CLI & Batch
+- CLI **exits with codes**: 0 success; non-zero per category (2 usage error, 10 IO, 20 network, 50 unexpected).
+- Batch steps **SHOULD** collect item-level errors; emit a summary at end. Mark job FAILED only for policy-defined thresholds.
+
+---
+
+## 11) Concurrency & Async
+- For `CompletableFuture`/reactive types, prefer **exceptionally/handle** operators at the edge.
+- **Never** block and wrap (`join()` → `CompletionException`) without translating at the boundary.
+
+**CompletableFuture boundary**
+```java
+return fetchAsync(id)
+  .exceptionally(e -> { throw new AppException("fetch " + id, e); });
+```
+
+---
+
+## 12) Libraries & Public APIs
+- Public libraries **SHOULD** minimize checked exceptions. Prefer well-documented unchecked with clear contracts.
+- Maintain **binary compatibility**: adding a new checked exception to a method is breaking.
+
+---
+
+## 13) Security & PII
+- **Never** include secrets, tokens, or raw PII in exception messages. Mask or omit.
+- In logs, prefer structured fields with masking at the logging layer.
+
+---
+
+## 14) Testing
+- Test both **happy path** and **error path**. Assert **type**, **message/fields**, and that **causes are preserved**.
+- Provide **test fixtures** for throwing repos/clients to exercise translation layers.
+
+---
+
+## 15) Lintable Rules (Automatable)
+- Forbid `throws Exception` in public methods.
+- Ban `printStackTrace` usage.
+- Ban empty catch blocks (`catch (X e) {}`) — unless `@SuppressWarnings("squid:S00112")` with rationale.
+- Enforce presence of cause when wrapping (`new X(msg, cause)` if a cause exists).
+- Disallow logging within `domain` packages.
+- Flag `catch (Exception|Throwable)` unless followed by rethrow/translate with context.
+
+---
+
+## 16) Quick Checklist (PR Review)
+- Correct choice checked vs unchecked?
+- Clear message with identifiers, no secrets?
+- Cause preserved?
+- Logged once at boundary, not inside domain?
+- REST/CLI mapping defined?
+- Try-with-resources used for closables?
+- Specific catches, no blanket unless necessary?
+
+---
+
+## Minimal Examples
+
+**Validation (unchecked)**
+```java
+public static void requirePositive(int n) {
+  if (n <= 0) throw new IllegalArgumentException("n must be > 0, got " + n);
+}
+```
+
+**Domain (specific)**
+```java
+public final class InsufficientFundsException extends DomainException {
+  public InsufficientFundsException(AccountId id, Money bal, Money debit) {
+    super("account %s: balance %s < debit %s".formatted(id, bal, debit));
+  }
+}
+```
+
+**Boundary (translation + logging)**
+```java
+try {
+  paymentService.charge(cmd);
+  log.info("charge ok tx={}", cmd.txId());
+} catch (InsufficientFundsException ex) {
+  log.warn("charge rejected tx={} msg={}", cmd.txId(), ex.getMessage());
+  return ResponseEntity.status(409).body(new ApiError("INSUFFICIENT_FUNDS", ex.getMessage(), corrId, List.of()));
+} catch (Exception ex) {
+  log.error("charge failed tx={}", cmd.txId(), ex);
+  throw new InternalServerErrorException("Charge failed");
+}
+```

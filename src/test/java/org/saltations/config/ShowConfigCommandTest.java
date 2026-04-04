@@ -7,7 +7,6 @@ import org.saltations.infra.XdgPaths;
 import picocli.CommandLine;
 
 import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 

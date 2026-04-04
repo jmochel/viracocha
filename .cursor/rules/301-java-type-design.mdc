@@ -1,0 +1,195 @@
+---
+globs: *.java
+alwaysApply: false
+title: "Java Type Design"
+tags:
+  - "java"
+  - "design"
+  - "api"
+  - "immutability"
+applies_to:
+  - "Java 17+"
+  - "Maven"
+---
+
+
+# Java Type Design (.mdc)
+
+**Scope:** How to choose and shape Java types (classes, records, interfaces, enums) for readability, safety, and long‑term stability.  
+**Normative language:** **MUST / SHOULD / MAY**.
+
+---
+
+## 1) Picking the Right Kind of Type
+- Use **records** for pure data carriers with value semantics (all fields part of state). Add validation in canonical ctor or a static factory.
+- Use **final classes** for rich behavior/value types that need invariants beyond records.
+- Use **interfaces** for capabilities/ports. Prefer **single-responsibility** interfaces; avoid “fat” kitchen-sink contracts.
+- Use **sealed hierarchies** (Java 17+) for closed polymorphism; list permitted types explicitly.
+- Use **enums** for small, closed sets. Put behavior next to constants (`abstract` method per constant if needed).
+
+**Example — sealed interface + records**
+```java
+public sealed interface Amount permits Fixed, Rate {}
+
+public record Fixed(long minorUnits) implements Amount {
+  public Fixed {
+    if (minorUnits < 0) throw new IllegalArgumentException("negative");
+  }
+}
+
+public record Rate(BigDecimal fraction) implements Amount {
+  public Rate {
+    Objects.requireNonNull(fraction);
+    if (fraction.signum() < 0) throw new IllegalArgumentException("negative");
+  }
+}
+```
+
+---
+
+## 2) Mutability & State
+- Value types **MUST** be **immutable**: `final` fields, no setters, defensive copies. Collections exposed as `List.copyOf(...)`.
+- Entities **SHOULD** minimize mutability and expose intent‑revealing operations (not raw setters).
+- Prefer **constructors/static factories** that fully initialize invariants; avoid partially-constructed objects.
+
+---
+
+## 3) Visibility & API Surface
+- Keep types/package members **as small as possible**: package‑private by default; escalate to `public` only when needed.
+- Separate `api` and `internal` packages; internal types **MUST NOT** leak in public signatures.
+- Mark extension points deliberately: classes are `final` by default; un‑finalize only if user subclassing is a requirement.
+
+---
+
+## 4) Construction: Constructors vs Static Factories
+- Use static factories when names/validation/caching/subtyping help; otherwise constructors are fine.
+- **Naming conventions:** `of(...)` (aggregate), `from(...)` (conversion), `valueOf(...)` (primitive/string), `parse(...)` (string w/ errors), `getInstance()` (lookup), `newInstance()` (always new).
+- For 4+ optionals or cross‑field rules, provide a **Builder**.
+
+**Example — record + factory**
+```java
+public record Email(String value) {
+  public Email {
+    Objects.requireNonNull(value);
+    value = value.trim().toLowerCase(Locale.ROOT);
+  }
+  public static Email parse(String raw) {
+    return new Email(raw);
+  }
+}
+```
+
+---
+
+## 5) Equality, Hashing, Ordering, String Form
+- Value types **MUST** implement `equals`/`hashCode`/`toString` consistently (records already do; override only with cause).
+- If natural ordering exists, implement `Comparable<T>` consistent with equals.
+- Do **not** include transient/derived/mutable fields in equality or ordering.
+
+---
+
+## 6) Generics & Type Parameters
+- Favor **type parameters** over `Object` + casts. Keep variance simple; prefer interfaces with bounded methods to wild hierarchies.
+- Avoid raw types. Prefer `List<T>` over arrays for public APIs.
+- For builders, use self‑types (`B extends Builder<B>`) only if you truly need fluent inheritance.
+
+---
+
+## 7) Nullability & Optional
+- Public methods **MUST** document nullability. Reject nulls unless explicitly allowed.
+- Use `Optional` **only** for return values that may be absent. **Do not** use as fields, parameters, or in collections of Optional.
+
+---
+
+## 8) Exceptions & Errors
+- Use checked exceptions for recoverable caller action; runtime otherwise. Preserve causes.
+- Domain errors should have **specific types**; avoid generic `Exception`/`RuntimeException` in APIs.
+
+---
+
+## 9) Thread‑Safety & Concurrency
+- Prefer **immutable** types or thread‑confined mutability. Document thread‑safety guarantees in Javadoc.
+- For lazy initialization, use holder idiom or `volatile` + double‑checked locking correctly.
+- Avoid exposing locks; prefer higher‑level concurrency utilities.
+
+---
+
+## 10) Serialization & Persistence
+- Do **not** expose Java serialization as a public contract. If unavoidable, use **serialization proxy** for invariant safety.
+- DTOs for wire formats **SHOULD** be records. Keep mapping in app layer (not inside entities).
+
+---
+
+## 11) Annotations & Contracts
+- Use annotations to **encode contracts**: `@Nullable`, `@Immutable`, `@ThreadSafe` (JSR-305 or SpotBugs annotations) where your tooling supports them.
+- Keep custom annotations minimal and well‑scoped.
+
+---
+
+## 12) Packages, Names & Docs
+- **Package by feature**; keep `api/` vs `internal/` clear.
+- Names reflect **ubiquitous language**; avoid abbreviation unless standard (id, uri, utc).
+- Javadoc **SHOULD** document invariants, ranges, units, nullability, and threading.
+
+---
+
+## 13) Performance & Footprint
+- Don’t pre‑optimize. When necessary: avoid needless allocation, reduce boxing in streams, and cache with clear lifetimes.
+- Prefer primitives/`EnumSet`/`EnumMap` on hot paths when profiling justifies.
+
+---
+
+## 14) Stability, Evolution & Deprecation
+- Adding new methods to **interfaces** is breaking unless default methods are safe and non‑throwing. Prefer new sub‑interfaces.
+- Keep **binary compatibility**: avoid removing types or changing method signatures in public APIs.
+- Use `@Deprecated(forRemoval = true, since = "x.y")` with a migration path.
+
+---
+
+## 15) Lintable Rules (Automatable)
+- Disallow public constructors when a type has a public factory (except for frameworks).
+- Forbid public mutable collections in API signatures (return copies/unmodifiable).
+- Ban `Optional` fields; ban raw types; ban `new Date()` in domain (inject `Clock`).
+- Enforce package cycles = 0 (ArchUnit/Enforcer).
+
+---
+
+## 16) Quick Checklist (PR/Code Review)
+- Correct *kind* of type chosen? (record/final class/interface/enum/sealed)
+- Clear invariants and validation at construction?
+- Minimal visibility? No internals leaked?
+- Equality/hash/toString/compareTo correct and documented?
+- Generics used (no raw types)?
+- Nullability/Optional handled and documented?
+- Thread‑safety guarantees stated?
+- Public API stable? Deprecations guided?
+
+---
+
+## Small Examples
+
+**Enum with behavior**
+```java
+public enum Rounding {
+  UP { public BigDecimal apply(BigDecimal v) { return v.setScale(2, RoundingMode.UP); } },
+  DOWN { public BigDecimal apply(BigDecimal v) { return v.setScale(2, RoundingMode.DOWN); } };
+  public abstract BigDecimal apply(BigDecimal v);
+}
+```
+
+**Builder when construction is complex**
+```java
+public final class SmtpConfig {
+  private final String host;
+  private final int port;
+  private final boolean tls;
+  private SmtpConfig(Builder b) { this.host=b.host; this.port=b.port; this.tls=b.tls; }
+  public static Builder builder(String host, int port){ return new Builder(host, port); }
+  public static final class Builder {
+    private final String host; private final int port; private boolean tls;
+    public Builder(String host, int port){ this.host=Objects.requireNonNull(host); this.port=port; }
+    public Builder tls(boolean v){ this.tls=v; return this; }
+    public SmtpConfig build(){ return new SmtpConfig(this); }
+  }
+}
+```

@@ -25,7 +25,8 @@ A personal CLI workspace manager (`vira`) for AI-assisted development workflows.
 - JDK 21 (Temurin distribution)
 - Java 21 is configured as the release version in `pom.xml`
 - Maven 3+ (via mvnw wrapper)
-- Lockfile: Maven pom.xml (present at `/home/jmochel/pers/viracocha/pom.xml`)
+- Lockfile: Maven pom.xml (present at `./viracocha/pom.xml`)
+
 ## Frameworks
 - Micronaut 4.10.10 - Java application framework using dependency injection and annotation processing
 - Picocli - CLI command framework for building command-line applications
@@ -46,11 +47,11 @@ A personal CLI workspace manager (`vira`) for AI-assisted development workflows.
 - Micronaut Graal - GraalVM native image compilation support
 - SnakeYAML - YAML configuration parsing
 ## Configuration
-- Application configuration via `application.yml` located at `/home/jmochel/pers/viracocha/src/main/resources/application.yml`
+- Application configuration via `application.yml` located at `src/main/resources/application.yml`
 - Micronaut application name: `viracocha`
 - Micronaut processing group: `org.saltations`
 - Micronaut processing module: `viracocha`
-- Maven POM configuration at `/home/jmochel/pers/viracocha/pom.xml`
+- Maven POM configuration at `pom.xml`
 - Maven Compiler configuration with annotation processing paths
 - Annotation processors: Lombok, Micronaut Inject, PicocliCodegen, Micronaut Graal, Micronaut Serde Processor
 ## Platform Requirements

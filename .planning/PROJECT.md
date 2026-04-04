@@ -52,6 +52,8 @@ A developer can register patterns and publishers once, then generate a correctly
 
 ## Context
 
+**Shipped v1.0 (2026-04-04):** Full CLI per roadmap — config init/show, publishers, patterns with Freemarker params, projects and mappings, and `vira generate` with skip-existing, dry-run, and verbose output. Requirements archive: `.planning/milestones/v1.0-REQUIREMENTS.md`.
+
 The project is named "viracocha" (package: `org.saltations`). The CLI binary is `vira`. The existing skeleton uses Micronaut for dependency injection alongside picocli — this is intentional and should be preserved.
 
 Patterns use Apache Freemarker for template expansion. Variables appear in file content AND in folder/file names. Parameter names are extracted from the pattern source at registration time (by scanning Freemarker directives).
@@ -94,4 +96,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-04 — Phase 3 (projects/mappings) validated*
+*Last updated: 2026-04-04 — v1.0 MVP milestone archived*

@@ -1,0 +1,558 @@
+---
+alwaysApply: false
+globs: pom.xml
+title: Maven Java Best Practices
+description: Maven Java best practices for this project
+scope: project
+tags: [maven, java, best-practices]
+---
+
+# Java + Maven Best Practices (.mdc)
+
+**Scope:** Java applications and libraries built with Maven (multi-module or single-module).  
+**Normative language:** MUST / SHOULD / MAY.
+
+---
+
+## 0) POM Structure & Organization
+
+### General Principles
+- Treat the POM as source code: small, reviewed, documented, versioned intentionally.
+- Zero environment knowledge in POM: externalize via config files, env vars, or deployment tooling.
+
+### Element Order
+POM elements **MUST** be provided in this order:
+1. `modelVersion`
+2. `parent`
+3. `groupId` / `artifactId` / `version` / `packaging`
+4. `name` / `description` / `url`
+5. `licenses` / `organization` / `developers` / `scm`
+6. `properties`
+7. `dependencyManagement`
+8. `dependencies`
+9. `repositories`
+10. `build` (pluginManagement then plugins)
+11. `reporting`
+12. `profiles`
+
+### Coordinates
+**MUST** provide explicit `groupId`, `artifactId`, `version`, `name`, `description`, `url`:
+
+```xml
+<groupId>org.saltations.exemplar</groupId>
+<artifactId>cli-exemplar</artifactId>
+<packaging>jar</packaging>
+<version>1.0.0</version>
+<name>CLI Exemplar</name>
+<description>Example CLI application</description>
+<url>https://github.com/org/repo</url>
+```
+
+### Properties Naming Conventions
+- Use `<properties>` to centralize JDK, dependency, and plugin versions.
+- Use `<maven.compiler.release>21</maven.compiler.release>` to specify Java version (not `source`/`target`).
+- Use `<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>` to set the default encoding.
+- **Dependency versions**: Use `artifact-name.version` naming (e.g., `<endeavour.version>0.3.0</endeavour.version>`).
+- **Maven plugin versions**: Use `maven-[name]-plugin.version` naming (e.g., `<maven-jacoco-plugin.version>0.8.12</maven-jacoco-plugin.version>`).
+- Append any other module-specific properties at the end of the properties list.
+
+Example properties structure:
+```xml
+<properties>
+  <!-- Java -->
+  <maven.compiler.release>21</maven.compiler.release>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+  <!-- Dependency Versions (not already defined in parent pom.xml or parent bom) -->
+  <endeavour.version>0.3.0</endeavour.version>
+
+  <!-- Maven Plugins -->
+  <maven-jacoco-plugin.version>0.8.12</maven-jacoco-plugin.version>
+  <maven-release-plugin.version>3.0.1</maven-release-plugin.version>
+  <maven-versions-plugin.version>2.17.1</maven-versions-plugin.version>
+  <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+
+  <!-- Module-specific plugin properties -->
+  <enforcer.maven.min>3.9.0</enforcer.maven.min>
+  <enforcer.java.min>21</enforcer.java.min>
+
+  <!-- Module-specific -->
+  <exec.mainClass>org.saltations.mn4.Mn4CliExemplarCommand</exec.mainClass>
+</properties>
+```
+
+---
+
+## 1) JDK & Build Reproducibility
+- Projects **MUST** target an LTS JDK (17 or 21). Pin toolchains with `maven-toolchains-plugin`.
+- `maven-compiler-plugin` **MUST** set `<release>` (not `source`/`target`).
+- Reproducible builds **MUST** be enabled via `project.build.outputTimestamp` and deterministic jar options.
+- Lock plugin versions in the parent POM’s `<pluginManagement>`.
+
+## 2) Dependency Management
+- Use a **single parent POM** with `<dependencyManagement>`; child modules **MUST NOT** pin versions for managed deps.
+- Prefer vendor BOMs via `<type>pom</type><scope>import</scope>` (e.g., Spring, Jackson, Micrometer).
+- Enable `maven-enforcer-plugin` to ban duplicate/conflicting deps, disallow snapshots in main, and require JDK/Maven ranges.
+- Shade **only** for CLI fat-jars. Libraries **MUST NOT** shade runtime deps.
+
+### Dependency Guidelines
+- All dependencies **MUST** have a managed dependency declaration in `dependencyManagement` using the appropriate version property.
+- All dependency usages **MUST** use the managed dependency declaration (no version specified in child modules).
+- Keep dependencies lean: no unused libs, no duplicates, correct scopes (`compile`/`test`/`runtime`/`provided`).
+- Avoid `system` scope; use normal dependencies or local repository.
+- Avoid version ranges, `LATEST`, or `RELEASE`; pin exact versions via properties.
+
+## 3) Testing & Coverage
+- **MUST** separate unit vs integration tests: `surefire` (unit) and `failsafe` (IT, `*IT.java`) 
+- Run ITs on CI; local opt-out via a profile flag.
+- `jacoco` **SHOULD** enforce a project-wide minimum (e.g., INSTRUCTION ≥ 75%), with package-specific overrides when justified.
+
+### Plugin Guidelines
+- All plugins **MUST** have a managed plugin declaration in `pluginManagement` using the appropriate version property.
+- Use minimal, purpose-driven plugins: `surefire`, `failsafe`, `jar`/`assembly`, `shade`, `jacoco`, `checkstyle`/`spotbugs`.
+- Child modules **MUST NOT** specify plugin versions; inherit from parent `pluginManagement`.
+
+### Profiles
+- Use profiles **ONLY** for build variations (e.g., integration tests), not environment config.
+- Environment-specific configuration **MUST** be externalized via config files, env vars, or deployment tooling.
+
+## 4) Source Quality
+- Enforce formatting with Spotless/Formatter (**SHOULD**). Style file lives in repo.
+- Run `checkstyle`/`pmd`/`spotbugs` in `verify`; fail build on high severity only; warnings allowed but visible.
+- No build-time logging; keep POM noise low.
+
+## 5) Packaging & Modules
+- Multi-module layout with a pure parent (`packaging` = `pom`); leaf modules are `jar`/`war` only.
+- Avoid cyclic dependencies; enforce via Enforcer and/or ArchUnit.
+- CLI apps: build one runnable JAR (assembly or shade). Libraries: plain JAR, no shaded transitive APIs.
+
+## 6) Security & Supply Chain
+- Use Enforcer banned-dependencies rules and/or OSS Index. Emit SBOM with `cyclonedx-maven-plugin` (**SHOULD**).
+- Pin parent and plugin versions; no floating parents. No `systemPath` dependencies.
+
+## 7) Versioning, Release, CI/CD
+- Semantic versioning **SHOULD**. Releases via CI tags.
+- `flatten-maven-plugin` for published POMs.
+- CI caches `~/.m2` with checksums; use `--batch-mode` and a clean agent. Standard stage order: `validate → test → integration-test → verify → package → deploy`.
+
+---
+
+## Example: Parent `pom.xml` (drop-in)
+
+> Place this at repo root as the aggregator/parent. Child modules inherit dependency versions and plugin locks.
+> Adjust groupId/artifactId/version to your org.
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <groupId>com.example</groupId>
+  <artifactId>example-parent</artifactId>
+  <version>1.0.0</version>
+  <packaging>pom</packaging>
+  <name>Example :: Parent</name>
+  <description>Parent POM with BOMs, pluginManagement, enforcer, and reproducible build settings.</description>
+
+  <!-- Reproducible builds -->
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.release>21</maven.compiler.release>
+    <maven.compiler.parameters>true</maven.compiler.parameters>
+
+    <!-- Reproducible jar timestamps -->
+    <project.build.outputTimestamp>${maven.build.timestamp}</project.build.outputTimestamp>
+    <maven.build.timestamp.format>yyyy-MM-dd'T'HH:mm:ss'Z'</maven.build.timestamp.format>
+
+    <!-- Centralize plugin versions (use maven-[name]-plugin.version naming) -->
+    <maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
+    <maven-surefire-plugin.version>3.2.5</maven-surefire-plugin.version>
+    <maven-failsafe-plugin.version>3.2.5</maven-failsafe-plugin.version>
+    <maven-jacoco-plugin.version>0.8.12</maven-jacoco-plugin.version>
+    <maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+    <maven-versions-plugin.version>2.17.1</maven-versions-plugin.version>
+    <maven-flatten-plugin.version>1.5.0</maven-flatten-plugin.version>
+    <maven-spotless-plugin.version>2.43.0</maven-spotless-plugin.version>
+    <maven-checkstyle-plugin.version>3.5.0</maven-checkstyle-plugin.version>
+    <maven-spotbugs-plugin.version>4.8.6.5</maven-spotbugs-plugin.version>
+    <maven-javadoc-plugin.version>3.7.0</maven-javadoc-plugin.version>
+    <maven-deploy-plugin.version>3.1.2</maven-deploy-plugin.version>
+    <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+
+    <!-- Enforcer configuration properties -->
+    <enforcer.maven.min>3.9.0</enforcer.maven.min>
+    <enforcer.java.min>21</enforcer.java.min>
+
+    <!-- Dependency versions (examples; prefer BOM imports below) -->
+    <jackson.version>2.17.2</jackson.version>
+    <junit.version>5.10.2</junit.version>
+  </properties>
+
+  <!-- Toolchains (pin JDK) -->
+  <build>
+    <pluginManagement>
+      <plugins>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>${maven-compiler-plugin.version}</version>
+          <configuration>
+            <release>${maven.compiler.release}</release>
+            <parameters>${maven.compiler.parameters}</parameters>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-surefire-plugin</artifactId>
+          <version>${maven-surefire-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-failsafe-plugin</artifactId>
+          <version>${maven-failsafe-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>integration-test</goal>
+                <goal>verify</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${maven-jacoco-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>check</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>check</goal>
+              </goals>
+              <configuration>
+                <rules>
+                  <rule>
+                    <element>BUNDLE</element>
+                    <limits>
+                      <limit>
+                        <counter>INSTRUCTION</counter>
+                        <value>COVEREDRATIO</value>
+                        <minimum>0.75</minimum>
+                      </limit>
+                    </limits>
+                  </rule>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-enforcer-plugin</artifactId>
+          <version>${maven-enforcer-plugin.version}</version>
+          <executions>
+            <execution>
+              <id>enforce-build-sanity</id>
+              <phase>validate</phase>
+              <goals>
+                <goal>enforce</goal>
+              </goals>
+              <configuration>
+                <fail>true</fail>
+                <rules>
+                  <!-- Tooling + JDK sanity -->
+                  <requireMavenVersion>
+                    <version>[${enforcer.maven.min},4.0)</version>
+                  </requireMavenVersion>
+
+                  <requireJavaVersion>
+                    <version>[${enforcer.java.min},)</version>
+                  </requireJavaVersion>
+
+                  <!-- Bytecode / compiler alignment -->
+                  <enforceBytecodeVersion>
+                    <maxJdkVersion>${maven.compiler.release}</maxJdkVersion>
+                    <ignoredScopes>test</ignoredScopes>
+                  </enforceBytecodeVersion>
+
+                  <!-- Dependency hygiene -->
+                  <dependencyConvergence/>
+                  <banDuplicatePomDependencyVersions/>
+                  <banDuplicateClasses/>
+
+                  <requireUpperBoundDeps>
+                    <excludes>
+                      <!-- example allowed conflict -->
+                      <exclude>org.slf4j:slf4j-simple</exclude>
+                    </excludes>
+                  </requireUpperBoundDeps>
+
+                  <requireReleaseDeps>
+                    <onlyWhenRelease>true</onlyWhenRelease>
+                  </requireReleaseDeps>
+
+                  <bannedDependencies>
+                    <searchTransitive>true</searchTransitive>
+                    <excludes>
+                      <exclude>log4j:log4j</exclude>
+                      <exclude>commons-logging:commons-logging</exclude>
+                      <exclude>*.**:*:*:jar:sources</exclude>
+                      <exclude>*.**:*:*:jar:javadoc</exclude>
+                    </excludes>
+                    <message>
+                      Use SLF4J with Logback or Log4j2; legacy logging libs are banned.
+                    </message>
+                  </bannedDependencies>
+
+                  <!-- Plugin hygiene -->
+                  <requirePluginVersions>
+                    <banLatest>true</banLatest>
+                    <banRelease>true</banRelease>
+                    <banSnapshots>true</banSnapshots>
+                  </requirePluginVersions>
+
+                  <!-- Repo hygiene -->
+                  <requireNoRepositories>
+                    <message>
+                      Do not define repositories in pom.xml; use settings.xml / corporate mirrors.
+                    </message>
+                  </requireNoRepositories>
+                </rules>
+              </configuration>
+            </execution>
+          </executions>
+        </plugin>
+
+        <plugin>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>flatten-maven-plugin</artifactId>
+          <version>${maven-flatten-plugin.version}</version>
+          <configuration>
+            <updatePomFile>true</updatePomFile>
+            <flattenMode>oss</flattenMode>
+          </configuration>
+          <executions>
+            <execution>
+              <id>flatten</id>
+              <phase>process-resources</phase>
+              <goals><goal>flatten</goal></goals>
+            </execution>
+            <execution>
+              <id>flatten-clean</id>
+              <phase>clean</phase>
+              <goals><goal>clean</goal></goals>
+            </execution>
+          </executions>
+        </plugin>
+
+        <!-- Formatting (Spotless) -->
+        <plugin>
+          <groupId>com.diffplug.spotless</groupId>
+          <artifactId>spotless-maven-plugin</artifactId>
+          <version>${maven-spotless-plugin.version}</version>
+          <configuration>
+            <java>
+              <googleJavaFormat/>
+            </java>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-checkstyle-plugin</artifactId>
+          <version>${maven-checkstyle-plugin.version}</version>
+          <configuration>
+            <failsOnError>true</failsOnError>
+            <violationSeverity>error</violationSeverity>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <groupId>com.github.spotbugs</groupId>
+          <artifactId>spotbugs-maven-plugin</artifactId>
+          <version>${maven-spotbugs-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>${maven-javadoc-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>${maven-deploy-plugin.version}</version>
+        </plugin>
+
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>${maven-jar-plugin.version}</version>
+          <configuration>
+            <archive>
+              <manifestEntries>
+                <Build-Time>${maven.build.timestamp}</Build-Time>
+              </manifestEntries>
+              <manifest>
+                <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+              </manifest>
+            </archive>
+          </configuration>
+        </plugin>
+
+      </plugins>
+    </pluginManagement>
+  </build>
+
+  <!-- Centralized dependency versions -->
+  <dependencyManagement>
+    <dependencies>
+      <!-- Example vendor BOMs -->
+      <dependency>
+        <groupId>com.fasterxml.jackson</groupId>
+        <artifactId>jackson-bom</artifactId>
+        <version>${jackson.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>org.junit</groupId>
+        <artifactId>junit-bom</artifactId>
+        <version>${junit.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+
+  <modules>
+    <!-- Add your modules here -->
+    <!-- <module>app</module> -->
+    <!-- <module>lib</module> -->
+  </modules>
+
+  <profiles>
+    <!-- Example: enable integration tests explicitly -->
+    <profile>
+      <id>it</id>
+      <activation>
+        <property>
+          <name>it</name>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+            <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-failsafe-plugin</artifactId>
+            <version>${maven-failsafe-plugin.version}</version>
+            <executions>
+              <execution>
+                <goals>
+                  <goal>integration-test</goal>
+                  <goal>verify</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
+
+</project>
+```
+
+---
+
+## Child Module (`pom.xml`) sketch
+
+```xml
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+
+  <parent>
+    <groupId>com.example</groupId>
+    <artifactId>example-parent</artifactId>
+    <version>1.0.0</version>
+    <relativePath>..</relativePath>
+  </parent>
+
+  <artifactId>example-lib</artifactId>
+  <packaging>jar</packaging>
+  <name>Example :: Lib</name>
+
+  <dependencies>
+    <!-- Versions managed by parent BOMs -->
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-databind</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter</artifactId>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <!-- no version, no executions: inherited from pluginManagement -->
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <!-- no version, no executions: inherited from pluginManagement -->
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <!-- no version, no executions: inherited from pluginManagement -->
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-jar-plugin</artifactId>
+        <!-- no version, no executions: inherited from pluginManagement -->
+      </plugin>
+    </plugins>
+  </build>
+</project>
+```
+
+---
+
+## Conventions Quick Reference
+- **No SNAPSHOTs on main**; release via tags.
+- **Unit vs IT** strictly separated; ITs run with `-Pit`.
+- **Formatting enforced**; style config checked in.
+- **No shaded libs**; only apps may produce fat-jars.
+- **Dependency versions** live in parent BOMs, not children.
+- **CI**: `mvn -B -ntp verify` on clean agents; cache `~/.m2` with checksum/MD5/SHA enabled.

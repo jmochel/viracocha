@@ -1,0 +1,179 @@
+---
+description: Enforce and auto-draft Conventional Commits v1.0.0 messages for commits and PRs
+alwaysApply: true
+---
+# Conventional Commits (MDC)
+
+```yaml
+name: conventional-commits
+applies_to: git, commits, pr_titles
+goal: Enforce and auto-draft Conventional Commits v1.0.0 messages
+author: chatgpt
+version: 1.0.0
+```
+
+## Summary (what to do)
+
+- Always format commit headers as:
+  ```
+  <type>(<scope>)!?: <short description>
+  ```
+  - `<type>`: one of `feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert`
+  - Optional `<scope>`: a noun describing the area (e.g., `api`, `db`, `ui`, `auth`, `repo`, or a package name).
+  - Optional `!` right after type/scope indicates a breaking change.
+  - `<short description>` is imperative, concise, no trailing period, ideally ≤ 72 chars.
+- Optional body (wrapped at 72 cols) explains **what** and **why**, not **how**.
+- Optional footer(s) for metadata:
+  - `BREAKING CHANGE: <explanation>` (required if using `!` or if breaking without `!`)
+  - Issue refs: `Closes #123`, `Refs #456`
+  - Co-authors, etc.
+
+## Allowed types (choose the *most* specific)
+
+- `feat`: a new user-visible feature
+- `fix`: a bug fix
+- `docs`: documentation only
+- `style`: code style only (formatting, no logic)
+- `refactor`: code change that neither fixes a bug nor adds a feature
+- `perf`: performance improvement
+- `test`: add/adjust tests only
+- `build`: build system or external dependencies
+- `ci`: CI configuration/scripts
+- `chore`: other tasks (no src/test changes)
+- `revert`: reverts a previous commit (use `revert: <header of reverted commit>` in body)
+
+## Assistant behavior (Cursor)
+
+When asked to generate or review a commit message:
+
+1. **Collect minimal facts** (if missing from the diff or user note):
+   - What changed? (Feature, fix, docs, etc.)
+   - Scope? (package/module/area)
+   - Breaking change? (yes/no; if yes, why + migration notes)
+   - Related issue(s)? (`#id` or links)
+2. **Propose** a header, then a succinct body and optional footers.
+3. **Validate** against rules and fix automatically.
+4. **Offer variants** (e.g., with/without scope; with `!` vs footer).
+
+## Lint rules (hard)
+
+- Header MUST match:
+  ```
+  ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([^)]+\))?(!)?: [^\s].+$
+  ```
+- If `!` is present **or** change is breaking → include a `BREAKING CHANGE:` footer describing the impact and migration.
+- Header description ≤ 72 chars (aim); body lines ≤ 72 chars.
+- No trailing period in header.
+- Avoid capitalizing the first word of the description unless a proper noun.
+- Use present/imperative mood (“add”, “fix”, “update”, not “adds/added/fixes/fixed/updated”).
+
+## Commit templates
+
+### Standard change
+```
+<type>(<scope>): <short imperative summary>
+
+<wrapped body explaining what & why; optional>
+
+Refs #<id>
+Closes #<id>
+```
+
+### Breaking change (two equivalent ways)
+
+**A. Exclamation mark in header**
+```
+<type>(<scope>)!: <short imperative summary>
+
+<details about why it's breaking, migration notes>
+
+BREAKING CHANGE: <concise explanation of the breaking aspect and migration>
+Closes #<id>
+```
+
+**B. No `!`, explicit footer**
+```
+<type>(<scope>): <short imperative summary>
+
+<details>
+
+BREAKING CHANGE: <explanation + migration>
+```
+
+### Revert
+```
+revert(<scope>): revert "<original header>"
+
+This reverts commit <hash>.
+```
+
+## Examples (good)
+
+- feat(api): add pagination to listOrders
+- fix(db): handle null warehouse_id in shipment view
+- refactor(core): extract OperationResult to shared module
+- perf(query): reduce N+1 selects in person loader
+- docs(readme): clarify setup for dev containers
+- build(deps): bump neo4j-driver from 5.19 to 5.20
+- ci(actions): cache dbt deps to speed up pipeline
+- chore(repo): normalize .editorconfig for SQL files
+- feat(auth)!: require MFA for admin routes  
+  
+```
+Enforce MFA for all endpoints under /admin/*.
+
+BREAKING CHANGE: Admin API clients must obtain TOTP codes. See docs/admin-mfa.md for migration steps.
+Closes #742
+```
+
+## Common mistakes (and fixes)
+
+- **Bad:** Fixed bug in parser  
+  **Good:** fix(parser): avoid infinite loop on empty token
+
+- **Bad:** feat: Added New Endpoint.  
+  **Good:** feat(api): add new /healthz endpoint
+
+- **Bad:** refactor: move stuff  
+  **Good:** refactor(storage): isolate blob client factory
+
+## 🔎 Review checklist (apply automatically)
+
+- [ ] Type is valid and most specific.
+- [ ] Optional scope meaningfully narrows the change.
+- [ ] Header has no trailing period; description is imperative and succinct (≤ 72).
+- [ ] Body explains “why” and notable “what”; no code-dump.
+- [ ] Breaking? `!` or `BREAKING CHANGE:` footer present with migration notes.
+- [ ] Issues referenced with `Closes #id` / `Refs #id`.
+- [ ] No unrelated changes bundled; suggest splitting if necessary.
+
+## Quick classification guide
+
+- New endpoint/flag/CLI option → `feat`
+- Bug fix or regression → `fix`
+- Only docs/readme/specs → `docs`
+- Whitespace, formatting, naming (no behavior) → `style`
+- Internal restructure (no feature/bug) → `refactor`
+- Faster/less memory → `perf`
+- Tests only → `test`
+- Build tooling, deps, Docker, Makefile, Azure Pipelines → `build`
+- CI pipelines, workflows → `ci`
+- Repo maintenance, scripts, housekeeping → `chore`
+- Undo a specific commit → `revert`
+
+## Monorepos & scopes
+
+- Use package/app/folder names as scope: `feat(app-web)`, `fix(pkg-sql)`, `build(dbt)`.
+- For cross-cutting changes, prefer a broad scope like `repo`, `core`, or list the dominant area.
+
+## PR title policy
+
+- Use the same Conventional Commit header as the **PR title**.
+- If a PR contains multiple commit types, title it by the **primary user-visible change** (`feat` beats `fix` beats others). Use labels for the rest.
+
+## References
+
+- Conventional Commits v1.0.0 — Summary and rules.  
+  Types, `!` for breaking, and `BREAKING CHANGE:` footer are derived from the spec.
+
+  

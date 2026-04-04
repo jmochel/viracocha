@@ -1,0 +1,244 @@
+---
+globs: *.java
+alwaysApply: false
+title: "Java Generics"
+version: "1.0.0"
+tags:
+  - "java"
+  - "generics"
+  - "api"
+  - "type-safety"
+applies_to:
+  - "Java 17+"
+  - "Maven"
+---
+
+# Java Generics (.mdc)
+
+**Scope:** Practical, opinionated rules for type‑safe, readable Java generics in libraries and applications.  
+**Normative language:** **MUST / SHOULD / MAY**.
+
+---
+
+## 1) Core Principles
+- Prefer **generic methods** over generic classes when the type parameter is local to one method.
+- Avoid **raw types** entirely (except in `instanceof` checks and class literals like `List.class` where unavoidable).
+- Minimize **unchecked casts**. When necessary, localize them and annotate with `@SuppressWarnings("unchecked")` **with a rationale comment**.
+- Prefer library types with generics (`Optional<T>`, `List<T>`, `Map<K,V>`) over arrays for public APIs.
+
+---
+
+## 2) PECS: Producer Extends, Consumer Super
+- If a parameter **produces** `T` values for you to **read**, use `? extends T`.
+- If a parameter **consumes** `T` values that you **write** into, use `? super T`.
+- Return types should be **exact** (`T`, not wildcards).
+
+**Examples**
+```java
+// Producer: read elements → extends
+static <T> void copyAll(Collection<? extends T> src, Collection<? super T> dst) {
+  for (T t : src) dst.add(t);
+}
+
+// Consumer: add elements → super
+static void addAllInts(Collection<? super Integer> dst, int n) {
+  for (int i = 0; i < n; i++) dst.add(i);
+}
+```
+
+---
+
+## 3) API Design with Generics
+- Public APIs **MUST NOT** expose wildcards in **return types**; use concrete `T` or immutable views.
+- Prefer **factory methods** to help type inference: `static <K,V> Map<K,V> mapOf(K k, V v) { ... }`.
+- When a type parameter appears only in **one method**, make the method generic rather than the class.
+- For **fluent builders with inheritance**, use the *self‑type* pattern only when truly needed.
+
+**Self‑type builder (only when inheritance is required)**
+```java
+abstract class HttpRequestBuilder<B extends HttpRequestBuilder<B>> {
+  String url; Map<String, String> headers = new HashMap<>();
+  public B url(String u){ this.url = u; return self(); }
+  public B header(String k, String v){ headers.put(k,v); return self(); }
+  protected abstract B self();
+  public HttpRequest build(){ return new HttpRequest(url, Map.copyOf(headers)); }
+}
+final class AuthRequestBuilder extends HttpRequestBuilder<AuthRequestBuilder> {
+  String token;
+  public AuthRequestBuilder token(String t){ this.token = t; return this; }
+  @Override protected AuthRequestBuilder self(){ return this; }
+}
+```
+
+---
+
+## 4) Bounded Type Parameters
+- Use **bounded type params** for constraints (`<T extends Number & Comparable<T>>`). Put **interfaces first** in multiple bounds.
+- Prefer bounds on **parameters** (`<T extends Comparable<? super T>>`) rather than wildcards in many cases to keep call‑sites clean.
+
+**Example — min for comparable**
+```java
+public static <T extends Comparable<? super T>> T min(Collection<? extends T> items) {
+  Iterator<? extends T> it = items.iterator();
+  T m = it.next();
+  while (it.hasNext()) {
+    T n = it.next();
+    if (n.compareTo(m) < 0) m = n;
+  }
+  return m;
+}
+```
+
+---
+
+## 5) Capture & Helper Methods
+- To fix wildcard capture issues, extract to a **helper generic method** with a named type parameter.
+```java
+static void swap(List<?> list, int i, int j) {
+  swapHelper(list, i, j);
+}
+private static <T> void swapHelper(List<T> list, int i, int j) {
+  T tmp = list.get(i); list.set(i, list.get(j)); list.set(j, tmp);
+}
+```
+
+---
+
+## 6) Arrays vs Generics (Erasure)
+- **Arrays are covariant and reified**; **generics are invariant and erased**. Mixing them causes pain.
+- Public APIs **SHOULD** prefer `List<T>` over `T[]`. If varargs are needed, see §7.
+- Avoid `new List<String>[10]` (illegal). For internal caches, use `@SuppressWarnings("unchecked")` with a safe, localized cast.
+
+---
+
+## 7) Varargs + Generics
+- Generic varargs are **heap‑polluting**. Prefer `List<T>` parameters.
+- If you must use them (e.g., builder DSLs), annotate the method with `@SafeVarargs` and make it `final`, `static`, or `private` after proving safety.
+
+```java
+@SafeVarargs
+public static <T> List<T> listOf(T... elements) {
+  return List.of(elements);
+}
+```
+
+---
+
+## 8) Equality, Hashing, and Comparators
+- Use **type‑safe comparators**: `Comparator.comparing(Foo::bar)` rather than raw `Comparator`.
+- Prefer **inference‑friendly** static factories for comparators and collectors.
+
+```java
+Comparator<Person> byAge = Comparator.comparingInt(Person::age);
+Comparator<Person> byNameThenAge = Comparator.comparing(Person::name)
+                                             .thenComparingInt(Person::age);
+```
+
+---
+
+## 9) Collections & Streams
+- Favor **immutable views** or copies in API returns: `List<T>` from `List.copyOf(...)`.
+- Prefer precise generic signatures on collectors/utilities.
+```java
+public static <T, K> Map<K, T> indexBy(Collection<T> items, Function<? super T, ? extends K> keyFn) {
+  return items.stream().collect(Collectors.toMap(keyFn, Function.identity()));
+}
+```
+
+---
+
+## 10) Class Tokens & Reified Alternatives
+- For runtime type info, accept **class tokens** or **`Type`/`ParameterizedType`** when needed.
+- For JSON/frameworks, prefer library **type tokens** (`new TypeReference<List<Foo>>() {}` in Jackson) to preserve generic info.
+
+```java
+static <T> T fromJson(String json, Class<T> type) { ... }
+static <T> T fromJson(String json, TypeReference<T> typeRef) { ... } // preserves generics
+```
+
+---
+
+## 11) Exceptions & Results with Generics
+- Do **not** use `Optional<Optional<T>>`; model tri‑state with a dedicated result type.
+- Avoid `List<Exception>` out params; return a result object containing `List<Error>` when needed.
+
+---
+
+## 12) Library Interop
+- Wrap legacy raw APIs with **type‑safe adapters** close to the boundary.
+- When bridging to reflection/collections with unknown element types, use **wildcards** and helper methods to isolate casts.
+
+---
+
+## 13) Performance Notes
+- Prefer primitives and specialized methods (`mapToInt`, `toArray()`) on hot paths to avoid boxing.
+- Beware of **autoboxing** in generic collections; profile before micro‑optimizing.
+
+---
+
+## 14) Lintable Rules (Automatable)
+- Ban raw types in public APIs.
+- Ban wildcard **return types** in public APIs.
+- Require `@SafeVarargs` on generic vararg methods that are `static/final/private`.
+- Flag `@SuppressWarnings("unchecked")` without an adjacent comment explaining safety.
+- Enforce `Comparator` types are parameterized (`Comparator<T>` not raw).
+- Forbid arrays in public APIs when a generic collection is feasible (allow exceptions for interop).
+
+---
+
+## 15) Quick Checklist (PR Review)
+- Any raw types? Any unchecked casts? Are they localized with rationale?
+- Are wildcards used only in **inputs** (PECS) and not returns?
+- Are bounds correct (`extends` vs `super`)?
+- Is there a helper method to break wildcard capture?
+- Are varargs either avoided or `@SafeVarargs` justified?
+- Are runtime type needs modeled with class/type tokens?
+
+---
+
+## Practical Snippets
+
+**Heterogeneous container pattern**
+```java
+final class Favorites {
+  private final Map<Class<?>, Object> values = new HashMap<>();
+  public <T> void put(Class<T> type, T value) {
+    values.put(Objects.requireNonNull(type), type.cast(value));
+  }
+  public <T> T get(Class<T> type) {
+    Object v = values.get(type);
+    return type.cast(v);
+  }
+}
+```
+
+**Generic factory to aid inference**
+```java
+public final class Maps {
+  private Maps() {}
+  public static <K,V> HashMap<K,V> newHashMap() { return new HashMap<>(); }
+  public static <K,V> HashMap<K,V> of(K k, V v) {
+    var m = new HashMap<K,V>(4);
+    m.put(k, v);
+    return m;
+  }
+}
+```
+
+**Type‑safe event bus interface**
+```java
+interface EventBus {
+  <T> void publish(Class<T> type, T event);
+  <T> void register(Class<T> type, Consumer<? super T> handler);
+}
+```
+
+**Wildcard capture fix (sort descending)** 
+```java
+static void sortDesc(List<?> list, Comparator<Object> cmp) {
+  sortDescHelper(list, cmp);
+}
+private static <T> void sortDescHelper(List<T> list, Comparator<? super T> cmp) {
+  list.sort(cmp.reversed());
+}
+```

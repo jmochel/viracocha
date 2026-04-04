@@ -1,0 +1,494 @@
+---
+globs: *.java
+alwaysApply: false
+title: "Java Unit Testing"
+version: "1.0.0"
+tags:
+  - "java"
+  - "testing"
+  - "junit"
+  - "mocking"
+  - "coverage"
+applies_to:
+  - "Java 17+"
+  - "Maven/Gradle"
+---
+
+# Java Unit Testing (.mdc)
+
+<!-- 
+  * What the rule set covers (e.g., “Java unit testing,” “Exception handling”).
+  * What it does not cover (explicit boundaries).
+  * Normative language used (MUST / SHOULD / MAY).
+ -->
+
+**Scope:** Opinionated rules for fast, reliable unit tests in Java projects; guidance on integration tests, containers, and CI.  
+**Normative language:** **MUST / SHOULD / MAY**.
+
+---
+
+## Principles
+
+<!-- 
+  * High-level, durable ideas that don’t change often.
+  * Example: “Tests must be deterministic” or “Value objects must be immutable.” 
+-->
+
+- Tests **MUST** be deterministic, isolated, and fast (≤ 100 ms typical). No network, disk, or time flakiness.
+- Prefer **behavior verification via observable outcomes** over internal state/interaction tests.
+- Keep tests **small and local**
+ 
+--- 
+
+## Design Decisions
+
+<!-- 
+  * The “why” that explains trade-offs. Example: “Prefer static factories when names/validation matter, constructors otherwise.
+  * Links to background (Effective Java, official guidelines, company standards). 
+-->
+
+### Principles
+
+- Tests **MUST** target **observable behavior**, not internals.
+- Aim for **minimal tests, maximal behavioral coverage**: fewer, high-signal cases over combinatorial noise.
+- Cover **success, boundaries, and each distinct failure mode**.
+   
+
+### Methodologies (what to include)
+
+- **Equivalence Partitioning** – Identify input classes the code treats the same; test **one** representative per class.  
+    _Example_: `n < 0`, `n == 0`, `n > 0`.
+- **Boundary Value Analysis** – Test **just below / at / just above** each boundary.  _Example_: min length 8 → 7, **8**, 9.
+- **Happy Path vs. Error Paths** – Always include the intended path **and** each documented reject/failure case.
+- **State Transition Testing** – For stateful classes, test all **legal transitions** and a few **illegal** ones (must throw).
+- **Polymorphism/Strategy** – For public behavior that varies by subtype/strategy, test **each relevant variant**.
+- **Error Guessing** – Add high-risk cases: nulls, empty, extremes, duplicates, timeouts, race-y inputs.
+- **(Optional) Property-based** – Add property tests where invariants are clearer than examples (sorting, idempotency).
+
+### What NOT to unit test
+
+- Trivial getters/setters, pure DTOs/records with no behavior.   
+- Framework behavior you didn’t write (unless you added custom logic).
+- Exact call sequences unless the **interaction itself is the contract** (then it’s valid).
+   
+
+---
+
+## General Approaches / Patterns
+
+<!-- 
+  Recommended practices, with short rationales.
+  Example: “Package by feature, not layer” or “Use PECS for generics.” 
+-->
+
+- Use **AAA** pattern (Arrange‑Act‑Assert). One assertion concept per - - Each test should be independent and not rely on the order of execution of other tests.  
+- Tests should be straightforward and avoid complex control flow (loops, if/else statements) within the test method itself.
+- Include edge cases and failure paths.
+
+
+---
+
+## Specific Rule Sections
+<!-- 
+    Break down into numbered sections per theme:
+      Construction
+      Exceptions
+      Generics
+      Logging
+      Mocks
+    Each section: concise rules, do/don’t bullets, code snippets.
+ -->
+
+---
+
+## Structure & Naming
+
+- **Test classes mirror production packages**: `src/test/java/.../FooServiceTest` or `FooServiceShould`.
+- **Use BDD naming style for tests** `when<Event>Then<ExpectedBehavior>`  (e.g. `whenRegistrationCanceledThenCreditCardDataIsRemovedFromCache` ) or `given<StartingCondition>When<event>Then<ExpectedBehavior>` (e.g. `givenCompleteRegistrationWhen7DaysBeforeCourseThenParticipantIsEmailedNotification`)
+- **Use `@DisplayNameGeneration(ReplaceBDDCamelCase.class)`** referencing a DisplayNameClassGenerator like 
+   - ```java
+        package <project-package>.fixture
+
+        import org.junit.jupiter.api.DisplayNameGenerator;
+
+        import java.lang.reflect.Method;
+
+        /**
+        * JUnit 5 Test Display Name generator
+        * <p>
+        * Does several things to transform test method names to test names.
+        * <ol>
+        *  <li>Separates camel case names with spaces</li>
+        *  <li>Replace BDD key words with all caps versions. i.e. 'GIVEN','WHEN','THEN'. 'given' Is only uppercase when
+        *  it is the first word of the test method name </li>
+        * </ol>
+        * <p>
+        * Does several things to transform nested class names to test scenario names.
+        * <ol>
+        *  <li>Removes 'Test' from the end of class </li>
+        *  <li>Separates camel case names with spaces</li>
+        *  <li>Replace BDD key words with all caps versions. i.e. 'AND','GIVEN','WHEN','THEN'. 'given' and 'and' are only uppercased
+        *  when they are the first word in the name of the class.</li>
+        * </ol>
+        */
+        public class ReplaceBDDCamelCase extends DisplayNameGenerator.Standard
+        {
+            @Override
+            public String generateDisplayNameForClass(Class<?> testClass) {
+
+                return splitCamelCase(testClass.getSimpleName().replaceAll("[Tt]est$",""));
+            }
+
+            @Override
+            public String generateDisplayNameForNestedClass(Class<?> nestedClass) {
+
+                var nestedClassDisplayName = splitCamelCase(nestedClass.getSimpleName().replaceAll("[Tt]est$",""))
+                        .toLowerCase()
+                        .replaceAll("^and", "AND ")
+                        .replaceAll("^given", "GIVEN ")
+                        .replaceAll(" when ", "WHEN ")
+                        .replaceAll(" then ", " THEN ")
+                        .replaceAll("  ", " ")
+                        .trim();
+
+            return nestedClassDisplayName;          
+            }
+
+            @Override
+            public String generateDisplayNameForMethod(Class<?> testClass, Method testMethod) {
+                var methodDisplayName =  splitCamelCase(testMethod.getName())
+                        .toLowerCase()
+                        .replaceAll("^given", "GIVEN ")
+                        .replaceAll("when ", "WHEN ")
+                        .replaceAll(" then ", " THEN ")
+                        .replaceAll("  ", " ")
+                        .trim();
+
+                return methodDisplayName;
+            }
+
+            private String splitCamelCase(String incoming)
+            {
+                return incoming.replaceAll("([A-Z][a-z]+)", " $1")
+                            .replaceAll("([A-Z][A-Z]+)", " $1")
+                            .replaceAll("([A-Z][a-z]+)", "$1 ")
+                            .trim();
+            }
+        }
+   ```
+
+
+---
+
+## Assertions
+
+- Use JUnit 5's Assertions class for clear and concise assertions.
+- Utilize assertThrows for testing exception scenarios.
+- Use `Assertions.assetAll(...);` for grouping multiple assertions within a single test.
+- Use AssertJ for adding meaningful assertions for complicated states in aggregates 
+
+---
+
+## Mocks, Fakes and Spys
+
+
+- **Prefer a Fake** when you can simulate the dependency cheaply (in-memory repo, test SMTP server, fake clock/id generator) and You want robust, state/output-based tests that don’t care about call counts and the dependency’s contract is stable and easy to emulate.
+- **Use a Mock** when the SUT must collaborate correctly with an external boundary (payment gateway, message bus, email sender) and the interaction itself is the behavior OR You need to simulate hard-to-reproduce failures (timeouts, 5xx, network errors) OR You must assert “called with X exactly once” for correctness (idempotency, ordering, retries).
+- Reach for a Spy (sparingly) when You need a real object’s behavior but want to override one method (e.g., expensive I/O) or observe an internal callback that’s otherwise invisible OR 
+Refactoring the code to make outcomes observable would be overkill for now OR You’re testing framework glue (e.g., Spring interceptors) where partial mocking is pragmatic.
+
+- **Do not mock value objects** (Money, EmailAddress) or collections. Build real instances
+- Do not verify every collaborator call. Over-specification = brittle tests.
+- Don’t use spies to peek at internals when you could assert an observable result.
+- Don’t mix many mocks/spies in one test; if you need 4+, your design likely violates SRP.
+
+- **Only mock what you own indirectly**: external systems, slow resources, random/time sources.
+- **Do not mock value objects** or trivial data; create real instances via **test data builders**.
+- Prefer **stubs/fakes** over mocks when behavior is simple and stable.
+
+```java
+// Test Data Builder
+public final class UserBuilder {
+  private String email = "user@example.com";
+  private Locale locale = Locale.US;
+  public static UserBuilder aUser(){ return new UserBuilder(); }
+  public UserBuilder withEmail(String v){ this.email=v; return this; }
+  public User build(){ return new User(email, locale); }
+}
+```
+
+---
+
+
+
+## Time, Randomness, IDs
+- Inject **Clock**, **Random**, and **IdGenerator**; **never** call `Instant.now()` / `UUID.randomUUID()` in domain logic.
+- In tests, use fixed `Clock` and seeded `Random` for reproducibility.
+
+```java
+Clock fixed = Clock.fixed(Instant.parse("2025-01-01T00:00:00Z"), ZoneOffset.UTC);
+var service = new TokenService(fixed, () -> new Random(123));
+```
+
+---
+
+## I/O, Threads, and Concurrency
+- Units **must not** touch real file system or network. Use in‑memory fakes or temporary directories via `@TempDir`.
+- For concurrency, prefer **virtual threads** in production if applicable; in tests, **avoid timing sleeps**—use latches, barriers, or `Awaitility` with timeouts.
+
+```java
+await().atMost(Duration.ofSeconds(2)).until(() -> queue.size() == 10);
+```
+
+---
+
+## Parameterized & Edge Cases
+- Use **@ParameterizedTest** for data‑driven checks; include **boundaries and pathological** inputs.
+- Cover **equals/hashCode/toString** for value objects once (don’t re‑test library code).
+
+```java
+@ParameterizedTest
+@CsvSource({"1, true", "0, false", "-1, false"})
+void isPositive(int n, boolean expected) {
+  assertThat(MathUtil.isPositive(n)).isEqualTo(expected);
+}
+```
+
+---
+
+## Exceptions
+- Assert **type**, **message**, and that **causes are preserved**.
+- Don’t assert stack trace text. Use `assertThatThrownBy`/`assertThrows`.
+
+```java
+assertThatThrownBy(() -> repo.find("x"))
+  .isInstanceOf(EntityNotFoundException.class)
+  .hasMessageContaining("x");
+```
+
+---
+
+
+## Spring/Micronaut (optional slices)
+- Use **slice tests** (`@DataJpaTest`, `@WebMvcTest`) instead of full context boots whenever possible.
+- Avoid field injection in tests; use constructor injection or explicit setup.
+
+---
+
+## Coverage & Mutation
+- Coverage is a **diagnostic**, not a goal. Set **Jacoco** floor (e.g., 75% instructions) to catch blind spots.
+- For critical packages, run **mutation testing** (Pitest) to detect assertion weakness.
+
+---
+
+## CI Rules
+- Tests **MUST** pass on clean agents with `-Xmx` modest; no reliance on local state.
+- Run unit tests on every push; IT/e2e on main and PRs. Parallelize where stable.
+- Flaky tests are **bugs**; quarantine only with ticket + time‑boxed fix.
+
+---
+
+
+## Technical Details/Tooling
+
+<!-- 
+  Dependency snippets (Maven/Gradle).
+  Specific annotations or APIs (@SafeVarargs, Clock, Optional).
+  Framework slices (@WebMvcTest, Testcontainers).
+ -->
+
+- **Use JUnit 5** (Jupiter) for tests, **AssertJ** for fluent assertions.
+- **Use Mockito** for mocks and spys
+- **Use ArchUnit** for architecture rules 
+- **Use Jacoco** for coverage measurement
+- Utilize annotations like @BeforeEach, @AfterEach, @Nested, and @Tag for setting up and tearing down test environments, organizing tests, and selective execution.
+ 
+
+---
+
+## Lintable / Automatable Rules
+
+<!-- 
+  Machine-enforceable constraints (ArchUnit, Checkstyle, Sonar).
+  Clear “what a linter could flag” vs. what requires human judgment.
+ -->
+
+- **Branch coverage** (Jacoco) **SHOULD ≥ 70%** for `..domain..` and `..app..` packages (proxy for scenario breadth).   
+- **No sleeps** in unit tests; require `Awaitility`/condition waits for async (static check).  
+    _Enforce_: forbid `Thread.sleep` under `src/test/java`.
+- **Disallow network & FS** in unit tests\*\*:\*\* forbid `java.net` and `java.nio.file` imports in `..unit..` or default test task.  
+    (Allow only in IT profile/task.)
+- **Naming & placement**: Every class in `..domain..` **MUST** have a sibling `*Test` under the mirrored package (ArchUnit).
+- **No disabled tests** without a tracking tag: forbid `@Disabled` unless it includes `reason` matching `ISSUE-\d+`.
+
+---
+
+
+## Checklists
+
+<!-- 
+  End-user “review before merge” guide.
+  Example: “Did you preserve causes when wrapping exceptions?”
+ -->
+
+### Reviewer Checklist (paste into PR template)
+
+-  **Happy path** covered?   
+-  **Each distinct failure** covered (bad input, external error, illegal state)?
+-  **Boundaries** covered (just below / at / above)?
+-  **State transitions**: legal + at least one illegal?
+-  **Subtypes/strategies**: each relevant variant tested?
+-  Tests assert **outcomes**, not incidental internals/calls?
+-  No time/random/network flakiness (Clock/Random injected, no sleeps)?
+
+---
+
+## Examples / Anti-patterns
+
+<!-- 
+  Minimal working examples (good and bad).
+  Helps cement the rules and reduce ambiguity. 
+-->
+
+### Example
+
+```java
+@Test void givenAnInsufficientBalanceThenTransferFails() {
+  // Arrange
+  var acct = new Account(Money.ofUSD(100));
+  // Act
+  Throwable ex = catchThrowable(() -> acct.debit(Money.ofUSD(200)));
+  // Assert
+  assertThat(ex).isInstanceOf(InsufficientFundsException.class)
+                .hasMessageContaining("100").hasMessageContaining("200");
+}
+```
+
+### Fake (in-memory repository) Example
+
+```java
+interface UserRepo { void save(User u); Optional<User> findByEmail(String e); }
+
+final class InMemoryUserRepo implements UserRepo {
+  private final Map<String, User> store = new HashMap<>();
+  public void save(User u) { store.put(u.email(), u); }
+  public Optional<User> findByEmail(String e) { return Optional.ofNullable(store.get(e)); }
+}
+
+@Test
+void whenUserIsRegisteredThenUserCanBeFoundByEmailAddress() {
+  var repo = new InMemoryUserRepo();           // Fake
+  var service = new UserService(repo);
+
+  service.register("a@ex.com");
+
+  assertThat(repo.findByEmail("a@ex.com")).isPresent();
+}
+```
+
+### Mock (behavior matters: must charge exactly once) Example
+
+```java
+@ExtendWith(MockitoExtension.class)
+class BillingServiceTest {
+  @Mock PaymentGateway gateway;                // Mock (external boundary)
+  @InjectMocks BillingService service;
+
+  @Test
+  void whenCardIsBilledThenCardIsChargedOnlyOnceForCorrectAmount() {
+
+    when(gateway.charge(any())).thenReturn(ChargeResult.ok("tx-1"));
+
+    boolean ok = service.bill("acct-1", Money.ofUSD(50));
+
+    assertThat(ok).isTrue();
+    verify(gateway, times(1)).charge(argThat(req -> req.amount().equals(Money.ofUSD(50))));
+    verifyNoMoreInteractions(gateway);
+  }
+}
+```
+
+### Spy (partial override + observation) Example
+
+```java
+@ExtendWith(MockitoExtension.class)
+class NotificationServiceTest {
+  @Spy EmailFormatter realFormatter = new EmailFormatter();  // Spy real object
+  @Mock MailSender sender;
+  @InjectMocks NotificationService service;
+
+  @Test
+  void whenNoticationSentThenSubjectIsFormatted() {
+
+    doReturn("Subject: Test").when(realFormatter).formatSubject(any()); // override one method
+
+    service.notifyUser(new User("a@ex.com"));
+
+    verify(realFormatter).formatSubject(any());
+    verify(sender).send(eq("a@ex.com"), eq("Subject: Test"), anyString());
+  }
+}
+```
+
+---
+
+
+## Lintable Rules (Automatable)
+
+- Disallow sleeps in tests (except with `Awaitility`/timeouts).
+- Ban network access in unit tests.
+- Enforce that domain code does not call `Instant.now()`/`UUID.randomUUID()` directly (allow via ArchUnit).
+- Require naming conventions (`*Test.java` for unit, `*IT.java` for integration).
+- Flag `@DirtiesContext` overuse (if Spring).
+- Forbid Mockito on value objects and collections.
+
+---
+
+## Quick Checklist (PR/Review)
+
+- Deterministic? No sleeps/random/time/network?
+- Tests assert behavior, not implementation details?
+- Clear AAA structure and intent‑revealing names?
+- Adequate edge cases (nulls, boundaries, errors)?
+- Unit vs Integration separation honored?
+- Coverage holes in critical paths addressed?
+
+---
+
+## Minimal Examples
+
+**Mockito + JUnit 5**
+```java
+@ExtendWith(MockitoExtension.class)
+class BillingServiceTest {
+  @Mock PaymentGateway gateway;
+  @InjectMocks BillingService service;
+
+  @Test void chargesCard() {
+    when(gateway.charge(any())).thenReturn(ChargeResult.ok("tx-1"));
+    var ok = service.bill("acct-1", Money.ofUSD(50));
+    assertThat(ok).isTrue();
+    verify(gateway).charge(argThat(req -> req.amount().equals(Money.ofUSD(50))));
+  }
+}
+```
+
+**Testcontainers IT**
+```java
+@Testcontainers
+class RepoIT {
+  @Container static PostgreSQLContainer<?> pg = new PostgreSQLContainer<>("postgres:16-alpine");
+  @Test void savesAndFinds() { /* ... */ }
+}
+```
+
+**ArchUnit guardrail**
+```java
+JavaClasses classes = new ClassFileImporter().importPackages("com.acme");
+ArchRule noNowInDomain = noClasses().that().resideInAPackage("..domain..")
+  .should().callMethod(Instant.class, "now");
+noNowInDomain.check(classes);
+```
+
+
+- Employ @ParameterizedTest with sources like @ValueSource, @CsvSource, or @MethodSource to test various input scenarios efficiently and reduce code duplication.

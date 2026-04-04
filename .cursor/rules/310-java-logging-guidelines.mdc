@@ -1,0 +1,122 @@
+---
+globs: *.java
+alwaysApply: false
+title: Java Logging Rules
+description: Rules for logging with SLF4J in this project
+scope: project
+tags: [java, logging]
+---
+
+# Logging Principles (what to log and when)
+
+- ERROR level should be used when the application really is in trouble. Users are affected AND there is probably not a workaround for the issue.
+- WARN level should be used when something unusual has happened that requires the application to use defaults or possibly endangers the successful completion of the business case.
+- INFO level is used to document state changes in the application or entities within the application that are important for the user to know to track the progress of the business process.
+  - Configuration start-up notifications
+  - Creation of dispatch jobs
+  - Change of state of dispatch jobs/assignments
+  - Batch jobs have finished or started
+- DEBUG level Is used to present any information that will help a developer identify what went wrong.
+- TRACE level is used for logging all information that helps us to trace the small details of a  business process. 
+
+
+# Logging Guidelines
+
+rules:
+  logging:
+    description: >
+      Java logging rules for this project.
+      Distinguish between REST Controllers, Event Handlers, and CLI Applications.
+      All rules use SLF4J + Logback, Lombok `@Slf4j` annotations, and parameterized messages.
+
+    defaults:
+      framework: "slf4j+logback"
+      declaration: "@Slf4j"
+      message_format: "parameterized"   # ban string concatenation
+      levels:
+        error: "use only for critical failures affecting users with no workaround"
+        warn: "use for notable conditions where business case may still succeed"
+        info: "use for state changes (startup, config loaded, job created, state transitions, batch start/finish)"
+        debug: "use for developer diagnostic detail; enabled only under flag"
+        trace: "use for request-path tracing; enabled only under flag"
+
+      pii_policy:
+        redact:
+          - emails (partial)
+          - phone_numbers (last 4 only)
+          - tokens_passwords_keys (masked as '***')
+        never_log:
+          - ssn
+          - jwt
+          - auth_headers
+          - secrets
+
+      exceptions:
+        log_once: true       # log at handling boundary only
+        error_with_stack: true
+        warn_with_stack: false
+        ban_methods: ["printStackTrace()", "e.getMessage() without context"]
+
+      environment:
+        production:
+          default_level: info
+          debug_enabled: false
+          trace_enabled: false
+        non_production:
+          default_level: debug
+          trace_enabled: flag
+
+      compliance:
+        on_violation: "patch_code_with_warning"   # auto-fix concatenation, warn otherwise
+
+    contexts:
+      rest_controllers:
+        description: >
+          Logging rules for REST controllers (web entrypoints).
+        rules:
+          - require_logger: true
+          - mdc_required: [traceId, spanId, correlationId]   # only for web apps
+          - info_events:
+              - "application startup/configuration"
+              - "dispatch job created/started/finished"
+              - "entity state transitions"
+              - "batch job start/finish"
+          - forbidden:
+              - "manual HTTP request/response logs (framework + SaaS tracing handles this)"
+          - exceptions:
+              - "handled once, with stacktrace if error"
+
+      event_handlers:
+        description: >
+          Logging rules for event handlers (message queue, async events).
+        rules:
+          - require_logger: true
+          - mdc_not_required: true
+          - info_events:
+              - "job creation"
+              - "assignment state change"
+              - "batch start/finish"
+          - forbidden:
+              - "manual HTTP call logs"
+              - "explicit timing logs"
+          - exceptions:
+              - "log once at boundary, stacktrace on error"
+
+      cli_applications:
+        description: >
+          Logging rules for command-line apps and batch jobs.
+        rules:
+          - require_logger: true
+          - mdc_not_required: true
+          - info_events:
+              - "application startup/configuration"
+              - "command execution start/finish"
+              - "batch processing milestones"
+          - performance:
+              - "no per-item timing logs"
+              - "for long jobs (>30s), emit INFO progress every 10s with counts and rates"
+          - forbidden:
+              - "HTTP request/response logs"
+              - "timing logs for methods or entry/exit"
+          - exceptions:
+              - "log once at boundary, stacktrace on error"

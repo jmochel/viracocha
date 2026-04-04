@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+# Launch Viracocha CLI (`vira`) from the repo: runs the packaged fat JAR in target/.
+# Update JAR_NAME if pom.xml <version> changes.
+
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+JAR_NAME="viracocha-0.1.jar"
+JAR="${ROOT}/target/${JAR_NAME}"
+MVNW="${ROOT}/mvnw"
+
+if [[ ! -f "$JAR" ]]; then
+  echo "vira: ${JAR_NAME} not found — building (mvn package)..." >&2
+  (cd "${ROOT}" && "${MVNW}" -q -DskipTests package)
+fi
+
+exec java -jar "${JAR}" "$@"

@@ -1,0 +1,48 @@
+---
+description: Creating Git branches
+alwaysApply: true
+---
+# Conventional Commits (MDC)
+
+```yaml
+name: conventional-branch
+applies_to: git, commits, pr_titles
+goal: Enforce and auto-draft Conventional Branch v1.0.0 branch names
+author: chatgpt
+version: 1.0.0
+```
+
+# Conventional Branch Naming
+
+**Purpose**: Guides the AI to use the Conventional Branch naming standard for all new Git branches.
+
+**Principle**: All new branches must follow the `type/description` format. The description should be concise and use kebab-case.
+
+**Example Branch Names**:
+
+* `feat/add-new-user-auth`: For new features or enhancements.
+* `bugfix/resolve-login-bug`: For fixing bugs in the code.
+* `hotfix/resolve-production-issue`: For urgent fixes to production issues.
+* `release/v1.2.0`: For preparing and testing new releases.
+* `chore/upgrade-dependencies`: For non-code-related tasks, such as updating dependencies or documentation.
+* `docs/update-readme`: For documentation-related changes.
+* `style/reformat-dbt-yml`: For code style changes that don't affect the logic.
+* `refactor/improve-payment-flow`: For code refactoring without changing functionality.
+
+**Rule Details**:
+- **Type**: Must be one of `feat`, `bugfix`, `hotfix`,`docs`, `chore`, `style`, `refactor`,`release`, `test`, `perf`, or `ci`.
+- **Scope (Optional)**: If the change is limited to a specific part of the codebase, include it as `type(scope)/description`.
+- **Description**: A short, kebab-cased summary of the changes.
+  - Use Lowercase Alphanumerics, Hyphens, and Dots
+  - No Consecutive, Leading, or Trailing Hyphens or Dots
+  - Include Ticket Numbers: : If applicable, include the ticket number from your project management tool to make tracking easier. For example, for a ticket issue-123, the branch name could be feature/issue-123-new-login.
+  - 
+
+**AI Directive**:
+When a new branch is being created, ensure the name conforms to the `type/description` or `type(scope)/description` format. Refer to the Conventional Branch specification and remind the user to follow this standard.
+
+## References
+
+- Conventional Branch v1.0.0 — Summary and rules.  
+  
+  
