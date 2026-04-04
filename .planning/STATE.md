@@ -2,7 +2,7 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: completed
+status: planning
 stopped_at: Phase 3 context gathered
 last_updated: "2026-04-04T14:02:42.555Z"
 last_activity: 2026-04-04 -- Phase 02 execution complete
@@ -20,16 +20,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-27)
 
 **Core value:** A developer can register patterns and publishers once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
-**Current focus:** Phase 03 — projects-and-mappings (not yet planned on disk)
+**Current focus:** Phase 03 — projects-and-mappings — context captured; ready to plan
 
 ## Current Position
 
-Phase: 03 (projects-and-mappings) — NOT STARTED
+Phase: 03 (projects-and-mappings) — context in `03-CONTEXT.md`
 Plan: —
-Status: Phase 02 complete (3/3 plans summarized); use `/gsd-discuss-phase 3` or `/gsd-plan-phase 3` to begin Phase 3
-Last activity: 2026-04-04 -- Phase 02 execution complete
+Status: Discuss-phase complete (auto defaults). Next: `/gsd-plan-phase 3`
+Last activity: 2026-04-04 — Phase 3 discussion log and context committed
 
-Progress: Phase 2 milestone plans done; roadmap updated
+Progress: Phase 3 ready for research/planning
 
 ## Performance Metrics
 
