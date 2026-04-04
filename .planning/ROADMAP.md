@@ -82,7 +82,7 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — ProjectEntry parameters, PathExpander + unit tests (GEN-02, GEN-03)
+- [x] 04-01-PLAN.md — ProjectEntry parameters, PathExpander + unit tests (GEN-02, GEN-03)
 - [ ] 04-02-PLAN.md — GeneratorService: merge model, walk pattern tree, skip-existing, dry-run (GEN-01–GEN-05, GEN-07)
 - [ ] 04-03-PLAN.md — `vira generate` command, summary/verbose output, integration tests (GEN-06, GEN-07, GEN-08)
 
@@ -96,4 +96,4 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 | 1. Foundation | 2/2 | Complete   | 2026-03-28 |
 | 2. Publishers and Patterns | 3/3 | Complete   | 2026-04-04 |
 | 3. Projects and Mappings | 3/3 | Complete    | 2026-04-04 |
-| 4. Workspace Generation | 0/3 | Not started | - |
+| 4. Workspace Generation | 1/3 | In progress | - |
