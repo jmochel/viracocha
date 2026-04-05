@@ -27,7 +27,7 @@ key-files:
 
 key-decisions:
   - "Global UUID uniqueness for subscription ids across all projects"
-  - "Duplicate triple rejected on same project (publisher, source, destination)"
+  - "Duplicate triple rejected on same project (publisher, source, workspacePath)"
 
 patterns-established:
   - "Subscription commands under org.saltations.subscription"

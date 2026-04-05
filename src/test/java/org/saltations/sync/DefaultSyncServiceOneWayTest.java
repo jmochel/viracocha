@@ -91,7 +91,7 @@ class DefaultSyncServiceOneWayTest {
     }
 
     @Test
-    void contentMismatch_doesNotOverwriteDestination() throws Exception {
+    void contentMismatch_doesNotOverwriteWorkspaceFile() throws Exception {
         Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(pubRoot.resolve("src/sub"));
@@ -157,7 +157,7 @@ class DefaultSyncServiceOneWayTest {
         Path wsRoot,
         SubscriptionSyncDirection direction,
         String sourcePath,
-        String destPath
+        String workspacePath
     ) throws Exception {
         ViracochaConfig cfg = new ViracochaConfig();
         cfg.getPublishers().add(new PublisherEntry("pub1", pubRoot.toString()));
@@ -165,7 +165,7 @@ class DefaultSyncServiceOneWayTest {
             "11111111-1111-1111-1111-111111111111",
             "pub1",
             sourcePath,
-            destPath,
+            workspacePath,
             direction);
         cfg.getProjects().add(new ProjectEntry("proj1", wsRoot.toString(), List.of(), new LinkedHashMap<>(), List.of(sub)));
         configService.save(cfg);

@@ -25,7 +25,7 @@ public class SyncCommand implements Callable<Integer> {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"--project-name"}, required = true, description = "Project name in configuration")
+    @Option(names = {"--project-name"}, description = "Project name in configuration")
     private String projectName;
 
     @Option(names = {"--subscription"}, description = "Limit to this subscription id (UUID)")
@@ -49,6 +49,10 @@ public class SyncCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
+        if (projectName == null || projectName.isBlank()) {
+            spec.commandLine().getErr().println("Missing required option: '--project-name'");
+            return 2;
+        }
         String subId = (subscriptionId == null || subscriptionId.isBlank()) ? null : subscriptionId;
         try {
             SyncEngineResult result = syncService.syncProject(projectName, subId, dryRun, verbose);

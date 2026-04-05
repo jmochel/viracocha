@@ -23,7 +23,7 @@ public class UnregisterPatternCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
-    @Option(names = {"--name"}, required = true, description = "Pattern name to remove")
+    @Option(names = {"-n", "--name"}, required = true, description = "Pattern name to remove")
     private String name;
 
     private final ConfigService configService;

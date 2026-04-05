@@ -33,8 +33,8 @@ public class AddMappingCommand implements Callable<Integer> {
     @Option(names = {"--pattern"}, required = true, description = "Registered pattern name")
     private String pattern;
 
-    @Option(names = {"--destination"}, required = true, description = "Destination path relative to project workspace")
-    private String destination;
+    @Option(names = {"-w", "--workspace"}, required = true, description = "Workspace path relative to project workspace root")
+    private String workspace;
 
     @Option(names = {"--param"}, description = "Parameter as key=value (repeatable)")
     private List<String> paramPairs;
@@ -71,8 +71,8 @@ public class AddMappingCommand implements Callable<Integer> {
                 return 1;
             }
 
-            String dest = destination.trim();
-            proj.getMappings().add(new MappingEntry(pattern, dest, params));
+            String workspacePath = workspace.trim();
+            proj.getMappings().add(new MappingEntry(pattern, workspacePath, params));
             configService.save(config);
             spec.commandLine().getOut().println("Mapping added to project '" + project + "'.");
             return 0;

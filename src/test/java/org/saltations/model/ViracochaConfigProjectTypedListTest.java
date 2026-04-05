@@ -35,7 +35,7 @@ class ViracochaConfigProjectTypedListTest {
         assertEquals(1, p.getMappings().size());
         MappingEntry m = p.getMappings().get(0);
         assertEquals("pat-a", m.getPatternName());
-        assertEquals("out/dir", m.getDestination());
+        assertEquals("out/dir", m.getWorkspacePath());
         assertEquals("v1", m.getParameters().get("k1"));
     }
 

@@ -73,7 +73,7 @@ class SubscriptionListShowRemoveTest {
             "--project", "p1",
             "--publisher", "pub1",
             "--source", "src",
-            "--destination", "out",
+            "--workspace", "out",
             "--direction", "publish-to-workspace");
         assertEquals(0, exit);
         String line = out.toString();

@@ -56,19 +56,19 @@ public class ListSubscriptionsCommand implements Callable<Integer> {
                         row.put("project", proj.getName());
                         row.put("publisher", sub.getPublisherName());
                         row.put("source", sub.getSourcePath());
-                        row.put("destination", sub.getDestinationPath());
+                        row.put("workspacePath", sub.getWorkspacePath());
                         row.put("direction", sub.getDirection().name());
                         spec.commandLine().getOut().println(om.writeValueAsString(row));
                     } else {
                         String idCol = truncate(sub.getId(), 36);
-                        String destCol = truncate(sub.getDestinationPath(), 48);
+                        String workspacePathCol = truncate(sub.getWorkspacePath(), 48);
                         spec.commandLine().getOut().printf(
                             "%-36s  %-15s  %-20s  %-24s  %s%n",
                             idCol,
                             proj.getName(),
                             sub.getPublisherName(),
                             sub.getDirection().name(),
-                            destCol);
+                            workspacePathCol);
                     }
                 }
             }

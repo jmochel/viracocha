@@ -106,16 +106,16 @@ GenerateCommand.run()
   → for each mapping in project.mappings:
       → PatternService.findPattern(mapping.pattern)
       → resolve merged params (project.params + mapping.values)
-      → GeneratorService.generate(pattern, mapping.destination, params)
-          → expand destination path (Freemarker variable substitution in path string)
-          → if destination is folder:
+      → GeneratorService.generate(pattern, mapping.workspacePath, params)
+          → expand workspace path (Freemarker variable substitution in path string)
+          → if workspace path is folder:
               → walk pattern source tree
               → for each file:
                   → expand file path segments with params
-                  → compute absolute destination path (workspace + expanded relative path)
-                  → if destination exists: log "Skipped", continue
+                  → compute absolute output path (project workspace + expanded relative path)
+                  → if output path exists: log "Skipped", continue
                   → else: expand file content via Freemarker, write file
-          → if destination is file:
+          → if workspace path is file:
               → expand content, write (skip if exists)
   → print summary: "N files created, M skipped"
 ```

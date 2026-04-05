@@ -54,13 +54,16 @@ class ShowConfigCommandTest {
     }
 
     @Test
-    void showAfterInitPrintsConfigFileLine() throws Exception {
+    void showAfterInitPrintsConfigFileHeader() throws Exception {
         configService.init();
+        Path expectedFile = configService.xdgPaths().configFile();
         int exitCode = buildCommandLine().execute();
         assertEquals(0, exitCode, "show after init must exit 0");
         String out = stdout.toString();
-        assertTrue(out.startsWith("Config file:"),
-            "First line must start with 'Config file:'");
+        assertTrue(out.startsWith("Configuration file:\n"),
+            "Output must start with Configuration file header");
+        assertTrue(out.contains(expectedFile.toAbsolutePath().normalize().toString()),
+            "Output must contain full path to config file");
     }
 
     @Test

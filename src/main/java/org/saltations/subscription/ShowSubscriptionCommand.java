@@ -68,7 +68,7 @@ public class ShowSubscriptionCommand implements Callable<Integer> {
                 row.put("project", owner.getName());
                 row.put("publisher", found.getPublisherName());
                 row.put("source", found.getSourcePath());
-                row.put("destination", found.getDestinationPath());
+                row.put("workspacePath", found.getWorkspacePath());
                 row.put("direction", found.getDirection().name());
                 spec.commandLine().getOut().println(new ObjectMapper().writeValueAsString(row));
             } else {
@@ -76,7 +76,7 @@ public class ShowSubscriptionCommand implements Callable<Integer> {
                 spec.commandLine().getOut().println("project: " + owner.getName());
                 spec.commandLine().getOut().println("publisher: " + found.getPublisherName());
                 spec.commandLine().getOut().println("source: " + found.getSourcePath());
-                spec.commandLine().getOut().println("destination: " + found.getDestinationPath());
+                spec.commandLine().getOut().println("workspacePath: " + found.getWorkspacePath());
                 spec.commandLine().getOut().println("direction: " + found.getDirection().name());
             }
             return 0;

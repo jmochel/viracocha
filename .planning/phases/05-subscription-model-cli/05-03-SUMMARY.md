@@ -26,7 +26,7 @@ key-files:
     - src/main/java/org/saltations/subscription/SubscriptionCommand.java
 
 key-decisions:
-  - "Plain list: id, project, publisher, direction, destination columns (truncation helpers)"
+  - "Plain list: id, project, publisher, direction, workspacePath columns (truncation helpers)"
 
 patterns-established:
   - "Show/remove search subscription id across all projects"

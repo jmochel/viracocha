@@ -83,11 +83,11 @@ public class GeneratorService {
 
             Path destRoot;
             try {
-                destRoot = resolveDestination(workspace, mapping.getDestination());
+                destRoot = resolveMappingWorkspacePath(workspace, mapping.getWorkspacePath());
             } catch (IllegalArgumentException e) {
                 failed++;
                 if (verbose) {
-                    verboseLines.add("Failed " + mapping.getDestination() + " (" + e.getMessage() + ")");
+                    verboseLines.add("Failed " + mapping.getWorkspacePath() + " (" + e.getMessage() + ")");
                 }
                 continue;
             }
@@ -110,7 +110,7 @@ public class GeneratorService {
                 } catch (IllegalArgumentException e) {
                     failed++;
                     if (verbose) {
-                        String hint = Path.of(mapping.getDestination()).resolve(relFromPattern).toString().replace('\\', '/');
+                        String hint = Path.of(mapping.getWorkspacePath()).resolve(relFromPattern).toString().replace('\\', '/');
                         verboseLines.add("Failed " + hint + " (path expansion: " + e.getMessage() + ")");
                     }
                     continue;
@@ -213,13 +213,13 @@ public class GeneratorService {
         return merged;
     }
 
-    private Path resolveDestination(Path workspace, String destination) {
-        if (destination == null || destination.isBlank()) {
-            throw new IllegalArgumentException("Mapping destination must not be empty.");
+    private Path resolveMappingWorkspacePath(Path projectWorkspace, String workspacePath) {
+        if (workspacePath == null || workspacePath.isBlank()) {
+            throw new IllegalArgumentException("Mapping workspace path must not be empty.");
         }
-        Path destRoot = workspace.resolve(destination).normalize().toAbsolutePath();
-        if (!destRoot.startsWith(workspace)) {
-            throw new IllegalArgumentException("Mapping destination escapes workspace.");
+        Path destRoot = projectWorkspace.resolve(workspacePath).normalize().toAbsolutePath();
+        if (!destRoot.startsWith(projectWorkspace)) {
+            throw new IllegalArgumentException("Mapping workspace path escapes project workspace.");
         }
         return destRoot;
     }

@@ -15,7 +15,7 @@ Requires **JDK 21**. Build with `./mvnw package` and run `java -jar target/virac
 | **Publisher**      | Named reference to a folder containing AI configuration artifacts that can be synced to a **workspace folder**. Paths to the **Publisher** must exist on disk when registered.                                                                                                      |
 | **Pattern**        | Named reference to a folder or file of **Freemarker** templates. The names of Pattern folders and files can contain `${variable}` and the file contents  can use `${variable}` placeholders.                                                                                         |
 | **Project**        | A configuration stored in the **Central Config** that has the path to the **workspace folder** and a list of **mappings** that map folders/files from **Publishers** and **Patterns**.                                                                                                                 |
-| **Mapping**        | “Install this **registered pattern** under this **destination** path (relative to the project workspace), with optional **parameters** (`key=value`) for Freemarker.” Project-level default parameters can exist; mapping params override. |
+| **Mapping**        | “Install this **registered pattern** under this **workspace** path (relative to the project workspace root), with optional **parameters** (`key=value`) for Freemarker.” Project-level default parameters can exist; mapping params override. |
 | `**generate`**     | Walks each mapping, merges parameters, expands templates, writes into the project workspace. **Existing files are not overwritten** (skip-existing).                                                                                       |
 
 Structured logging (JSONL) goes to `~/.local/share/viracocha/vira.jsonl`; normal command output stays on stdout/stderr.
@@ -30,7 +30,7 @@ Structured logging (JSONL) goes to `~/.local/share/viracocha/vira.jsonl`; normal
    - `workspace-to-publish` — copy workspace → publisher
    - `bidirectional` — reconcile both sides (analyze then apply); conflicts abort the apply phase
 
-   Example: `vira subscription add --project <name> --publisher <pub> --source <rel> --destination <rel> --direction publish-to-workspace`
+   Example: `vira subscription add --project <name> --publisher <pub> --source <rel> --workspace <rel> --direction publish-to-workspace`
 
 3. **Run sync:** `vira sync --project-name <name>` with optional:
    - `--subscription <uuid>` — limit to one subscription
@@ -89,7 +89,7 @@ vira project create --name my-app --path /absolute/path/to/workspace
 vira project add-mapping \
   --project my-app \
   --pattern my-pattern \
-  --destination relative/target/dir \
+  --workspace relative/target/dir \
   --param foo=bar \
   --param other=value
 vira project show --name my-app
@@ -117,7 +117,7 @@ Summary line always reports counts: `Generated: …, Skipped: …, Failed: …`.
 | `vira config show`                                                     | Print config path and file contents.                                                                                 |
 | `vira publisher` … `register`, `list`, `show`, `unregister`            | CRUD for named publisher paths (`--name`, `--path` where needed).                                                    |
 | `vira pattern` … `register`, `list`, `show`, `unregister`              | CRUD for named pattern trees; `show` lists extracted Freemarker parameters.                                          |
-| `vira project` … `create`, `list`, `show`, `add-mapping`, `unregister` | Projects (`--name`, `--path`), mappings (`--project`, `--pattern`, `--destination`, repeatable `--param key=value`). |
+| `vira project` … `create`, `list`, `show`, `add-mapping`, `unregister` | Projects (`--name`, `--path`), mappings (`--project`, `--pattern`, `--workspace`, repeatable `--param key=value`). |
 | `vira generate`                                                        | `--project-name` (required), optional `--dry-run`, `--verbose`.                                                      |
 | `vira subscription` … `add`, `list`, `show`, `remove`                  | Link a publisher subtree to a workspace subtree with a sync direction.                                                |
 | `vira sync`                                                            | `--project-name` (required); optional `--subscription`, `--dry-run`, `--verbose`, `--json`.                         |

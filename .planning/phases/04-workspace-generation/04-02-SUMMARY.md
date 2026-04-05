@@ -31,7 +31,7 @@ key-files:
 
 key-decisions:
   - "Unknown pattern name throws IllegalArgumentException at start of mapping (fail fast)"
-  - "Workspace escape on mapping destination rejected with IllegalArgumentException"
+  - "Workspace escape on mapping workspace path rejected with IllegalArgumentException"
 
 patterns-established:
   - "Hidden path segments skipped via PatternPathUtils"

@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Implement a **filesystem sync engine** as a **testable service** (no user-facing `vira sync` command — Phase 7). For each subscription, resolve absolute paths (`publisher.root / sourcePath`, `project.workspace / destinationPath`), walk the subscribed subtrees, **copy** files according to **direction**, and **detect conflicts** when both sides have a path but content or file-kind disagree. Default behavior on conflict: **abort** with a **structured list** (SYN-04, ROADMAP). **Hidden** segments use the same rule as `generate`: skip paths where `PatternPathUtils.hasHiddenPathSegment` applies to the walk roots (SYN-05, parity with `GeneratorService`).
+Implement a **filesystem sync engine** as a **testable service** (no user-facing `vira sync` command — Phase 7). For each subscription, resolve absolute paths (`publisher.root / sourcePath`, `project.workspace / workspacePath`), walk the subscribed subtrees, **copy** files according to **direction**, and **detect conflicts** when both sides have a path but content or file-kind disagree. Default behavior on conflict: **abort** with a **structured list** (SYN-04, ROADMAP). **Hidden** segments use the same rule as `generate`: skip paths where `PatternPathUtils.hasHiddenPathSegment` applies to the walk roots (SYN-05, parity with `GeneratorService`).
 
 Out of scope for Phase 6: CLI flags, `--dry-run` / `--verbose` user output, README (Phase 7); **optional conflict-strategy flags** reserved for Phase 7 if implemented.
 
@@ -22,7 +22,7 @@ Out of scope for Phase 6: CLI flags, `--dry-run` / `--verbose` user output, READ
 - **D-04:** **One side missing:** Not a conflict — it drives a **copy** in the allowed direction(s) for that subscription (SYN-01 / SYN-02). No “delete the extra side” in Phase 6 (see area 2).
 
 ### 2. Tree semantics (gray area 2)
-- **D-05:** **Copy-only:** Phase 6 does **not** delete files on the destination when the source tree omits a path (no mirror-delete). Aligns with “copy files” wording and avoids surprising data loss before Phase 7 documents UX.
+- **D-05:** **Copy-only:** Phase 6 does **not** delete files in the workspace when the source tree omits a path (no mirror-delete). Aligns with “copy files” wording and avoids surprising data loss before Phase 7 documents UX.
 - **D-06:** **Directories:** Create parent directories as needed when copying a file. **Empty directories** are not materialized as first-class sync targets (no copying of empty-dir-only nodes); if a file copy implies parents, those directories appear as a side effect.
 - **D-07:** **Ordering of copies** within a direction: deterministic (e.g. **lexicographic** order of normalized relative path strings, `/` separators) so tests are stable.
 
@@ -71,7 +71,7 @@ Out of scope for Phase 6: CLI flags, `--dry-run` / `--verbose` user output, READ
 ## Existing Code Insights
 
 ### Reusable assets
-- **`PatternPathUtils.hasHiddenPathSegment(root, path)`** — same hidden rule as pattern walk / generate; use for both publisher-root and workspace-root walks from subscription `sourcePath` / `destinationPath` roots.
+- **`PatternPathUtils.hasHiddenPathSegment(root, path)`** — same hidden rule as pattern walk / generate; use for both publisher-root and workspace-root walks from subscription `sourcePath` / `workspacePath` roots.
 - **`GeneratorService`** — example of `Files.walk` + regular-file filter + hidden filter; sync should mirror that filter philosophy for SYN-05.
 - **`SubscriptionEntry`**, **`ProjectEntry`**, **`PublisherEntry`**, **`ConfigService`** — model and loading for integration tests.
 

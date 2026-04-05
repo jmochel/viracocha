@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "subscription",
+    aliases = {"sub"},
     description = "Manage publisher↔workspace subscriptions.",
     mixinStandardHelpOptions = true,
     subcommands = {

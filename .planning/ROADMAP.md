@@ -32,7 +32,7 @@
 **Design notes:**
 
 - Add `SubscriptionEntry` (or equivalent) and nest subscriptions under each `ProjectEntry` in YAML (keeps project as the anchor for workspace path).
-- Fields (minimum): stable **id**, **publisherName** (must match registered publisher), **sourcePath** (relative to publisher root), **destinationPath** (relative to project workspace), **direction** (`PUBLISH_TO_WORKSPACE` | `WORKSPACE_TO_PUBLISH` | `BIDIRECTIONAL`).
+- Fields (minimum): stable **id**, **publisherName** (must match registered publisher), **sourcePath** (relative to publisher root), **workspacePath** (relative to project workspace), **direction** (`PUBLISH_TO_WORKSPACE` | `WORKSPACE_TO_PUBLISH` | `BIDIRECTIONAL`).
 - Command group: `vira subscription` with `add`, `list`, `show`, `remove` (names aligned with existing picocli style). `--project <name>` required where applicable.
 - Reuse `ConfigService` load/save; extend schema version if needed.
 
@@ -48,7 +48,7 @@
 
 **Design notes:**
 
-- Resolve absolute paths: `publisher.root / sourcePath` and `project.workspace / destinationPath`.
+- Resolve absolute paths: `publisher.root / sourcePath` and `project.workspace / workspacePath`.
 - Implement tree walk + copy (NIO `Files.walkFileTree` or equivalent); respect direction.
 - **Conflict policy (v2.0):** When both files exist and differ, default **abort** with a structured conflict list; optional strategy flag reserved for Phase 7 if time permits (SYN-04).
 - Align **hidden** file/directory handling with `GeneratorService` (reference same helper or document explicit parity).

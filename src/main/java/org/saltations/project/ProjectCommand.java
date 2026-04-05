@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "project",
+    aliases = {"proj"},
     description = "Manage projects and mappings.",
     mixinStandardHelpOptions = true,
     subcommands = {

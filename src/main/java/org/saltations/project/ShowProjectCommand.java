@@ -26,7 +26,7 @@ public class ShowProjectCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
-    @Option(names = {"--name"}, required = true, description = "Project name")
+    @Option(names = {"-n", "--name"}, required = true, description = "Project name")
     private String name;
 
     @Option(names = {"--json"}, description = "Output as JSON")
@@ -63,7 +63,7 @@ public class ShowProjectCommand implements Callable<Integer> {
                     for (MappingEntry m : entry.getMappings()) {
                         spec.commandLine().getOut().println("Mapping " + i + ":");
                         spec.commandLine().getOut().println("  Pattern: " + m.getPatternName());
-                        spec.commandLine().getOut().println("  Destination: " + m.getDestination());
+                        spec.commandLine().getOut().println("  Workspace: " + m.getWorkspacePath());
                         String params = formatParameters(m.getParameters());
                         spec.commandLine().getOut().println("  Parameters: " + params);
                         i++;

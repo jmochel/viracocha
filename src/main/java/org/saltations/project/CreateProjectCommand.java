@@ -27,10 +27,10 @@ public class CreateProjectCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
-    @Option(names = {"--name"}, required = true, description = "Project name")
+    @Option(names = {"-n", "--name"}, required = true, description = "Project name")
     private String name;
 
-    @Option(names = {"--path"}, required = true, description = "Absolute path to project workspace root")
+    @Option(names = {"-p", "--path"}, required = true, description = "Absolute path to project workspace root")
     private String path;
 
     private final ConfigService configService;

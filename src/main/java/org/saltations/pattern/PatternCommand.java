@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "pattern",
+    aliases = {"ptn"},
     description = "Manage registered patterns.",
     mixinStandardHelpOptions = true,
     subcommands = {

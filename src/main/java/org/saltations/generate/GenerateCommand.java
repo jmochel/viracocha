@@ -14,14 +14,18 @@ import java.util.concurrent.Callable;
 /**
  * Command: vira generate
  */
-@Command(name = "generate", description = "Generate workspace files from project mappings.", mixinStandardHelpOptions = true)
+@Command(
+    name = "generate",
+    aliases = {"gen"},
+    description = "Generate workspace files from project mappings.",
+    mixinStandardHelpOptions = true)
 @Singleton
 public class GenerateCommand implements Callable<Integer> {
 
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"--project-name"}, required = true, description = "Project name to generate")
+    @Option(names = {"--project-name"}, description = "Project name to generate")
     private String projectName;
 
     @Option(names = {"--dry-run"}, description = "Show actions without writing files")
@@ -39,6 +43,10 @@ public class GenerateCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
+        if (projectName == null || projectName.isBlank()) {
+            spec.commandLine().getErr().println("Missing required option: '--project-name'");
+            return 2;
+        }
         try {
             GenerationResult result = generatorService.generate(projectName, dryRun, verbose);
             if (verbose) {

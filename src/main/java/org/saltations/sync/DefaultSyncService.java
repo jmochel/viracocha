@@ -97,7 +97,7 @@ public class DefaultSyncService implements SyncService {
 
     private static ResolvedRoots resolveRoots(PublisherEntry pub, ProjectEntry proj, SubscriptionEntry sub) {
         Path publisherSubtree = Path.of(pub.getPath()).resolve(sub.getSourcePath()).normalize().toAbsolutePath();
-        Path workspaceSubtree = Path.of(proj.getPath()).resolve(sub.getDestinationPath()).normalize().toAbsolutePath();
+        Path workspaceSubtree = Path.of(proj.getPath()).resolve(sub.getWorkspacePath()).normalize().toAbsolutePath();
         return new ResolvedRoots(publisherSubtree, workspaceSubtree);
     }
 

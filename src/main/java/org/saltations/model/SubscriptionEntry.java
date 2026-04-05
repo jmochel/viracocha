@@ -16,6 +16,7 @@ public class SubscriptionEntry {
     private String id;
     private String publisherName;
     private String sourcePath;
-    private String destinationPath;
+    /** Path relative to the project workspace root (subscription "workspace" subtree). */
+    private String workspacePath;
     private SubscriptionSyncDirection direction;
 }

@@ -21,7 +21,7 @@ public class UnregisterProjectCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
-    @Option(names = {"--name"}, required = true, description = "Project name to remove")
+    @Option(names = {"-n", "--name"}, required = true, description = "Project name to remove")
     private String name;
 
     private final ConfigService configService;

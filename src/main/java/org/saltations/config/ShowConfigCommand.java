@@ -14,7 +14,8 @@ import java.util.concurrent.Callable;
  * Command: vira config show
  * Displays the config file path and its raw YAML contents.
  * Output format:
- *   Config file: &lt;absolute-path&gt;
+ *   Configuration file:
+ *   &lt;full absolute path&gt;
  *   &lt;blank line&gt;
  *   &lt;raw YAML contents&gt;
  * Exit codes: 0 = success, 1 = config not initialized or IO error
@@ -44,9 +45,17 @@ public class ShowConfigCommand implements Callable<Integer> {
             configService.load();
             java.nio.file.Path configFile = configService.xdgPaths().configFile();
             String rawYaml = Files.readString(configFile);
-            spec.commandLine().getOut().println("Config file: " + configFile.toAbsolutePath());
-            spec.commandLine().getOut().println();
-            spec.commandLine().getOut().println(rawYaml);
+            java.nio.file.Path fullPath = configFile.toAbsolutePath().normalize();
+            try {
+                fullPath = configFile.toRealPath();
+            } catch (IOException ignored) {
+                // keep normalized absolute path
+            }
+            var out = spec.commandLine().getOut();
+            out.println("Configuration file:");
+            out.println(fullPath);
+            out.println();
+            out.println(rawYaml);
             spec.commandLine().getOut().flush();
             return 0;
         } catch (ConfigNotInitializedException e) {

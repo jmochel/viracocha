@@ -41,8 +41,8 @@ public class AddSubscriptionCommand implements Callable<Integer> {
     @Option(names = {"--source"}, required = true, description = "Path relative to publisher root")
     private String source;
 
-    @Option(names = {"--destination"}, required = true, description = "Path relative to project workspace")
-    private String destination;
+    @Option(names = {"-w", "--workspace"}, required = true, description = "Path relative to project workspace")
+    private String workspace;
 
     @Option(names = {"--direction"}, required = true, description = "Sync direction (kebab-case)")
     private String directionRaw;
@@ -86,18 +86,18 @@ public class AddSubscriptionCommand implements Callable<Integer> {
             }
 
             String src = source.trim();
-            String dest = destination.trim();
-            if (isUnsafeRelative(src) || isUnsafeRelative(dest)) {
-                spec.commandLine().getErr().println("Error: invalid path: " + (isUnsafeRelative(src) ? src : dest));
+            String workspacePath = workspace.trim();
+            if (isUnsafeRelative(src) || isUnsafeRelative(workspacePath)) {
+                spec.commandLine().getErr().println("Error: invalid path: " + (isUnsafeRelative(src) ? src : workspacePath));
                 return 1;
             }
 
             for (SubscriptionEntry existing : proj.getSubscriptions()) {
                 if (existing.getPublisherName().equals(publisher)
                     && existing.getSourcePath().equals(src)
-                    && existing.getDestinationPath().equals(dest)) {
+                    && existing.getWorkspacePath().equals(workspacePath)) {
                     spec.commandLine().getErr().println(
-                        "Subscription already exists for this project with the same publisher, source, and destination.");
+                        "Subscription already exists for this project with the same publisher, source, and workspace path.");
                     return 1;
                 }
             }
@@ -112,7 +112,7 @@ public class AddSubscriptionCommand implements Callable<Integer> {
                 newId = UUID.randomUUID().toString();
             }
 
-            SubscriptionEntry entry = new SubscriptionEntry(newId, publisher, src, dest, direction);
+            SubscriptionEntry entry = new SubscriptionEntry(newId, publisher, src, workspacePath, direction);
             proj.getSubscriptions().add(entry);
             configService.save(config);
             spec.commandLine().getOut().println("Subscription added (id=" + newId + ").");

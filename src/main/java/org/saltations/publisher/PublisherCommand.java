@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "publisher",
+    aliases = {"pub"},
     description = "Manage registered publishers.",
     mixinStandardHelpOptions = true,
     subcommands = {

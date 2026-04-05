@@ -29,10 +29,10 @@ public class RegisterPublisherCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
-    @Option(names = {"--name"}, required = true, description = "Publisher name")
+    @Option(names = {"-n", "--name"}, required = true, description = "Publisher name")
     private String name;
 
-    @Option(names = {"--path"}, required = true, description = "Absolute path to publisher directory")
+    @Option(names = {"-p", "--path"}, required = true, description = "Absolute path to publisher directory")
     private String path;
 
     private final ConfigService configService;

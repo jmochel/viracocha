@@ -36,5 +36,6 @@ class SubscriptionEntryYamlTest {
         SubscriptionEntry s = p.getSubscriptions().get(0);
         assertEquals(SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, s.getDirection());
         assertEquals("pub1", s.getPublisherName());
+        assertEquals("out", s.getWorkspacePath());
     }
 }

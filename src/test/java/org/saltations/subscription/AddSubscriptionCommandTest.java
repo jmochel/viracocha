@@ -80,7 +80,7 @@ class AddSubscriptionCommandTest {
             "--project", "p1",
             "--publisher", "pub1",
             "--source", "src",
-            "--destination", "out",
+            "--workspace", "out",
             "--direction", "publish-to-workspace");
         assertEquals(0, exit);
         assertTrue(stdout.toString().contains("Subscription added"));
@@ -98,7 +98,7 @@ class AddSubscriptionCommandTest {
             "--project", "nope",
             "--publisher", "pub1",
             "--source", "a",
-            "--destination", "b",
+            "--workspace", "b",
             "--direction", "publish-to-workspace");
         assertEquals(1, exit);
         assertTrue(stderr.toString().contains("not found"));

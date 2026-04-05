@@ -47,7 +47,6 @@ public class ViracochaCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        // Root command with no subcommand: show help
         return 0;
     }
 }

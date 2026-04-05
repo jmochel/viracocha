@@ -52,7 +52,7 @@ class AddMappingAndShowProjectTest {
         int exitAdd = clAdd.execute(
             "--project", "proj",
             "--pattern", "pat1",
-            "--destination", "rel/out",
+            "--workspace", "rel/out",
             "--param", "a=1",
             "--param", "b=two"
         );
@@ -89,7 +89,7 @@ class AddMappingAndShowProjectTest {
         int exit = clAdd.execute(
             "--project", "p2",
             "--pattern", "missing-pattern",
-            "--destination", "x"
+            "--workspace", "x"
         );
         assertEquals(1, exit);
         assertTrue(err.toString().contains("Pattern 'missing-pattern' not found"));

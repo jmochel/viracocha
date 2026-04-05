@@ -77,6 +77,13 @@ class GenerateCommandTest {
     }
 
     @Test
+    void missingProjectName_exits2() {
+        int exit = commandLine.execute();
+        assertEquals(2, exit);
+        assertTrue(stderr.toString().contains("--project-name"));
+    }
+
+    @Test
     void printsSummaryLineWithCounts() throws Exception {
         seedProject();
         int exit = commandLine.execute("--project-name", "p1");

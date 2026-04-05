@@ -32,10 +32,10 @@ public class RegisterPatternCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
-    @Option(names = {"--name"}, required = true, description = "Pattern name")
+    @Option(names = {"-n", "--name"}, required = true, description = "Pattern name")
     private String name;
 
-    @Option(names = {"--path"}, required = true, description = "Absolute path to pattern directory")
+    @Option(names = {"-p", "--path"}, required = true, description = "Absolute path to pattern directory")
     private String path;
 
     private final ConfigService configService;

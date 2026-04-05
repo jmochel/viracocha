@@ -27,7 +27,7 @@ public class ShowPublisherCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
-    @Option(names = {"--name"}, required = true, description = "Publisher name")
+    @Option(names = {"-n", "--name"}, required = true, description = "Publisher name")
     private String name;
 
     @Option(names = {"--json"}, description = "Output as JSON")

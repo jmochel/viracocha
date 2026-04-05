@@ -24,7 +24,7 @@ Out of scope: subscriptions/sync, `--force` overwrite, network/Git — per PROJE
 - **D-04:** **Schema:** Add optional `Map<String, String> parameters` (defaults) to `ProjectEntry` if not already present — PROJECT.md calls for project-level defaults; YAML field name should match existing style (camelCase in Java / snake-friendly in YAML as elsewhere). Planner must migrate any existing configs without the field (empty map).
 
 ### Path and content expansion (GEN-03, GEN-04)
-- **D-05:** Introduce a dedicated **PathExpander** (name flexible) that expands `${...}` / Freemarker expressions in **relative path segments** (each mapping’s destination root + pattern-relative path) using the merged model — Freemarker does not do this by itself; STATE.md flags this as a prerequisite. Unit-test PathExpander **before** wiring full generation.
+- **D-05:** Introduce a dedicated **PathExpander** (name flexible) that expands `${...}` / Freemarker expressions in **relative path segments** (each mapping’s workspace path root + pattern-relative path) using the merged model — Freemarker does not do this by itself; STATE.md flags this as a prerequisite. Unit-test PathExpander **before** wiring full generation.
 - **D-06:** File **content** expansion uses Freemarker templates as today’s patterns imply; encoding UTF-8 unless Claude’s discretion picks a standard default.
 
 ### Skip-existing and directories (GEN-04, GEN-05)

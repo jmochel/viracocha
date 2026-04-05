@@ -11,15 +11,15 @@
 
 ### C1: Freemarker Filename Variable Expansion Is Not Built-In
 
-**What goes wrong:** Freemarker processes file *content*, not file *paths*. If a pattern source tree has a folder named `${projectName}`, walking it and mapping source paths to destination paths produces a literal directory named `${projectName}` in the output. The template engine has no concept of the destination path.
+**What goes wrong:** Freemarker processes file *content*, not file *paths*. If a pattern source tree has a folder named `${projectName}`, walking it and mapping source paths to workspace paths produces a literal directory named `${projectName}` in the output. The template engine has no concept of the workspace output path.
 
-**Why it happens:** `Template.process(dataModel, writer)` writes expanded content to a `Writer`. The destination path is a Java `Path` determined by the caller before `process()` is invoked. Variable expressions in source directory/file names are copied literally unless explicitly expanded first.
+**Why it happens:** `Template.process(dataModel, writer)` writes expanded content to a `Writer`. The output path is a Java `Path` determined by the caller before `process()` is invoked. Variable expressions in source directory/file names are copied literally unless explicitly expanded first.
 
 **Consequences:** Generated workspace has directories named `${projectName}` rather than the resolved value. Silent corruption — no exception thrown, files write successfully to the wrong location.
 
 **Prevention:**
 - Write a `PathExpander` utility that takes a path string and a `Map<String, Object>` data model and returns the resolved path string with `${var}` tokens replaced.
-- Never treat source-to-destination path mapping as a simple `relativize()` + `resolve()` operation.
+- Never treat source-to-workspace path mapping as a simple `relativize()` + `resolve()` operation.
 - Test `PathExpander` independently before any file-writing code.
 
 **Warning signs:**
@@ -172,7 +172,7 @@ Encapsulate in a single `XdgPaths` utility class. All other classes go through i
 
 ### M7: Skip-Existing Has a TOCTOU Race
 
-**What goes wrong:** `Files.exists(destination)` + `Files.write(destination, ...)` is a Time-Of-Check-Time-Of-Use race. A concurrent process can create the file between check and write, causing an overwrite.
+**What goes wrong:** `Files.exists(target)` + `Files.write(target, ...)` is a Time-Of-Check-Time-Of-Use race. A concurrent process can create the file between check and write, causing an overwrite.
 
 **Prevention:**
 - Use `Files.newOutputStream(path, StandardOpenOption.CREATE_NEW)` — atomically creates or throws `FileAlreadyExistsException`. Catch `FileAlreadyExistsException` as the skip signal.

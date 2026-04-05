@@ -175,3 +175,12 @@ $RECYCLE.BIN/
 *.lnk
 
 
+### Cursor ###
+
+.cursor/**/*.log
+
+### Project Specific ###
+
+scratch.md
+scratch.txt
+

@@ -129,7 +129,7 @@ class SyncCommandIntegrationTest {
         Path wsRoot,
         SubscriptionSyncDirection direction,
         String sourcePath,
-        String destPath,
+        String workspacePath,
         String subscriptionId
     ) throws Exception {
         ViracochaConfig cfg = new ViracochaConfig();
@@ -138,7 +138,7 @@ class SyncCommandIntegrationTest {
             subscriptionId,
             "pub1",
             sourcePath,
-            destPath,
+            workspacePath,
             direction);
         cfg.getProjects().add(new ProjectEntry("intproj", wsRoot.toString(), List.of(), new LinkedHashMap<>(), List.of(sub)));
         configService.save(cfg);

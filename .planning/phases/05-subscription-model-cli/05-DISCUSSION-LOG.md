@@ -38,7 +38,7 @@
 
 ### Q4: Output and validation
 
-**Resolution:** List/show/`--json` follows **03-CONTEXT.md** conventions; duplicates rejected by publisher+source+destination on same project; reject `..` in relative paths; publisher/project must exist before save.
+**Resolution:** List/show/`--json` follows **03-CONTEXT.md** conventions; duplicates rejected by publisher+source+workspacePath on same project; reject `..` in relative paths; publisher/project must exist before save.
 
 ---
 

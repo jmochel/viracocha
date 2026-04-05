@@ -61,7 +61,7 @@
 
 - JSON field naming and column formatting
 - Package layout for project commands and model classes
-- Path normalization details for `destination`
+- Path normalization details for workspace paths
 
 ## Deferred Ideas
 

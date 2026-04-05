@@ -17,7 +17,7 @@ Requirements for milestone v2.0. Each maps to roadmap phases (5–7).
 
 ### Subscriptions (CLI & model)
 
-- [ ] **SUB-01**: User can add a subscription on a **project** that references a registered **publisher** by name and ties a publisher-side source path to a workspace-relative destination path
+- [ ] **SUB-01**: User can add a subscription on a **project** that references a registered **publisher** by name and ties a publisher-side source path to a workspace-relative path (subscription subtree)
 - [ ] **SUB-02**: Each subscription records **sync direction**: publisher→workspace only, workspace→publisher only, or **bidirectional**
 - [ ] **SUB-03**: User can **list** subscriptions (scope: project or global list — as implemented in roadmap) in plain text and JSON consistent with existing `vira` commands
 - [ ] **SUB-04**: User can **show** details for one subscription

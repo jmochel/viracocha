@@ -8,7 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- * One pattern-to-destination mapping under a project.
+ * One pattern-to-workspace-path mapping under a project.
  * Serialized to/from YAML by jackson-dataformat-yaml.
  */
 @Data
@@ -17,6 +17,7 @@ import java.util.Map;
 public class MappingEntry {
 
     private String patternName;
-    private String destination;
+    /** Relative path under the project workspace root where the pattern is installed. */
+    private String workspacePath;
     private Map<String, String> parameters = new LinkedHashMap<>();
 }

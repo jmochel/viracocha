@@ -25,9 +25,9 @@ expected: |
 result: pass
 notes: JAR smoke + ProjectCommandsTest
 
-### 2. Add mapping with destination and --param key=value
+### 2. Add mapping with workspace path and --param key=value
 expected: |
-  With a registered pattern, `vira project add-mapping --project <p> --pattern <pat> --destination <rel> --param k=v`
+  With a registered pattern, `vira project add-mapping --project <p> --pattern <pat> --workspace <rel> --param k=v`
   exits 0 and `project show` lists the mapping with parameters.
 result: pass
 notes: JAR smoke + AddMappingAndShowProjectTest
@@ -41,7 +41,7 @@ notes: JAR smoke (exit 1) + AddMappingAndShowProjectTest
 
 ### 4. Project show lists workspace path and mappings
 expected: |
-  `vira project show --name <n>` prints Name, Path, and each mapping (pattern, destination, parameters);
+  `vira project show --name <n>` prints Name, Path, and each mapping (pattern, workspace path, parameters);
   `--json` emits one JSON object for the project.
 result: pass
 notes: JAR smoke (plain output) + tests

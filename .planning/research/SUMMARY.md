@@ -90,7 +90,7 @@ GenerateCommand.run()
   → for each mapping:
       → PatternService.findPattern(name)
       → merge params (project.params + mapping.values)
-      → GeneratorService.generate(pattern, destination, params)
+      → GeneratorService.generate(pattern, workspacePath, params)
           → PathExpander.expand(relPath, params)   // MUST happen before any File I/O
           → walk pattern source tree
           → for each file:
@@ -114,7 +114,7 @@ GenerateCommand.run()
 ## Critical Warnings
 
 ### W1: Freemarker Does Not Expand Path Variables (affects Phase 4)
-Freemarker's `Template.process()` writes expanded content to a `Writer` — it has no awareness of destination paths. A pattern source tree with a directory named `${projectName}` will generate a literal directory named `${projectName}` in the workspace unless the caller explicitly expands it first. **Mitigation:** Implement `PathExpander` as the first task of Phase 4 and test it independently with unit tests before writing any file-output code.
+Freemarker's `Template.process()` writes expanded content to a `Writer` — it has no awareness of output paths in the workspace. A pattern source tree with a directory named `${projectName}` will generate a literal directory named `${projectName}` in the workspace unless the caller explicitly expands it first. **Mitigation:** Implement `PathExpander` as the first task of Phase 4 and test it independently with unit tests before writing any file-output code.
 
 ### W2: All Three Missing Dependencies Must Be Added Before Phase 2 (affects Phase 1)
 `freemarker`, `jackson-dataformat-yaml`, and `logstash-logback-encoder` are absent from pom.xml. Any code referencing these classes will produce `ClassNotFoundException` at runtime. **Mitigation:** Add all three as the opening task of Phase 1 before any other code is written. Verify with a clean `mvn compile`.

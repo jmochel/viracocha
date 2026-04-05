@@ -11,6 +11,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "config",
+    aliases = {"cfg"},
     description = "Manage the viracocha central configuration.",
     mixinStandardHelpOptions = true,
     subcommands = {
@@ -23,7 +24,6 @@ public class ConfigCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        // Group command with no subcommand: show help
         return 0;
     }
 }
