@@ -2,7 +2,7 @@
 
 **Defined:** 2026-04-04  
 **Milestone:** v2.0 Subscriptions & sync  
-**Core Value:** (from PROJECT.md) Register patterns and publishers once; generate safely; **keep published artifacts in sync with the workspace** via subscriptions.
+**Core Value:** (from PROJECT.md) Register patterns and catalogs once; generate safely; **keep published artifacts in sync with the workspace** via subscriptions.
 
 ---
 
@@ -12,23 +12,23 @@ Requirements for milestone v2.0. Each maps to roadmap phases (5–7).
 
 ### Config schema
 
-- [ ] **CFG-01**: Central YAML includes a `subscriptions` collection (or nested under projects — see roadmap) with enough fields to persist publisher reference, paths, direction, and stable identity for CLI targeting
+- [ ] **CFG-01**: Central YAML includes a `subscriptions` collection (or nested under projects — see roadmap) with enough fields to persist catalog reference, paths, direction, and stable identity for CLI targeting
 - [ ] **CFG-02**: Config load/save round-trips subscription entries without data loss; invalid YAML fails with a clear error
 
 ### Subscriptions (CLI & model)
 
-- [ ] **SUB-01**: User can add a subscription on a **project** that references a registered **publisher** by name and ties a publisher-side source path to a workspace-relative path (subscription subtree)
-- [ ] **SUB-02**: Each subscription records **sync direction**: publisher→workspace only, workspace→publisher only, or **bidirectional**
+- [ ] **SUB-01**: User can add a subscription on a **project** that references a registered **catalog** by name and ties a catalog-side source path to a workspace-relative path (subscription subtree)
+- [ ] **SUB-02**: Each subscription records **sync direction**: catalog→workspace only, workspace→catalog only, or **bidirectional**
 - [ ] **SUB-03**: User can **list** subscriptions (scope: project or global list — as implemented in roadmap) in plain text and JSON consistent with existing `vira` commands
 - [ ] **SUB-04**: User can **show** details for one subscription
 - [ ] **SUB-05**: User can **remove** a subscription
-- [ ] **SUB-06**: Registration validates that the project and publisher exist, paths exist where required, and paths reject unsafe traversal (e.g. `..` escapes)
+- [ ] **SUB-06**: Registration validates that the project and catalog exist, paths exist where required, and paths reject unsafe traversal (e.g. `..` escapes)
 - [ ] **SUB-07**: Duplicate or overlapping subscriptions are rejected or warned per explicit rules documented in CLI help
 
 ### Sync engine
 
-- [ ] **SYN-01**: A sync service can **copy files** from publisher tree into the workspace for subscriptions with publisher→workspace or bidirectional direction
-- [ ] **SYN-02**: The same service can **copy files** from workspace into the publisher tree when direction includes workspace→publisher
+- [ ] **SYN-01**: A sync service can **copy files** from catalog tree into the workspace for subscriptions with catalog→workspace or bidirectional direction
+- [ ] **SYN-02**: The same service can **copy files** from workspace into the catalog tree when direction includes workspace→catalog
 - [ ] **SYN-03**: **Bidirectional** runs combine both directions using a **documented conflict policy** when both sides have changes affecting the same relative path
 - [ ] **SYN-04**: Default conflict behavior is **safe** (e.g. fail the sync with a clear report); optional flags may allow **explicit** overwrite / last-write-wins where implemented
 - [ ] **SYN-05**: Sync skips or includes **hidden** segments consistently with `generate` (document behavior)
@@ -42,7 +42,7 @@ Requirements for milestone v2.0. Each maps to roadmap phases (5–7).
 
 ### Cross-cutting
 
-- [ ] **X-01**: Integration tests cover at least one publisher→workspace flow, one workspace→publisher flow, and one bidirectional conflict case
+- [ ] **X-01**: Integration tests cover at least one catalog→workspace flow, one workspace→catalog flow, and one bidirectional conflict case
 - [ ] **X-02**: README documents subscriptions, directions, conflict policy, and examples
 
 ---
@@ -52,7 +52,7 @@ Requirements for milestone v2.0. Each maps to roadmap phases (5–7).
 | ID | Item |
 |----|------|
 | WATCH-01 | Watch mode / background sync daemon |
-| PUB-02a | `vira publisher list` shows subscriber count per publisher (optional enhancement) |
+| PUB-02a | `vira catalog list` shows subscriber count per catalog (optional enhancement) |
 | PAT-02a | `vira pattern unregister` warns when pattern still referenced |
 
 ---
@@ -61,7 +61,7 @@ Requirements for milestone v2.0. Each maps to roadmap phases (5–7).
 
 | Feature | Reason |
 |---------|--------|
-| Remote publishers (HTTP/Git) | Network/auth complexity; local paths only |
+| Remote catalogs (HTTP/Git) | Network/auth complexity; local paths only |
 | Git integration | Explicit v1/v2 filesystem scope |
 | Interactive merge UI | Scriptable CLI first |
 

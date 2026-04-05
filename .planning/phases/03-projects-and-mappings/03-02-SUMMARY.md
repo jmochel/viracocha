@@ -17,5 +17,5 @@ completed: 2026-04-04
 **`project create`, `list`, and `unregister` with ConfigService persistence and `ProjectCommandsTest` coverage.**
 
 ## Accomplishments
-- Parity with publisher commands for path validation, duplicate handling, and `--json` list output
+- Parity with catalog commands for path validation, duplicate handling, and `--json` list output
 - Integration tests for happy path, duplicate create, and missing unregister

@@ -1,4 +1,4 @@
-package org.saltations.publisher;
+package org.saltations.catalog;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
@@ -13,24 +13,22 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 
 /**
- * Command: vira publisher unregister
- * Removes a named publisher from central config.
- * Per D-07: prints error and exits 1 if name is not found.
- * Exit codes: 0 = success, 1 = not found or any error
+ * Command: vira catalog unregister
+ * Removes a named catalog from central config.
  */
-@Command(name = "unregister", description = "Unregister a named publisher.", mixinStandardHelpOptions = true)
+@Command(name = "unregister", description = "Unregister a named catalog.", mixinStandardHelpOptions = true)
 @Singleton
-public class UnregisterPublisherCommand implements Callable<Integer> {
+public class UnregisterCatalogCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
-    @Option(names = {"-n", "--name"}, required = true, description = "Publisher name to remove")
+    @Option(names = {"-n", "--name"}, required = true, description = "Catalog name to remove")
     private String name;
 
     private final ConfigService configService;
 
     @Inject
-    public UnregisterPublisherCommand(ConfigService configService) {
+    public UnregisterCatalogCommand(ConfigService configService) {
         this.configService = configService;
     }
 
@@ -38,13 +36,13 @@ public class UnregisterPublisherCommand implements Callable<Integer> {
     public Integer call() {
         try {
             var config = configService.load();
-            boolean removed = config.getPublishers().removeIf(e -> e.getName().equals(name));
+            boolean removed = config.getCatalogs().removeIf(e -> e.getName().equals(name));
             if (!removed) {
-                spec.commandLine().getErr().println("Publisher '" + name + "' not found.");
+                spec.commandLine().getErr().println("Catalog '" + name + "' not found.");
                 return 1;
             }
             configService.save(config);
-            spec.commandLine().getOut().println("Publisher '" + name + "' unregistered.");
+            spec.commandLine().getOut().println("Catalog '" + name + "' unregistered.");
             return 0;
         } catch (ConfigNotInitializedException e) {
             spec.commandLine().getErr().println(e.getMessage());

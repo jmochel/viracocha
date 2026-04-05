@@ -50,7 +50,7 @@ Combined must-haves from plans 01-01 and 01-02.
 | `pom.xml` | jackson-dataformat-yaml + logstash-logback-encoder dependencies | VERIFIED | Lines 58-69: jackson-dataformat-yaml (compile, BOM-managed); logstash-logback-encoder 7.4 (runtime) |
 | `src/main/resources/logback.xml` | JSONL FileAppender, no ConsoleAppender | VERIFIED | FileAppender with LogstashEncoder to ${user.home}/.local/share/viracocha/vira.jsonl; no ConsoleAppender |
 | `src/main/java/org/saltations/infra/XdgPaths.java` | XDG path resolution with fallback; configDir(), configFile(), dataDir(), logFile() | VERIFIED | @Singleton; all 4 methods implemented with env-first, ~/.config fallback logic |
-| `src/main/java/org/saltations/model/ViracochaConfig.java` | Root config POJO with version field | VERIFIED | @Data with version=1, publishers/patterns/projects as List<Object> |
+| `src/main/java/org/saltations/model/ViracochaConfig.java` | Root config POJO with version field | VERIFIED | @Data with version=1, catalogs/patterns/projects as List<Object> |
 | `src/test/java/org/saltations/infra/XdgPathsTest.java` | XdgPaths unit tests (4 tests) | VERIFIED | 4 tests; all pass |
 | `src/test/java/org/saltations/model/ViracochaConfigTest.java` | ViracochaConfig round-trip YAML test (2 tests) | VERIFIED | 2 tests; all pass |
 | `src/main/java/org/saltations/ViracochaCommand.java` | Root command with Callable<Integer>, subcommands={ConfigCommand.class} | VERIFIED | Implements Callable<Integer>; @Command(subcommands={ConfigCommand.class}); PicocliRunner.execute() with System.exit() |

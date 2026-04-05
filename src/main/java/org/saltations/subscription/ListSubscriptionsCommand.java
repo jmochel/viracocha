@@ -54,7 +54,7 @@ public class ListSubscriptionsCommand implements Callable<Integer> {
                         Map<String, Object> row = new LinkedHashMap<>();
                         row.put("id", sub.getId());
                         row.put("project", proj.getName());
-                        row.put("publisher", sub.getPublisherName());
+                        row.put("catalog", sub.getCatalogName());
                         row.put("source", sub.getSourcePath());
                         row.put("workspacePath", sub.getWorkspacePath());
                         row.put("direction", sub.getDirection().name());
@@ -66,7 +66,7 @@ public class ListSubscriptionsCommand implements Callable<Integer> {
                             "%-36s  %-15s  %-20s  %-24s  %s%n",
                             idCol,
                             proj.getName(),
-                            sub.getPublisherName(),
+                            sub.getCatalogName(),
                             sub.getDirection().name(),
                             workspacePathCol);
                     }

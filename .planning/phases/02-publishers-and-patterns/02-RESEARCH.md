@@ -1,4 +1,4 @@
-# Phase 2: Publishers and Patterns - Research
+# Phase 2: Catalogs and Patterns - Research
 
 **Researched:** 2026-03-28
 **Domain:** Java CLI command groups, Jackson YAML POJO typing, Freemarker variable extraction via regex
@@ -25,7 +25,7 @@
 - Exact column alignment widths for plain text output
 - Precise JSON field names for `--json` output (should be camelCase, e.g., `name`, `path`, `parameters`)
 - Internal package structure for publisher/pattern commands and model POJOs
-- Whether `PublisherCommand` and `PatternCommand` are in separate packages or a shared `commands` package
+- Whether `CatalogCommand` and `PatternCommand` are in separate packages or a shared `commands` package
 - Freemarker extraction regex implementation detail (character class for valid identifier chars)
 
 ### Deferred Ideas (OUT OF SCOPE)
@@ -40,11 +40,11 @@ None — discussion stayed within phase scope.
 
 | ID | Description | Research Support |
 |----|-------------|------------------|
-| PUB-01 | User can run `vira publisher register --name <name> --path <path>` to register a named publisher in central config | ConfigService load-mutate-save pattern; PublisherEntry POJO; duplicate guard D-06 |
-| PUB-02 | `vira publisher register` validates that the specified path exists on disk before registering | `Files.exists(Path.of(path))` before adding to list |
-| PUB-03 | User can run `vira publisher list` to display all registered publishers (name, path) | D-01 plain text aligned columns; D-03 --json flag |
-| PUB-04 | User can run `vira publisher show --name <name>` to display details of a specific publisher | D-02 multi-line key-value block; D-03 --json flag |
-| PUB-05 | User can run `vira publisher unregister --name <name>` to remove a publisher from central config | D-07 not-found error; load-mutate-save |
+| PUB-01 | User can run `vira catalog register --name <name> --path <path>` to register a named publisher in central config | ConfigService load-mutate-save pattern; CatalogEntry POJO; duplicate guard D-06 |
+| PUB-02 | `vira catalog register` validates that the specified path exists on disk before registering | `Files.exists(Path.of(path))` before adding to list |
+| PUB-03 | User can run `vira catalog list` to display all registered catalogs (name, path) | D-01 plain text aligned columns; D-03 --json flag |
+| PUB-04 | User can run `vira catalog show --name <name>` to display details of a specific catalog | D-02 multi-line key-value block; D-03 --json flag |
+| PUB-05 | User can run `vira catalog unregister --name <name>` to remove a catalog from central config | D-07 not-found error; load-mutate-save |
 | PAT-01 | User can run `vira pattern register --name <name> --path <path>` to register a named pattern in central config | Same as PUB-01 + FreemarkerVariableExtractor |
 | PAT-02 | `vira pattern register` validates that the specified path exists on disk before registering | `Files.exists` before registering |
 | PAT-03 | `vira pattern register` extracts Freemarker variable names from pattern source and stores them | FreemarkerVariableExtractor: scan file content + path segments; D-04 regex; D-05 fail on malformed |
@@ -57,9 +57,9 @@ None — discussion stayed within phase scope.
 
 ## Summary
 
-Phase 2 adds two new command groups (`vira publisher` and `vira pattern`) with four leaf subcommands each (register, list, show, unregister). The structural pattern is identical to Phase 1's `ConfigCommand` → `InitCommand`/`ShowConfigCommand` hierarchy: a group `@Command` class containing subcommands via static `subcommands = {...}` declaration, with each leaf command as a `@Singleton` implementing `Callable<Integer>`.
+Phase 2 adds two new command groups (`vira catalog` and `vira pattern`) with four leaf subcommands each (register, list, show, unregister). The structural pattern is identical to Phase 1's `ConfigCommand` → `InitCommand`/`ShowConfigCommand` hierarchy: a group `@Command` class containing subcommands via static `subcommands = {...}` declaration, with each leaf command as a `@Singleton` implementing `Callable<Integer>`.
 
-The main new technical work in this phase is twofold: (1) upgrading `ViracochaConfig` lists from `List<Object>` to typed `List<PublisherEntry>` / `List<PatternEntry>` POJOs with proper Jackson YAML annotations, and (2) implementing `FreemarkerVariableExtractor` — a pure-logic class that walks a directory tree, reads file content and path segments, and extracts `${varName}` identifiers using a regex. The Freemarker library itself is NOT needed for extraction; the task requires only `java.util.regex.Pattern` and `java.nio.file` APIs. Freemarker will become relevant in Phase 4 for actual template rendering.
+The main new technical work in this phase is twofold: (1) upgrading `ViracochaConfig` lists from `List<Object>` to typed `List<CatalogEntry>` / `List<PatternEntry>` POJOs with proper Jackson YAML annotations, and (2) implementing `FreemarkerVariableExtractor` — a pure-logic class that walks a directory tree, reads file content and path segments, and extracts `${varName}` identifiers using a regex. The Freemarker library itself is NOT needed for extraction; the task requires only `java.util.regex.Pattern` and `java.nio.file` APIs. Freemarker will become relevant in Phase 4 for actual template rendering.
 
 **Primary recommendation:** Replicate the command structure from Phase 1 exactly (same annotations, same DI wiring, same test pattern), add `freemarker` to pom.xml now as noted in STATE.md blockers, implement `FreemarkerVariableExtractor` as a standalone unit-testable class, and update `ViracochaConfig` to use typed list entries.
 
@@ -104,20 +104,20 @@ The main new technical work in this phase is twofold: (1) upgrading `ViracochaCo
 
 ```
 src/main/java/org/saltations/
-├── ViracochaCommand.java         # add PublisherCommand.class, PatternCommand.class to subcommands
+├── ViracochaCommand.java         # add CatalogCommand.class, PatternCommand.class to subcommands
 ├── config/                       # Phase 1 — unchanged
 ├── infra/
 │   └── XdgPaths.java            # Phase 1 — unchanged
 ├── model/
-│   ├── ViracochaConfig.java      # CHANGE: List<Object> -> List<PublisherEntry>, List<PatternEntry>
-│   ├── PublisherEntry.java       # NEW: @Data, name + path fields
+│   ├── ViracochaConfig.java      # CHANGE: List<Object> -> List<CatalogEntry>, List<PatternEntry>
+│   ├── CatalogEntry.java       # NEW: @Data, name + path fields
 │   └── PatternEntry.java         # NEW: @Data, name + path + List<String> parameters fields
 ├── publisher/
-│   ├── PublisherCommand.java     # NEW: group command (register/list/show/unregister subcommands)
-│   ├── RegisterPublisherCommand.java
-│   ├── ListPublishersCommand.java
-│   ├── ShowPublisherCommand.java
-│   └── UnregisterPublisherCommand.java
+│   ├── CatalogCommand.java     # NEW: group command (register/list/show/unregister subcommands)
+│   ├── RegisterCatalogCommand.java
+│   ├── ListCatalogsCommand.java
+│   ├── ShowCatalogCommand.java
+│   └── UnregisterCatalogCommand.java
 └── pattern/
     ├── PatternCommand.java       # NEW: group command
     ├── RegisterPatternCommand.java
@@ -128,10 +128,10 @@ src/main/java/org/saltations/
 
 src/test/java/org/saltations/
 ├── publisher/
-│   ├── RegisterPublisherCommandTest.java
-│   ├── ListPublishersCommandTest.java
-│   ├── ShowPublisherCommandTest.java
-│   └── UnregisterPublisherCommandTest.java
+│   ├── RegisterCatalogCommandTest.java
+│   ├── ListCatalogsCommandTest.java
+│   ├── ShowCatalogCommandTest.java
+│   └── UnregisterCatalogCommandTest.java
 ├── pattern/
 │   ├── RegisterPatternCommandTest.java
 │   ├── ListPatternsCommandTest.java
@@ -150,17 +150,17 @@ Identical to `ConfigCommand`. Every group command is a `@Singleton` `Callable<In
 // Source: existing ConfigCommand.java in this project
 @Command(
     name = "publisher",
-    description = "Manage registered publishers.",
+    description = "Manage registered catalogs.",
     mixinStandardHelpOptions = true,
     subcommands = {
-        RegisterPublisherCommand.class,
-        ListPublishersCommand.class,
-        ShowPublisherCommand.class,
-        UnregisterPublisherCommand.class
+        RegisterCatalogCommand.class,
+        ListCatalogsCommand.class,
+        ShowCatalogCommand.class,
+        UnregisterCatalogCommand.class
     }
 )
 @Singleton
-public class PublisherCommand implements Callable<Integer> {
+public class CatalogCommand implements Callable<Integer> {
     @Override
     public Integer call() { return 0; }
 }
@@ -174,7 +174,7 @@ Identical to `InitCommand`. Every leaf command gets `ConfigService` via `@Inject
 // Source: existing InitCommand.java in this project
 @Command(name = "register", description = "Register a named publisher.", mixinStandardHelpOptions = true)
 @Singleton
-public class RegisterPublisherCommand implements Callable<Integer> {
+public class RegisterCatalogCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
@@ -187,7 +187,7 @@ public class RegisterPublisherCommand implements Callable<Integer> {
     private final ConfigService configService;
 
     @Inject
-    public RegisterPublisherCommand(ConfigService configService) {
+    public RegisterCatalogCommand(ConfigService configService) {
         this.configService = configService;
     }
 
@@ -211,12 +211,12 @@ public class RegisterPublisherCommand implements Callable<Integer> {
 
 ### Pattern 3: Typed POJO Model Entries
 
-`PublisherEntry` and `PatternEntry` follow the same `@Data` Lombok pattern as `ViracochaConfig`. Jackson YAML handles polymorphic deserialization automatically when the field type is a concrete class (not `Object`).
+`CatalogEntry` and `PatternEntry` follow the same `@Data` Lombok pattern as `ViracochaConfig`. Jackson YAML handles polymorphic deserialization automatically when the field type is a concrete class (not `Object`).
 
 ```java
 // Model POJO — no special Jackson annotations needed for simple typed list
 @Data
-public class PublisherEntry {
+public class CatalogEntry {
     private String name;
     private String path;
 }
@@ -231,11 +231,11 @@ public class PatternEntry {
 
 `ViracochaConfig` changes:
 ```java
-private List<PublisherEntry> publishers = new ArrayList<>();
+private List<CatalogEntry> publishers = new ArrayList<>();
 private List<PatternEntry> patterns = new ArrayList<>();
 ```
 
-**Important:** Jackson with `YAMLFactory` can deserialize a `List<PublisherEntry>` from YAML without `@JsonDeserialize` annotations when using a concrete type. The existing `ConfigService` uses `yaml.readValue(file, ViracochaConfig.class)` — this already handles typed lists correctly. No change to `ConfigService` needed.
+**Important:** Jackson with `YAMLFactory` can deserialize a `List<CatalogEntry>` from YAML without `@JsonDeserialize` annotations when using a concrete type. The existing `ConfigService` uses `yaml.readValue(file, ViracochaConfig.class)` — this already handles typed lists correctly. No change to `ConfigService` needed.
 
 **Migration concern:** Existing `config.yaml` files written with Phase 1 code have `publishers: []` and `patterns: []` (empty lists). Jackson deserializes empty YAML lists to an empty `ArrayList` regardless of element type, so the upgrade is safe with no data migration needed.
 
@@ -284,12 +284,12 @@ private boolean json;
 if (json) {
     ObjectMapper om = new ObjectMapper();
     // For list: one object per line
-    for (PublisherEntry e : config.getPublishers()) {
+    for (CatalogEntry e : config.getCatalogs()) {
         spec.commandLine().getOut().println(om.writeValueAsString(e));
     }
 } else {
     // Plain text aligned columns
-    for (PublisherEntry e : config.getPublishers()) {
+    for (CatalogEntry e : config.getCatalogs()) {
         spec.commandLine().getOut().printf("%-20s  %s%n", e.getName(), e.getPath());
     }
 }
@@ -350,9 +350,9 @@ Step 2.5 SKIPPED — this is a greenfield feature phase, not a rename/refactor/m
 
 ### Pitfall 1: ViracochaConfig Typed List Breaks Existing Tests
 
-**What goes wrong:** `ViracochaConfigTest` currently asserts that serialized YAML contains `publishers` and `patterns` keys. Changing the list type from `List<Object>` to `List<PublisherEntry>` may alter how Jackson serializes an empty list — but it should NOT break anything because an empty `ArrayList<PublisherEntry>` serializes to `publishers: []` in YAML, identical to `List<Object>`.
+**What goes wrong:** `ViracochaConfigTest` currently asserts that serialized YAML contains `catalogs` and `patterns` keys. Changing the list type from `List<Object>` to `List<CatalogEntry>` may alter how Jackson serializes an empty list — but it should NOT break anything because an empty `ArrayList<CatalogEntry>` serializes to `publishers: []` in YAML, identical to `List<Object>`.
 
-**Why it happens:** Concern about Jackson type erasure with YAML factory. In practice, empty lists serialize identically regardless of element type. Non-empty lists will now serialize with field names from `PublisherEntry` rather than as raw objects.
+**Why it happens:** Concern about Jackson type erasure with YAML factory. In practice, empty lists serialize identically regardless of element type. Non-empty lists will now serialize with field names from `CatalogEntry` rather than as raw objects.
 
 **How to avoid:** Run all 17 existing tests after changing `ViracochaConfig`. If any test fails, the serialization format changed — review Jackson YAML behavior.
 
@@ -360,13 +360,13 @@ Step 2.5 SKIPPED — this is a greenfield feature phase, not a rename/refactor/m
 
 ### Pitfall 2: Partial Subcommand Hierarchy Fails Silently at Runtime
 
-**What goes wrong:** Adding `PublisherCommand.class` to `ViracochaCommand.subcommands` but NOT also adding all leaf subcommands to `PublisherCommand.subcommands` causes picocli to accept `vira publisher` but silently fail on `vira publisher register`.
+**What goes wrong:** Adding `CatalogCommand.class` to `ViracochaCommand.subcommands` but NOT also adding all leaf subcommands to `CatalogCommand.subcommands` causes picocli to accept `vira catalog` but silently fail on `vira catalog register`.
 
 **Why it happens:** Picocli builds its command tree statically from annotations. A missing subcommand in the static declaration means the subcommand class is never registered.
 
 **How to avoid:** Declare ALL leaf subcommands in the group command's `@Command(subcommands = {...})` annotation before any integration testing. Wire the full hierarchy in a single task.
 
-**Warning signs:** `vira publisher register --help` shows only the group command help, not the register command. Exit code 2 from picocli on unrecognized subcommand.
+**Warning signs:** `vira catalog register --help` shows only the group command help, not the register command. Exit code 2 from picocli on unrecognized subcommand.
 
 ### Pitfall 3: Freemarker Malformed Expression False Positives
 
@@ -419,7 +419,7 @@ public Integer call() {
         }
 
         // Duplicate check (D-06)
-        boolean alreadyExists = config.getPublishers().stream()
+        boolean alreadyExists = config.getCatalogs().stream()
             .anyMatch(e -> e.getName().equals(name));
         if (alreadyExists) {
             spec.commandLine().getErr().println(
@@ -428,7 +428,7 @@ public Integer call() {
         }
 
         // Mutate
-        config.getPublishers().add(new PublisherEntry(name, path));
+        config.getCatalogs().add(new CatalogEntry(name, path));
 
         // Save
         configService.save(config);
@@ -459,7 +459,7 @@ void setUp() {
     };
     ConfigService configService = new ConfigService(xdgPaths);
     // Wire command manually — no Micronaut container needed
-    RegisterPublisherCommand command = new RegisterPublisherCommand(configService);
+    RegisterCatalogCommand command = new RegisterCatalogCommand(configService);
     commandLine = new CommandLine(command);
     stdout = new ByteArrayOutputStream();
     stderr = new ByteArrayOutputStream();
@@ -519,21 +519,21 @@ public Set<String> extractFromDirectory(Path root) throws IOException {
 
 | Old Approach | Current Approach | When Changed | Impact |
 |--------------|------------------|--------------|--------|
-| `List<Object>` in ViracochaConfig | `List<PublisherEntry>` / `List<PatternEntry>` | Phase 2 | Type-safe access; Jackson handles transparently |
+| `List<Object>` in ViracochaConfig | `List<CatalogEntry>` / `List<PatternEntry>` | Phase 2 | Type-safe access; Jackson handles transparently |
 | No freemarker in pom.xml | `freemarker:2.3.34` added | Phase 2 start | Required for Phase 4; harmless in Phase 2 |
 
 **Deprecated/outdated:**
-- `ViracochaConfig.publishers` as `List<Object>`: replaced by `List<PublisherEntry>` in Phase 2.
+- `ViracochaConfig.publishers` as `List<Object>`: replaced by `List<CatalogEntry>` in Phase 2.
 - `ViracochaConfig.patterns` as `List<Object>`: replaced by `List<PatternEntry>` in Phase 2.
 
 ---
 
 ## Open Questions
 
-1. **PublisherEntry: should `@AllArgsConstructor` be added?**
+1. **CatalogEntry: should `@AllArgsConstructor` be added?**
    - What we know: `@Data` generates a required-args constructor only if there are `final` fields. `@Data` alone does NOT generate a constructor if all fields are mutable.
-   - What's unclear: Whether `new PublisherEntry(name, path)` works without an explicit `@AllArgsConstructor`.
-   - Recommendation: Add `@AllArgsConstructor` explicitly to `PublisherEntry` and `PatternEntry` alongside `@Data` so that convenient constructor calls work. Also add `@NoArgsConstructor` for Jackson deserialization. This is the safe pattern.
+   - What's unclear: Whether `new CatalogEntry(name, path)` works without an explicit `@AllArgsConstructor`.
+   - Recommendation: Add `@AllArgsConstructor` explicitly to `CatalogEntry` and `PatternEntry` alongside `@Data` so that convenient constructor calls work. Also add `@NoArgsConstructor` for Jackson deserialization. This is the safe pattern.
 
 2. **freemarker version: should a `<properties>` entry be added?**
    - What we know: `logstash-logback-encoder` was pinned with inline `<version>7.4</version>` in Phase 1 (noted in STATE.md) because it is not BOM-managed.
@@ -549,18 +549,18 @@ public Set<String> extractFromDirectory(Path root) throws IOException {
 |----------|-------|
 | Framework | JUnit 5 (Jupiter) + maven-surefire |
 | Config file | `pom.xml` (surefire auto-detects JUnit 5) |
-| Quick run command | `./mvnw test -pl . -Dtest="*PublisherCommand*,*PatternCommand*,*FreemarkerVariable*" -q` |
+| Quick run command | `./mvnw test -pl . -Dtest="*CatalogCommand*,*PatternCommand*,*FreemarkerVariable*" -q` |
 | Full suite command | `./mvnw test` |
 
 ### Phase Requirements → Test Map
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| PUB-01 | register saves publisher to config | unit | `./mvnw test -Dtest=RegisterPublisherCommandTest` | No - Wave 0 |
-| PUB-02 | register rejects non-existent path | unit | `./mvnw test -Dtest=RegisterPublisherCommandTest#registrationFailsForNonExistentPath` | No - Wave 0 |
-| PUB-03 | list shows name+path columns | unit | `./mvnw test -Dtest=ListPublishersCommandTest` | No - Wave 0 |
-| PUB-04 | show prints key-value block | unit | `./mvnw test -Dtest=ShowPublisherCommandTest` | No - Wave 0 |
-| PUB-05 | unregister removes publisher | unit | `./mvnw test -Dtest=UnregisterPublisherCommandTest` | No - Wave 0 |
+| PUB-01 | register saves publisher to config | unit | `./mvnw test -Dtest=RegisterCatalogCommandTest` | No - Wave 0 |
+| PUB-02 | register rejects non-existent path | unit | `./mvnw test -Dtest=RegisterCatalogCommandTest#registrationFailsForNonExistentPath` | No - Wave 0 |
+| PUB-03 | list shows name+path columns | unit | `./mvnw test -Dtest=ListCatalogsCommandTest` | No - Wave 0 |
+| PUB-04 | show prints key-value block | unit | `./mvnw test -Dtest=ShowCatalogCommandTest` | No - Wave 0 |
+| PUB-05 | unregister removes publisher | unit | `./mvnw test -Dtest=UnregisterCatalogCommandTest` | No - Wave 0 |
 | PAT-01 | pattern register saves to config | unit | `./mvnw test -Dtest=RegisterPatternCommandTest` | No - Wave 0 |
 | PAT-02 | register rejects non-existent path | unit | `./mvnw test -Dtest=RegisterPatternCommandTest#registrationFailsForNonExistentPath` | No - Wave 0 |
 | PAT-03 | variable extraction from content+paths | unit | `./mvnw test -Dtest=FreemarkerVariableExtractorTest` | No - Wave 0 |
@@ -581,10 +581,10 @@ public Set<String> extractFromDirectory(Path root) throws IOException {
 
 All test files are new — none exist yet:
 
-- [ ] `src/test/java/org/saltations/publisher/RegisterPublisherCommandTest.java`
-- [ ] `src/test/java/org/saltations/publisher/ListPublishersCommandTest.java`
-- [ ] `src/test/java/org/saltations/publisher/ShowPublisherCommandTest.java`
-- [ ] `src/test/java/org/saltations/publisher/UnregisterPublisherCommandTest.java`
+- [ ] `src/test/java/org/saltations/catalog/RegisterCatalogCommandTest.java`
+- [ ] `src/test/java/org/saltations/catalog/ListCatalogsCommandTest.java`
+- [ ] `src/test/java/org/saltations/catalog/ShowCatalogCommandTest.java`
+- [ ] `src/test/java/org/saltations/catalog/UnregisterCatalogCommandTest.java`
 - [ ] `src/test/java/org/saltations/pattern/RegisterPatternCommandTest.java`
 - [ ] `src/test/java/org/saltations/pattern/ListPatternsCommandTest.java`
 - [ ] `src/test/java/org/saltations/pattern/ShowPatternCommandTest.java`
@@ -602,7 +602,7 @@ The following directives from CLAUDE.md are binding constraints on all planning 
 | Directive | Impact on Phase 2 |
 |-----------|-------------------|
 | Tech stack: JDK 21, Micronaut, picocli, Lombok, Freemarker, jackson-dataformat-yaml, Logback — no deviations | Freemarker is the mandated template engine; Jackson YAML for config |
-| Config format: YAML only | `config.yaml` stores publishers and patterns; no JSON config files |
+| Config format: YAML only | `config.yaml` stores catalogs and patterns; no JSON config files |
 | Regeneration must not overwrite — skip-existing semantics | Not relevant in Phase 2 (no generation); relevant in Phase 4 |
 | Local filesystem only — no network, no Git operations in v1 | Publisher/pattern paths are local filesystem paths only |
 | All subcommands declared statically | `@Command(subcommands = {...})` — no dynamic registration |

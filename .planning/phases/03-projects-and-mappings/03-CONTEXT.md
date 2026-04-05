@@ -61,7 +61,7 @@ Delivers: `vira project create/list/show/unregister` and `vira project add-mappi
 - `src/main/java/org/saltations/model/ViracochaConfig.java` — upgrade `projects` to typed list
 - `src/main/java/org/saltations/config/ConfigService.java` — persistence
 - `src/main/java/org/saltations/ViracochaCommand.java` — add `ProjectCommand` to subcommands
-- `src/main/java/org/saltations/publisher/PublisherCommand.java` (or equivalent path) — mirror command group structure for `ProjectCommand`
+- `src/main/java/org/saltations/catalog/CatalogCommand.java` (or equivalent path) — mirror command group structure for `ProjectCommand`
 
 </canonical_refs>
 
@@ -69,7 +69,7 @@ Delivers: `vira project create/list/show/unregister` and `vira project add-mappi
 ## Existing Code Insights
 
 ### Reusable Assets
-- `ConfigService`, `ViracochaConfig`, `PatternEntry` / `PublisherEntry` — same persistence and POJO patterns for `ProjectEntry` and mapping types.
+- `ConfigService`, `ViracochaConfig`, `PatternEntry` / `CatalogEntry` — same persistence and POJO patterns for `ProjectEntry` and mapping types.
 - Picocli command groups with leaf commands and `Callable<Integer>` return codes.
 
 ### Established Patterns

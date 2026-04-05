@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Implement a **filesystem sync engine** as a **testable service** (no user-facing `vira sync` command — Phase 7). For each subscription, resolve absolute paths (`publisher.root / sourcePath`, `project.workspace / workspacePath`), walk the subscribed subtrees, **copy** files according to **direction**, and **detect conflicts** when both sides have a path but content or file-kind disagree. Default behavior on conflict: **abort** with a **structured list** (SYN-04, ROADMAP). **Hidden** segments use the same rule as `generate`: skip paths where `PatternPathUtils.hasHiddenPathSegment` applies to the walk roots (SYN-05, parity with `GeneratorService`).
+Implement a **filesystem sync engine** as a **testable service** (no user-facing `vira sync` command — Phase 7). For each subscription, resolve absolute paths (`catalog.root / sourcePath`, `project.workspace / workspacePath`), walk the subscribed subtrees, **copy** files according to **direction**, and **detect conflicts** when both sides have a path but content or file-kind disagree. Default behavior on conflict: **abort** with a **structured list** (SYN-04, ROADMAP). **Hidden** segments use the same rule as `generate`: skip paths where `PatternPathUtils.hasHiddenPathSegment` applies to the walk roots (SYN-05, parity with `GeneratorService`).
 
 Out of scope for Phase 6: CLI flags, `--dry-run` / `--verbose` user output, README (Phase 7); **optional conflict-strategy flags** reserved for Phase 7 if implemented.
 
@@ -60,7 +60,7 @@ Out of scope for Phase 6: CLI flags, `--dry-run` / `--verbose` user output, READ
 - `src/main/java/org/saltations/pattern/PatternPathUtils.java` — hidden segment rule (reuse for sync walks)
 - `src/main/java/org/saltations/generate/GeneratorService.java` — reference for hidden filtering pattern
 - `src/main/java/org/saltations/model/SubscriptionEntry.java` — fields and direction enum
-- `src/main/java/org/saltations/model/ProjectEntry.java`, `PublisherEntry.java` — path resolution inputs
+- `src/main/java/org/saltations/model/ProjectEntry.java`, `CatalogEntry.java` — path resolution inputs
 - `src/main/java/org/saltations/config/ConfigService.java` — loading config for service tests
 
 **External specs:** No external specs — requirements fully captured in decisions above.
@@ -73,7 +73,7 @@ Out of scope for Phase 6: CLI flags, `--dry-run` / `--verbose` user output, READ
 ### Reusable assets
 - **`PatternPathUtils.hasHiddenPathSegment(root, path)`** — same hidden rule as pattern walk / generate; use for both publisher-root and workspace-root walks from subscription `sourcePath` / `workspacePath` roots.
 - **`GeneratorService`** — example of `Files.walk` + regular-file filter + hidden filter; sync should mirror that filter philosophy for SYN-05.
-- **`SubscriptionEntry`**, **`ProjectEntry`**, **`PublisherEntry`**, **`ConfigService`** — model and loading for integration tests.
+- **`SubscriptionEntry`**, **`ProjectEntry`**, **`CatalogEntry`**, **`ConfigService`** — model and loading for integration tests.
 
 ### Established patterns
 - JUnit 5 + `@TempDir` for isolated trees; Micronaut `@Singleton` services with `@Inject`.

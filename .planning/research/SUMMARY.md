@@ -9,7 +9,7 @@
 
 Viracocha is a personal CLI workspace manager that falls into the well-understood category of scaffolding/template-expansion tools (think cookiecutter, maven archetypes), but implemented in Java with a specific opinionated stack. The existing project skeleton provides a solid foundation: Micronaut 4.10.10 + picocli is already wired and compiles. The core build challenge is not architectural novelty — the layered service design is conventional — but rather the careful sequencing of three mutually dependent concerns: config persistence (YAML), template variable extraction (Freemarker), and filesystem generation (path expansion + skip-existing semantics).
 
-The recommended approach is a strict bottom-up build order: config model and ConfigService must exist and be tested before any other component is written, because every command depends on it. Publisher and Pattern management follow as independent leaf services. Project/Mapping management sits above them (references both). Generation is the capstone phase and is the highest-risk component because it combines Freemarker template expansion, path variable substitution (which Freemarker does NOT handle automatically), and atomic skip-existing file writes.
+The recommended approach is a strict bottom-up build order: config model and ConfigService must exist and be tested before any other component is written, because every command depends on it. Catalog and Pattern management follow as independent leaf services. Project/Mapping management sits above them (references both). Generation is the capstone phase and is the highest-risk component because it combines Freemarker template expansion, path variable substitution (which Freemarker does NOT handle automatically), and atomic skip-existing file writes.
 
 The top risk is silent corruption in the generation phase: Freemarker does not expand variables in file or directory names — the caller must do this explicitly via a path-expansion utility. This pitfall has no compile-time or runtime warning; generated files silently appear at the wrong path. A secondary risk is the three missing pom.xml dependencies (`freemarker`, `jackson-dataformat-yaml`, `logstash-logback-encoder`) — no production code should be written in phases 2+ until these are added.
 
@@ -62,7 +62,7 @@ The top risk is silent corruption in the generation phase: Freemarker does not e
 infra/           XdgPaths, FreemarkerFactory       — cross-cutting utilities
 model/           ViracochaConfig, *Entry POJOs     — pure data; no logic
 config/          ConfigService + InitCommand        — CRITICAL PATH BLOCKER
-publisher/       PublisherService + commands        — depends on ConfigService
+catalog/       CatalogService + commands        — depends on ConfigService
 pattern/         PatternService + commands          — depends on ConfigService + Freemarker
 project/         ProjectService + commands          — depends on ConfigService
 generate/        GeneratorService + GenerateCommand — depends on all above
@@ -74,11 +74,11 @@ generate/        GeneratorService + GenerateCommand — depends on all above
 |-----------|---------|----------------|
 | Command Layer | `org.saltations.*Command` | Thin CLI dispatchers — parse args, call services, print to stdout |
 | Config Service | `org.saltations.config` | Read/write/init central YAML config; never cached across invocations |
-| Publisher Service | `org.saltations.publisher` | Register and list named publisher entries in config |
+| Catalog Service | `org.saltations.catalog` | Register and list named catalog entries in config |
 | Pattern Service | `org.saltations.pattern` | Register/list patterns; extract Freemarker variable names at registration |
 | Project Service | `org.saltations.project` | Create/list projects; add/list mappings with per-mapping param values |
 | Generator Service | `org.saltations.generate` | Expand pattern templates to workspace; path expansion; skip-existing logic |
-| Model | `org.saltations.model` | POJOs for YAML schema (`ViracochaConfig`, `PublisherEntry`, `PatternEntry`, `ProjectEntry`, `MappingEntry`) |
+| Model | `org.saltations.model` | POJOs for YAML schema (`ViracochaConfig`, `CatalogEntry`, `PatternEntry`, `ProjectEntry`, `MappingEntry`) |
 | Infrastructure | `org.saltations.infra` | `XdgPaths` (config path resolution), `FreemarkerFactory` (per-pattern config), `PathExpander` (path variable substitution) |
 
 ### Key Data Flow: `vira generate`
@@ -105,7 +105,7 @@ GenerateCommand.run()
 | Phase | Components Built |
 |-------|-----------------|
 | Phase 1: Foundation | model POJOs, XdgPaths, ConfigService, InitCommand, pom.xml deps, Logback config, exit code wiring |
-| Phase 2: Publishers + Patterns | PublisherService, publisher commands, FreemarkerFactory, PatternService, pattern commands |
+| Phase 2: Publishers + Patterns | CatalogService, catalog commands, FreemarkerFactory, PatternService, pattern commands |
 | Phase 3: Projects + Mappings | ProjectService, project commands, AddMappingCommand with param validation |
 | Phase 4: Generation | PathExpander, GeneratorService, GenerateCommand, JSONL log events, dry-run flag |
 
@@ -123,7 +123,7 @@ Freemarker's `Template.process()` writes expanded content to a `Writer` — it h
 `PicocliRunner` only sees subcommands declared statically in `@Command(subcommands={...})`. Dynamic `addSubcommand()` calls are invisible to the runner. Partially-declared hierarchies fail silently — `vira --help` shows no subcommands and invocations throw `UnmatchedArgumentException`. **Mitigation:** Declare the full two-level command hierarchy (root → group → leaf stubs) as the first code task, even if commands are no-ops.
 
 ### W4: Config YAML Schema Nulls Propagate Silently Into Generation (affects Phases 1 + 4)
-Jackson YAML silently nulls any field absent from the config file, including `publishers`, `patterns`, and `projects` lists. Null lists crash generation or silently produce literal `${varName}` in output. **Mitigation:** Implement a `ConfigValidator` that checks required fields immediately after deserialization. Annotate list fields with `@JsonSetter(nulls = Nulls.AS_EMPTY)` or initialize in the no-arg constructor.
+Jackson YAML silently nulls any field absent from the config file, including `catalogs`, `patterns`, and `projects` lists. Null lists crash generation or silently produce literal `${varName}` in output. **Mitigation:** Implement a `ConfigValidator` that checks required fields immediately after deserialization. Annotate list fields with `@JsonSetter(nulls = Nulls.AS_EMPTY)` or initialize in the no-arg constructor.
 
 ### W5: Skip-Existing Uses `EXISTS` Check — Must Use `CREATE_NEW` Instead (affects Phase 4)
 `Files.exists(dest)` followed by `Files.write(dest)` is a TOCTOU race. More critically, it can produce incorrect behavior in generation loops. **Mitigation:** Use `Files.newOutputStream(path, StandardOpenOption.CREATE_NEW)` and catch `FileAlreadyExistsException` as the skip signal. This is also the correct semantic for the idempotent-generate contract.
@@ -141,8 +141,8 @@ Jackson YAML silently nulls any field absent from the config file, including `pu
 | Meaningful exit codes (0/1/2) | 1 | Requires `Callable<Integer>` on all commands |
 | Actionable error messages to stderr | 1 | `IExecutionExceptionHandler`; no stack traces to users |
 | Gate on config init (all commands) | 1 | `ConfigNotInitializedException` → friendly message |
-| Empty-state messages on list commands | 2-3 | "No publishers registered. Run 'vira publisher register'." |
-| Confirmation line on every write | 2-3 | "Registered publisher 'x' at /path" |
+| Empty-state messages on list commands | 2-3 | "No catalogs registered. Run 'vira catalog register'." |
+| Confirmation line on every write | 2-3 | "Registered catalog 'x' at /path" |
 | Config path transparency on init | 1 | Print full path where config.yaml was created |
 | Idempotent generate with skip logging | 4 | Log each skipped file: "Skipped (exists): path/to/file" |
 | Generate summary report | 4 | "N files created, M skipped, K failed" |
@@ -165,7 +165,7 @@ Jackson YAML silently nulls any field absent from the config file, including `pu
 |---------|--------|
 | `vira sync` / subscriptions | Requires sync semantics, conflict resolution — out of scope |
 | Watch mode | Background process complexity; not needed for core use case |
-| Remote publishers (HTTP/Git) | Local paths only in v1 |
+| Remote catalogs (HTTP/Git) | Local paths only in v1 |
 | Interactive prompts during generate | Breaks scripting; all values supplied upfront |
 | `--force` overwrite on generate | Dangerous; skip-existing is the v1 contract |
 | Shell completion scripts | Nice-to-have after core is stable |
@@ -181,9 +181,9 @@ The phase order is determined by hard dependency chains:
 
 1. **Config must come first.** Every command, service, and test fixture depends on `ConfigService`. It is the only component with zero dependencies on other project code. Nothing else can be tested end-to-end until it exists.
 
-2. **Publishers and Patterns are parallel but pattern depends on Freemarker.** Both read/write config. Publishers are simpler (no external library). Patterns add Freemarker parameter extraction. Build together but implement publisher first as the simpler warm-up.
+2. **Catalogs and Patterns are parallel but pattern depends on Freemarker.** Both read/write config. Catalogs are simpler (no external library). Patterns add Freemarker parameter extraction. Build together but implement catalog first as the simpler warm-up.
 
-3. **Projects depend on patterns and publishers.** A `MappingEntry` references a pattern by name, so pattern registration must exist before mapping addition makes sense. Project CRUD can be scaffolded earlier, but `add-mapping` validation requires Phase 2 to complete first.
+3. **Projects depend on patterns and catalogs.** A `MappingEntry` references a pattern by name, so pattern registration must exist before mapping addition makes sense. Project CRUD can be scaffolded earlier, but `add-mapping` validation requires Phase 2 to complete first.
 
 4. **Generation is the riskiest phase and depends on everything.** It combines Freemarker template expansion, path variable substitution, atomic file writes, and structured logging. The `PathExpander` pitfall (W1) means the utility must be built and tested before any file I/O code is written.
 
@@ -195,11 +195,11 @@ Deliver a compiling, testable skeleton with correct command hierarchy, config YA
 - Needs research: No — patterns are standard
 - Key outputs: `ViracochaConfig` POJO, `ConfigService`, `InitCommand`, `XdgPaths`, full subcommand stub hierarchy, `logback.xml`
 
-**Phase 2: Publishers and Patterns**
-Deliver working register/list for both publishers and patterns, including Freemarker parameter extraction at registration time. Users can populate config with real data after this phase.
+**Phase 2: Catalogs and Patterns**
+Deliver working register/list for both catalogs and patterns, including Freemarker parameter extraction at registration time. Users can populate config with real data after this phase.
 - Must avoid: M1 (ClassPathTemplateLoader for filesystem templates), M2 (regex extraction gaps — document limitation)
 - Needs research: No — standard CRUD + regex extraction
-- Key outputs: `PublisherService`, `PatternService`, `FreemarkerFactory`, all register/list commands
+- Key outputs: `CatalogService`, `PatternService`, `FreemarkerFactory`, all register/list commands
 
 **Phase 3: Projects and Mappings**
 Deliver project creation and mapping addition with validation (referenced pattern exists, required params present). After this phase users can fully specify what to generate.

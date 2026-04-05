@@ -8,7 +8,7 @@ requires:
   - phase: 06-sync-engine
     provides: SyncService API and result types from plan 01
 provides:
-  - DefaultSyncService one-way sync (PUBLISH_TO_WORKSPACE, WORKSPACE_TO_PUBLISH)
+  - DefaultSyncService one-way sync (CATALOG_TO_WORKSPACE, WORKSPACE_TO_CATALOG)
   - DefaultSyncServiceOneWayTest
 affects: [06-sync-engine]
 

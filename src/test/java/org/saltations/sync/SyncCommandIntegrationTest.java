@@ -6,7 +6,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.saltations.config.ConfigService;
 import org.saltations.infra.XdgPaths;
 import org.saltations.model.ProjectEntry;
-import org.saltations.model.PublisherEntry;
+import org.saltations.model.CatalogEntry;
 import org.saltations.model.SubscriptionEntry;
 import org.saltations.model.SubscriptionSyncDirection;
 import org.saltations.model.ViracochaConfig;
@@ -67,13 +67,13 @@ class SyncCommandIntegrationTest {
     }
 
     @Test
-    void syncPublisherToWorkspace_copiesViaCli() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+    void syncCatalogToWorkspace_copiesViaCli() throws Exception {
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(pubRoot.resolve("src/sub"));
         Files.writeString(pubRoot.resolve("src/sub/a.txt"), "hello", StandardCharsets.UTF_8);
 
-        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, "src", "out",
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.CATALOG_TO_WORKSPACE, "src", "out",
             "33333333-3333-3333-3333-333333333333");
 
         int exit = commandLine.execute("--project-name", "intproj");
@@ -87,13 +87,13 @@ class SyncCommandIntegrationTest {
     }
 
     @Test
-    void syncWorkspaceToPublisher_copiesViaCli() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+    void syncWorkspaceToCatalog_copiesViaCli() throws Exception {
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(wsRoot.resolve("out/sub"));
         Files.writeString(wsRoot.resolve("out/sub/w.txt"), "ws-only", StandardCharsets.UTF_8);
 
-        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.WORKSPACE_TO_PUBLISH, "src", "out",
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.WORKSPACE_TO_CATALOG, "src", "out",
             "44444444-4444-4444-4444-444444444444");
 
         int exit = commandLine.execute("--project-name", "intproj");
@@ -105,7 +105,7 @@ class SyncCommandIntegrationTest {
 
     @Test
     void bidirectionalConflictExitsNonZero() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(pubRoot.resolve("src"));
         Files.createDirectories(wsRoot.resolve("out"));
@@ -133,7 +133,7 @@ class SyncCommandIntegrationTest {
         String subscriptionId
     ) throws Exception {
         ViracochaConfig cfg = new ViracochaConfig();
-        cfg.getPublishers().add(new PublisherEntry("pub1", pubRoot.toString()));
+        cfg.getCatalogs().add(new CatalogEntry("pub1", pubRoot.toString()));
         SubscriptionEntry sub = new SubscriptionEntry(
             subscriptionId,
             "pub1",

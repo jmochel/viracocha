@@ -1,4 +1,4 @@
-package org.saltations.publisher;
+package org.saltations.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,7 +15,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class RegisterPublisherCommandTest {
+class RegisterCatalogCommandTest {
 
     @TempDir Path tempDir;
     private CommandLine commandLine;
@@ -31,8 +31,8 @@ class RegisterPublisherCommandTest {
             @Override public Path dataDir() { return tempDir.resolve("share/viracocha"); }
         };
         configService = new ConfigService(xdgPaths);
-        configService.init();  // initialize config so most tests have it ready
-        RegisterPublisherCommand command = new RegisterPublisherCommand(configService);
+        configService.init();
+        RegisterCatalogCommand command = new RegisterCatalogCommand(configService);
         commandLine = new CommandLine(command);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
@@ -45,11 +45,11 @@ class RegisterPublisherCommandTest {
         Path pubDir = Files.createDirectory(tempDir.resolve("mypub"));
         int exit = commandLine.execute("--name", "mypub", "--path", pubDir.toString());
         assertEquals(0, exit);
-        assertTrue(stdout.toString().contains("Publisher 'mypub' registered."));
+        assertTrue(stdout.toString().contains("Catalog 'mypub' registered."));
         ViracochaConfig config = configService.load();
-        assertEquals(1, config.getPublishers().size());
-        assertEquals("mypub", config.getPublishers().get(0).getName());
-        assertEquals(pubDir.toString(), config.getPublishers().get(0).getPath());
+        assertEquals(1, config.getCatalogs().size());
+        assertEquals("mypub", config.getCatalogs().get(0).getName());
+        assertEquals(pubDir.toString(), config.getCatalogs().get(0).getPath());
     }
 
     @Test
@@ -57,7 +57,7 @@ class RegisterPublisherCommandTest {
         int exit = commandLine.execute("--name", "bad", "--path", "/does/not/exist/ever");
         assertEquals(1, exit);
         assertTrue(stderr.toString().contains("Error: path does not exist:"));
-        assertEquals(0, configService.load().getPublishers().size());
+        assertEquals(0, configService.load().getCatalogs().size());
     }
 
     @Test
@@ -68,19 +68,18 @@ class RegisterPublisherCommandTest {
         int exit = commandLine.execute("--name", "mypub", "--path", pubDir.toString());
         assertEquals(1, exit);
         assertTrue(stderr.toString().contains("already registered. Use unregister first."));
-        assertEquals(1, configService.load().getPublishers().size());
+        assertEquals(1, configService.load().getCatalogs().size());
     }
 
     @Test
     void registerWithoutInitializedConfigExitsOneWithMessage() {
-        // Create a fresh command with an uninitialized config dir
         XdgPaths uninitXdg = new XdgPaths() {
             @Override public Path configFile() { return tempDir.resolve("uninit/config.yaml"); }
             @Override public Path configDir() { return tempDir.resolve("uninit"); }
             @Override public Path dataDir() { return tempDir.resolve("uninit/share"); }
         };
         ConfigService uninitService = new ConfigService(uninitXdg);
-        RegisterPublisherCommand cmd = new RegisterPublisherCommand(uninitService);
+        RegisterCatalogCommand cmd = new RegisterCatalogCommand(uninitService);
         CommandLine cl = new CommandLine(cmd);
         ByteArrayOutputStream err = new ByteArrayOutputStream();
         cl.setErr(new PrintWriter(err, true));

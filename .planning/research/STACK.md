@@ -44,7 +44,7 @@
 
 ```java
 // Root command — PicocliRunner handles DI bootstrap
-@Command(name = "vira", subcommands = {ConfigCommand.class, PublisherCommand.class})
+@Command(name = "vira", subcommands = {ConfigCommand.class, CatalogCommand.class})
 @Singleton
 public class ViracochaCommand implements Runnable {
     @Inject ConfigService configService;

@@ -5,8 +5,8 @@ package org.saltations.model;
  */
 public enum SubscriptionSyncDirection {
 
-    PUBLISH_TO_WORKSPACE,
-    WORKSPACE_TO_PUBLISH,
+    CATALOG_TO_WORKSPACE,
+    WORKSPACE_TO_CATALOG,
     BIDIRECTIONAL;
 
     /**
@@ -26,8 +26,8 @@ public enum SubscriptionSyncDirection {
         }
         String lower = t.toLowerCase();
         return switch (lower) {
-            case "publish-to-workspace" -> PUBLISH_TO_WORKSPACE;
-            case "workspace-to-publish" -> WORKSPACE_TO_PUBLISH;
+            case "catalog-to-workspace" -> CATALOG_TO_WORKSPACE;
+            case "workspace-to-catalog" -> WORKSPACE_TO_CATALOG;
             case "bidirectional" -> BIDIRECTIONAL;
             default -> throw new IllegalArgumentException("Invalid direction: " + t);
         };

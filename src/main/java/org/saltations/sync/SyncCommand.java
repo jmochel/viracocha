@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "sync",
-    description = "Sync files between publishers and project workspace per subscriptions.",
+    description = "Sync files between catalogs and project workspace per subscriptions.",
     mixinStandardHelpOptions = true)
 @Singleton
 public class SyncCommand implements Callable<Integer> {

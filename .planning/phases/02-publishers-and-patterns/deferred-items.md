@@ -9,4 +9,4 @@
 - Confirmed pre-existing: failure was present before Plan 02-02 changes (verified via `git stash` test run)
 - Cause: `FreemarkerVariableExtractor` does not yet skip hidden files/directories when scanning
 - Fix: Plan 02-03 (pattern commands) should include hidden-dir filtering in `FreemarkerVariableExtractor`
-- Priority: Medium — functional correctness issue but not blocking publisher commands
+- Priority: Medium — functional correctness issue but not blocking catalog commands

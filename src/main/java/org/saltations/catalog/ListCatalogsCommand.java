@@ -1,11 +1,11 @@
-package org.saltations.publisher;
+package org.saltations.catalog;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigNotInitializedException;
 import org.saltations.config.ConfigService;
-import org.saltations.model.PublisherEntry;
+import org.saltations.model.CatalogEntry;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -15,15 +15,12 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 
 /**
- * Command: vira publisher list
- * Lists all registered publishers in plain text (aligned columns) or JSONL (--json flag).
- * Per D-01: name  path (no headers, aligned columns)
- * Per D-03: --json outputs one JSON object per line
- * Exit codes: 0 = success, 1 = any error
+ * Command: vira catalog list
+ * Lists all registered catalogs in plain text (aligned columns) or JSONL (--json flag).
  */
-@Command(name = "list", description = "List all registered publishers.", mixinStandardHelpOptions = true)
+@Command(name = "list", description = "List all registered catalogs.", mixinStandardHelpOptions = true)
 @Singleton
-public class ListPublishersCommand implements Callable<Integer> {
+public class ListCatalogsCommand implements Callable<Integer> {
 
     @Spec CommandSpec spec;
 
@@ -33,7 +30,7 @@ public class ListPublishersCommand implements Callable<Integer> {
     private final ConfigService configService;
 
     @Inject
-    public ListPublishersCommand(ConfigService configService) {
+    public ListCatalogsCommand(ConfigService configService) {
         this.configService = configService;
     }
 
@@ -43,11 +40,11 @@ public class ListPublishersCommand implements Callable<Integer> {
             var config = configService.load();
             if (json) {
                 ObjectMapper om = new ObjectMapper();
-                for (PublisherEntry e : config.getPublishers()) {
+                for (CatalogEntry e : config.getCatalogs()) {
                     spec.commandLine().getOut().println(om.writeValueAsString(e));
                 }
             } else {
-                for (PublisherEntry e : config.getPublishers()) {
+                for (CatalogEntry e : config.getCatalogs()) {
                     spec.commandLine().getOut().printf("%-20s  %s%n", e.getName(), e.getPath());
                 }
             }

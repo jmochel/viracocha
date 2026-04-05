@@ -3,8 +3,8 @@ package org.saltations.sync;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigService;
+import org.saltations.model.CatalogEntry;
 import org.saltations.model.ProjectEntry;
-import org.saltations.model.PublisherEntry;
 import org.saltations.model.SubscriptionEntry;
 import org.saltations.model.ViracochaConfig;
 import org.saltations.pattern.PatternPathUtils;
@@ -79,26 +79,26 @@ public class DefaultSyncService implements SyncService {
         boolean dryRun,
         boolean verbose
     ) throws IOException {
-        PublisherEntry pub = config.getPublishers().stream()
-            .filter(p -> p.getName().equals(sub.getPublisherName()))
+        CatalogEntry cat = config.getCatalogs().stream()
+            .filter(c -> c.getName().equals(sub.getCatalogName()))
             .findFirst()
-            .orElseThrow(() -> new IllegalArgumentException("Publisher '" + sub.getPublisherName() + "' not found."));
+            .orElseThrow(() -> new IllegalArgumentException("Catalog '" + sub.getCatalogName() + "' not found."));
 
-        ResolvedRoots roots = resolveRoots(pub, project, sub);
+        ResolvedRoots roots = resolveRoots(cat, project, sub);
 
         return switch (sub.getDirection()) {
             case BIDIRECTIONAL -> syncBidirectional(sub.getId(), roots, dryRun, verbose);
-            case PUBLISH_TO_WORKSPACE -> syncOneWay(sub.getId(), roots.publisherSubtree(), roots.workspaceSubtree(), dryRun, verbose);
-            case WORKSPACE_TO_PUBLISH -> syncOneWay(sub.getId(), roots.workspaceSubtree(), roots.publisherSubtree(), dryRun, verbose);
+            case CATALOG_TO_WORKSPACE -> syncOneWay(sub.getId(), roots.catalogSubtree(), roots.workspaceSubtree(), dryRun, verbose);
+            case WORKSPACE_TO_CATALOG -> syncOneWay(sub.getId(), roots.workspaceSubtree(), roots.catalogSubtree(), dryRun, verbose);
         };
     }
 
-    private record ResolvedRoots(Path publisherSubtree, Path workspaceSubtree) {}
+    private record ResolvedRoots(Path catalogSubtree, Path workspaceSubtree) {}
 
-    private static ResolvedRoots resolveRoots(PublisherEntry pub, ProjectEntry proj, SubscriptionEntry sub) {
-        Path publisherSubtree = Path.of(pub.getPath()).resolve(sub.getSourcePath()).normalize().toAbsolutePath();
+    private static ResolvedRoots resolveRoots(CatalogEntry cat, ProjectEntry proj, SubscriptionEntry sub) {
+        Path catalogSubtree = Path.of(cat.getPath()).resolve(sub.getSourcePath()).normalize().toAbsolutePath();
         Path workspaceSubtree = Path.of(proj.getPath()).resolve(sub.getWorkspacePath()).normalize().toAbsolutePath();
-        return new ResolvedRoots(publisherSubtree, workspaceSubtree);
+        return new ResolvedRoots(catalogSubtree, workspaceSubtree);
     }
 
     /**
@@ -167,18 +167,18 @@ public class DefaultSyncService implements SyncService {
 
     private SyncSubscriptionResult syncBidirectional(String subscriptionId, ResolvedRoots roots, boolean dryRun, boolean verbose)
         throws IOException {
-        Path pubRoot = roots.publisherSubtree();
+        Path catRoot = roots.catalogSubtree();
         Path wsRoot = roots.workspaceSubtree();
 
         Set<String> union = new TreeSet<>();
-        collectFileRelPaths(pubRoot, union);
+        collectFileRelPaths(catRoot, union);
         collectFileRelPaths(wsRoot, union);
 
         List<SyncConflictRecord> analyzeConflicts = new ArrayList<>();
         for (String rel : union) {
-            Path pPub = pubRoot.resolve(rel).normalize();
+            Path pCat = catRoot.resolve(rel).normalize();
             Path pWs = wsRoot.resolve(rel).normalize();
-            classifyForBidirectional(subscriptionId, rel, pPub, pWs).ifPresent(analyzeConflicts::add);
+            classifyForBidirectional(subscriptionId, rel, pCat, pWs).ifPresent(analyzeConflicts::add);
         }
 
         if (!analyzeConflicts.isEmpty()) {
@@ -194,39 +194,39 @@ public class DefaultSyncService implements SyncService {
 
         SyncSubscriptionResult result = baseResult(subscriptionId);
 
-        // Apply phase — publisher → workspace first (D-08)
+        // Apply phase — catalog → workspace first (D-08)
         for (String rel : union) {
-            Path pPub = pubRoot.resolve(rel).normalize();
+            Path pCat = catRoot.resolve(rel).normalize();
             Path pWs = wsRoot.resolve(rel).normalize();
-            if (!Files.exists(pPub) || Files.isSymbolicLink(pPub) || !Files.isRegularFile(pPub)) {
+            if (!Files.exists(pCat) || Files.isSymbolicLink(pCat) || !Files.isRegularFile(pCat)) {
                 continue;
             }
             if (!Files.exists(pWs)) {
                 if (!dryRun) {
                     Files.createDirectories(pWs.getParent());
-                    Files.copy(pPub, pWs, StandardCopyOption.COPY_ATTRIBUTES);
+                    Files.copy(pCat, pWs, StandardCopyOption.COPY_ATTRIBUTES);
                 }
                 result.setFilesCopied(result.getFilesCopied() + 1);
                 verboseLine(result, verbose, "COPY " + rel);
-            } else if (Files.isRegularFile(pWs) && Files.mismatch(pPub, pWs) == -1L) {
+            } else if (Files.isRegularFile(pWs) && Files.mismatch(pCat, pWs) == -1L) {
                 result.setFilesSkipped(result.getFilesSkipped() + 1);
                 verboseLine(result, verbose, "SKIP " + rel);
             }
         }
 
-        // Second pass — workspace → publisher (paths still missing on publisher only)
+        // Second pass — workspace → catalog (paths still missing on catalog only)
         for (String rel : union) {
-            Path pPub = pubRoot.resolve(rel).normalize();
+            Path pCat = catRoot.resolve(rel).normalize();
             Path pWs = wsRoot.resolve(rel).normalize();
             if (!Files.exists(pWs) || Files.isSymbolicLink(pWs) || !Files.isRegularFile(pWs)) {
                 continue;
             }
-            if (Files.exists(pPub)) {
+            if (Files.exists(pCat)) {
                 continue;
             }
             if (!dryRun) {
-                Files.createDirectories(pPub.getParent());
-                Files.copy(pWs, pPub, StandardCopyOption.COPY_ATTRIBUTES);
+                Files.createDirectories(pCat.getParent());
+                Files.copy(pWs, pCat, StandardCopyOption.COPY_ATTRIBUTES);
             }
             result.setFilesCopied(result.getFilesCopied() + 1);
             verboseLine(result, verbose, "COPY " + rel);
@@ -236,25 +236,25 @@ public class DefaultSyncService implements SyncService {
         return result;
     }
 
-    private Optional<SyncConflictRecord> classifyForBidirectional(String subscriptionId, String rel, Path pPub, Path pWs)
+    private Optional<SyncConflictRecord> classifyForBidirectional(String subscriptionId, String rel, Path pCat, Path pWs)
         throws IOException {
-        boolean exPub = Files.exists(pPub);
+        boolean exCat = Files.exists(pCat);
         boolean exWs = Files.exists(pWs);
-        if (!exPub || !exWs) {
+        if (!exCat || !exWs) {
             return Optional.empty();
         }
-        if (Files.isSymbolicLink(pPub) || Files.isSymbolicLink(pWs)) {
+        if (Files.isSymbolicLink(pCat) || Files.isSymbolicLink(pWs)) {
             return Optional.of(new SyncConflictRecord(subscriptionId, rel, SyncConflictKind.SYMLINK_UNSUPPORTED, null));
         }
-        boolean regPub = Files.isRegularFile(pPub);
+        boolean regCat = Files.isRegularFile(pCat);
         boolean regWs = Files.isRegularFile(pWs);
-        if (regPub != regWs) {
+        if (regCat != regWs) {
             return Optional.of(new SyncConflictRecord(subscriptionId, rel, SyncConflictKind.TYPE_MISMATCH, null));
         }
-        if (!regPub) {
+        if (!regCat) {
             return Optional.empty();
         }
-        long mismatch = Files.mismatch(pPub, pWs);
+        long mismatch = Files.mismatch(pCat, pWs);
         if (mismatch == -1L) {
             return Optional.empty();
         }

@@ -152,7 +152,7 @@ None - no external service configuration required.
 - Config subsystem fully operational: init, show, ConfigNotInitializedException guard all working
 - All 17 tests passing — build is green
 - CONF-01, CONF-02, CONF-03 requirements satisfied
-- Phase 01-foundation complete — Phase 02 (publisher management) can begin
+- Phase 01-foundation complete — Phase 02 (catalog management) can begin
 - Pattern established: `@Spec CommandSpec` for testable command output must be followed by all future command classes
 
 ---

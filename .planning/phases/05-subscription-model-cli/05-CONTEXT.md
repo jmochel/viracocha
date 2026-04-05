@@ -6,7 +6,7 @@
 <domain>
 ## Phase Boundary
 
-Introduce **subscription** entities persisted in central YAML, bound to an existing **project** and **publisher**, with CLI to add, list, show, and remove subscriptions. Each subscription records publisher-relative source path, workspace-relative path (subscription subtree), sync direction, and a stable **id** for later `vira sync` targeting (Phase 7).
+Introduce **subscription** entities persisted in central YAML, bound to an existing **project** and **catalog**, with CLI to add, list, show, and remove subscriptions. Each subscription records catalog-relative source path, workspace-relative path (subscription subtree), sync direction, and a stable **id** for later `vira sync` targeting (Phase 7).
 
 This phase does **not** implement filesystem sync or `vira sync` — that is Phases 6–7.
 
@@ -18,26 +18,26 @@ Delivers: CFG-01, CFG-02, SUB-01 through SUB-07 per `.planning/REQUIREMENTS.md`.
 ## Implementation Decisions
 
 ### Command surface (gray area: top-level vs under `project`)
-- **D-01:** Use a **top-level** command group `vira subscription` with leaf commands `add`, `list`, `show`, `remove` — matches `.planning/ROADMAP.md` Phase 5 design notes and keeps subscription CRUD discoverable alongside `publisher` / `pattern` / `project`.
-- **D-02:** `add` requires **`--project <name>`** and **`--publisher <name>`** (registered names), plus **`--source`** (path relative to publisher root), **`--workspace`** (path relative to project workspace), and **`--direction`** (see D-06). Mirrors the explicit-flag style of `project add-mapping`.
+- **D-01:** Use a **top-level** command group `vira subscription` with leaf commands `add`, `list`, `show`, `remove` — matches `.planning/ROADMAP.md` Phase 5 design notes and keeps subscription CRUD discoverable alongside `catalog` / `pattern` / `project`.
+- **D-02:** `add` requires **`--project <name>`** and **`--catalog <name>`** (registered names), plus **`--source`** (path relative to catalog root), **`--workspace`** (path relative to project workspace), and **`--direction`** (see D-06). Mirrors the explicit-flag style of `project add-mapping`.
 
 ### Data model & YAML
 - **D-03:** Nest subscriptions under each project: add `List<SubscriptionEntry> subscriptions` (default empty) to `ProjectEntry` — workspace anchor stays the project; no root-level `subscriptions[]` array in `ViracochaConfig`.
-- **D-04:** `SubscriptionEntry` fields: **`id`** (string, unique within the whole config — see D-05), **`publisherName`**, **`sourcePath`**, **`workspacePath`**, **`direction`** (see D-06). Optional: store `name` label later — **not** in v2.0 Phase 5 unless planner adds it for UX.
+- **D-04:** `SubscriptionEntry` fields: **`id`** (string, unique within the whole config — see D-05), **`catalogName`**, **`sourcePath`**, **`workspacePath`**, **`direction`** (see D-06). Optional: store `name` label later — **not** in v2.0 Phase 5 unless planner adds it for UX.
 - **D-05:** **`id`** is generated on `add` as a **UUID string** (e.g. Java `UUID.randomUUID().toString()`) so `show`/`remove` and Phase 7 `--subscription` stay stable if paths are edited later.
 
 ### Direction values (CLI + YAML)
-- **D-06:** Three directions aligned with ROADMAP: **`PUBLISH_TO_WORKSPACE`**, **`WORKSPACE_TO_PUBLISH`**, **`BIDIRECTIONAL`**. YAML stores these enum names (or identical string values). CLI accepts **kebab-case** long values: `publish-to-workspace`, `workspace-to-publish`, `bidirectional` (picocli `enum` or custom converter).
+- **D-06:** Three directions aligned with ROADMAP: **`CATALOG_TO_WORKSPACE`**, **`WORKSPACE_TO_CATALOG`**, **`BIDIRECTIONAL`**. YAML stores these enum names (or identical string values). CLI accepts **kebab-case** long values: `catalog-to-workspace`, `workspace-to-catalog`, `bidirectional` (picocli `enum` or custom converter).
 
 ### Output format (carry forward Phase 3)
-- **D-07:** **`subscription list`**: plain text, aligned columns (id, project, publisher, direction, workspacePath summary) — same spirit as `project list` / `publisher list` per `03-CONTEXT.md` D-03.
+- **D-07:** **`subscription list`**: plain text, aligned columns (id, project, catalog, direction, workspacePath summary) — same spirit as `project list` / `catalog list` per `03-CONTEXT.md` D-03.
 - **D-08:** **`subscription show`**: multi-line key-value block; **`--json`** for machine-readable output — same convention as `03-CONTEXT.md` D-04/D-05.
 
 ### Validation and errors
-- **D-09:** **Project** must exist; **publisher** must exist (by name in `ViracochaConfig.publishers`). If either missing → clear message, exit 1, no save (mirror `AddMappingCommand` / Phase 3 D-07).
+- **D-09:** **Project** must exist; **catalog** must exist (by name in `ViracochaConfig.catalogs`). If either missing → clear message, exit 1, no save (mirror `AddMappingCommand` / Phase 3 D-07).
 - **D-10:** Reject path strings containing **`..`** segments or absolute paths where relative paths are required; normalize trimming and separator style consistently with existing commands (Claude's discretion on exact normalization if tested).
-- **D-11:** **Duplicate detection:** reject `add` when an existing subscription on the same project has the same **`publisherName` + `sourcePath` + `workspacePath`** (case-sensitive string compare after trim) — satisfies SUB-07 “explicit rules”.
-- **D-12:** Optional existence check: if publisher root path from config does not exist on disk, **warn** to stderr but **allow** add (forward-compatible); if stricter behavior is needed, planner can tighten to fail — default here is warn-only.
+- **D-11:** **Duplicate detection:** reject `add` when an existing subscription on the same project has the same **`catalogName` + `sourcePath` + `workspacePath`** (case-sensitive string compare after trim) — satisfies SUB-07 “explicit rules”.
+- **D-12:** Optional existence check: if catalog root path from config does not exist on disk, **warn** to stderr but **allow** add (forward-compatible); if stricter behavior is needed, planner can tighten to fail — default here is warn-only.
 
 ### Tests
 - **D-13:** JUnit 5 + `@MicronautTest` for subscription commands; `@TempDir` for isolated config — same as `03-CONTEXT.md` D-11.
@@ -66,7 +66,7 @@ Delivers: CFG-01, CFG-02, SUB-01 through SUB-07 per `.planning/REQUIREMENTS.md`.
 
 ### Code entry points
 - `src/main/java/org/saltations/model/ProjectEntry.java` — add subscriptions list
-- `src/main/java/org/saltations/model/PublisherEntry.java` — publisher name/path reference
+- `src/main/java/org/saltations/model/CatalogEntry.java` — catalog name/path reference
 - `src/main/java/org/saltations/config/ConfigService.java` — load/save
 - `src/main/java/org/saltations/ViracochaCommand.java` — register `SubscriptionCommand`
 - `src/main/java/org/saltations/project/AddMappingCommand.java` — reference for load → find project → validate → mutate → save
@@ -81,7 +81,7 @@ Delivers: CFG-01, CFG-02, SUB-01 through SUB-07 per `.planning/REQUIREMENTS.md`.
 ### Reusable Assets
 - **`ConfigService`** + **`ViracochaConfig`** — same load/mutate/save loop as `AddMappingCommand`.
 - **`ProjectEntry`**, **`MappingEntry`** — POJO + Lombok pattern for `SubscriptionEntry`.
-- **`PublisherCommand`** / **`ProjectCommand`** — picocli nested command group pattern for `SubscriptionCommand`.
+- **`CatalogCommand`** / **`ProjectCommand`** — picocli nested command group pattern for `SubscriptionCommand`.
 
 ### Established Patterns
 - Config not initialized → `ConfigNotInitializedException` on load; message to stderr; exit 1.
@@ -106,7 +106,7 @@ Delivers: CFG-01, CFG-02, SUB-01 through SUB-07 per `.planning/REQUIREMENTS.md`.
 ## Deferred Ideas
 
 - **Sync engine behavior** (conflict policy, copy algorithm) — Phases 6–7, not Phase 5.
-- **`vira publisher list` subscriber counts** (PUB-v2-01) — optional enhancement; not required for Phase 5 minimum.
+- **`vira catalog list` subscriber counts** (PUB-v2-01) — optional enhancement; not required for Phase 5 minimum.
 - **Watch mode** — post–v2.0 per PROJECT.md.
 
 **Reviewed todos:** None (todo match-phase returned 0 for phase 5).

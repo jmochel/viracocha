@@ -8,7 +8,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.saltations.config.ConfigService;
 import org.saltations.infra.XdgPaths;
 import org.saltations.model.ProjectEntry;
-import org.saltations.model.PublisherEntry;
+import org.saltations.model.CatalogEntry;
 import org.saltations.model.ViracochaConfig;
 import picocli.CommandLine;
 
@@ -60,7 +60,7 @@ class SubscriptionListShowRemoveTest {
         Path pubDir = Files.createDirectory(tempDir.resolve("pub"));
         Path ws = Files.createDirectory(tempDir.resolve("ws"));
         ViracochaConfig cfg = configService.load();
-        cfg.getPublishers().add(new PublisherEntry("pub1", pubDir.toString()));
+        cfg.getCatalogs().add(new CatalogEntry("pub1", pubDir.toString()));
         cfg.getProjects().add(new ProjectEntry("p1", ws.toString(), new ArrayList<>(), new LinkedHashMap<>(), new ArrayList<>()));
         configService.save(cfg);
 
@@ -71,10 +71,10 @@ class SubscriptionListShowRemoveTest {
         clAdd.setErr(new PrintWriter(new ByteArrayOutputStream(), true));
         int exit = clAdd.execute(
             "--project", "p1",
-            "--publisher", "pub1",
+            "--catalog", "pub1",
             "--source", "src",
             "--workspace", "out",
-            "--direction", "publish-to-workspace");
+            "--direction", "catalog-to-workspace");
         assertEquals(0, exit);
         String line = out.toString();
         Matcher m = Pattern.compile("id=([0-9a-f-]{36})").matcher(line);

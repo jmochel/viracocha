@@ -110,7 +110,7 @@ Out of scope: subscriptions/sync, `--force` overwrite, network/Git — per PROJE
 ## Deferred Ideas
 
 - **`--force` overwrite** — v2 (UX-03 in REQUIREMENTS v2)
-- **Publisher sync / subscriptions** — v2
+- **Catalog sync / subscriptions** — v2
 - **GraalVM native image** — out of scope
 
 </deferred>

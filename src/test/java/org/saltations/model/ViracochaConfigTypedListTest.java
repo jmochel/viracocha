@@ -9,7 +9,7 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Verifies that typed List<PublisherEntry> and List<PatternEntry> round-trip
+ * Verifies that {@code CatalogEntry} and {@code PatternEntry} list fields round-trip
  * correctly through jackson-dataformat-yaml serialization.
  */
 class ViracochaConfigTypedListTest {
@@ -20,19 +20,19 @@ class ViracochaConfigTypedListTest {
     void emptyListsSerializeToYamlWithoutError() throws Exception {
         ViracochaConfig config = new ViracochaConfig();
         String serialized = yaml.writeValueAsString(config);
-        assertTrue(serialized.contains("publishers"), "YAML must contain publishers key");
+        assertTrue(serialized.contains("catalogs"), "YAML must contain catalogs key");
         assertTrue(serialized.contains("patterns"), "YAML must contain patterns key");
     }
 
     @Test
-    void publisherEntryRoundTripsCorrectly() throws Exception {
+    void catalogEntryRoundTripsCorrectly() throws Exception {
         ViracochaConfig config = new ViracochaConfig();
-        config.getPublishers().add(new PublisherEntry("mypub", "/tmp/pub"));
+        config.getCatalogs().add(new CatalogEntry("mypub", "/tmp/pub"));
         String serialized = yaml.writeValueAsString(config);
         ViracochaConfig deserialized = yaml.readValue(serialized, ViracochaConfig.class);
-        assertEquals(1, deserialized.getPublishers().size());
-        assertEquals("mypub", deserialized.getPublishers().get(0).getName());
-        assertEquals("/tmp/pub", deserialized.getPublishers().get(0).getPath());
+        assertEquals(1, deserialized.getCatalogs().size());
+        assertEquals("mypub", deserialized.getCatalogs().get(0).getName());
+        assertEquals("/tmp/pub", deserialized.getCatalogs().get(0).getPath());
     }
 
     @Test

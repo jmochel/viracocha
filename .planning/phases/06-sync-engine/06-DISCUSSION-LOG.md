@@ -58,7 +58,7 @@
 | Analyze then apply | Detect all conflicts before writes | ✓ |
 | Apply pub→ws before ws→pub after clean analyze | Deterministic | ✓ |
 
-**User's choice:** Two-phase (analyze → apply); apply order publisher→workspace then workspace→publisher; abort apply if conflicts detected in analyze.
+**User's choice:** Two-phase (analyze → apply); apply order catalog→workspace then workspace→catalog; abort apply if conflicts detected in analyze.
 
 ---
 

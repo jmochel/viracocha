@@ -6,7 +6,7 @@
     "allDeclaredMethods": true
   },
   {
-    "name": "org.saltations.model.PublisherEntry",
+    "name": "org.saltations.model.CatalogEntry",
     "allDeclaredConstructors": true,
     "allDeclaredFields": true,
     "allDeclaredMethods": true

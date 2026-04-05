@@ -2,21 +2,21 @@
 
 ## What This Is
 
-A personal CLI workspace manager (`vira`) for AI-assisted development workflows. It manages how developer workspaces are populated — by registering reusable Freemarker-templated patterns and folder sources (publishers), then generating workspace content from those registrations. Aimed at eliminating manual copy-paste when bootstrapping or updating AI assistant configuration across multiple projects.
+A personal CLI workspace manager (`vira`) for AI-assisted development workflows. It manages how developer workspaces are populated — by registering reusable Freemarker-templated patterns and folder sources (catalogs), then generating workspace content from those registrations. Aimed at eliminating manual copy-paste when bootstrapping or updating AI assistant configuration across multiple projects.
 
 ## Core Value
 
-A developer can register patterns and publishers once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
+A developer can register patterns and catalogs once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
 
 ## Current Milestone: v2.0 Subscriptions & sync
 
-**Goal:** Let users attach **subscriptions** from registered **publishers** into a **project workspace**, then run **`vira sync`** to propagate published artifacts **to and from** the workspace with explicit direction and conflict rules.
+**Goal:** Let users attach **subscriptions** from registered **catalogs** into a **project workspace**, then run **`vira sync`** to propagate published artifacts **to and from** the workspace with explicit direction and conflict rules.
 
 **Target features:**
 
-- Subscription records in central YAML (link project ↔ publisher, source/dest paths, sync direction).
-- CLI to add, list, show, and remove subscriptions; validation against existing projects and publishers.
-- `vira sync` (project-scoped) that performs filesystem sync per subscription direction: publisher→workspace, workspace→publisher, or bidirectional.
+- Subscription records in central YAML (link project ↔ catalog, source/dest paths, sync direction).
+- CLI to add, list, show, and remove subscriptions; validation against existing projects and catalogs.
+- `vira sync` (project-scoped) that performs filesystem sync per subscription direction: catalog→workspace, workspace→catalog, or bidirectional.
 - Documented conflict policy when both sides change (e.g. fail with diff summary, or last-write-wins with opt-in flags) — see `.planning/REQUIREMENTS.md`.
 - Tests and docs for subscription + sync flows.
 
@@ -26,7 +26,7 @@ A developer can register patterns and publishers once, then generate a correctly
 
 - ✓ CLI scaffold with Micronaut DI + picocli; Maven + JUnit 5
 - ✓ Config init/show; XDG YAML central config; JSONL logging
-- ✓ Publishers, patterns (Freemarker params), projects, mappings
+- ✓ Catalogs, patterns (Freemarker params), projects, mappings
 - ✓ `vira generate` with skip-existing, dry-run, verbose
 - ✓ Full detail: `.planning/milestones/v1.0-REQUIREMENTS.md`
 
@@ -45,13 +45,13 @@ See `.planning/REQUIREMENTS.md` for traceability and any follow-up items.
 
 ### Out of Scope
 
-- Remote publishers (HTTP/Git) — local filesystem paths only (same as v1 until a later milestone).
+- Remote catalogs (HTTP/Git) — local filesystem paths only (same as v1 until a later milestone).
 - **Watch mode / background daemon** — deferred to v2.1+ (one-shot `vira sync` is in v2.0).
 - Graal native image, multiple config profiles — unchanged from v1 deferrals.
 
 ## Context
 
-**Shipped v1.0 (2026-04-04):** Full CLI per roadmap — config init/show, publishers, patterns with Freemarker params, projects and mappings, and `vira generate` with skip-existing, dry-run, and verbose output. Requirements archive: `.planning/milestones/v1.0-REQUIREMENTS.md`.
+**Shipped v1.0 (2026-04-04):** Full CLI per roadmap — config init/show, catalogs, patterns with Freemarker params, projects and mappings, and `vira generate` with skip-existing, dry-run, and verbose output. Requirements archive: `.planning/milestones/v1.0-REQUIREMENTS.md`.
 
 **Current:** v2.0 milestone shipped (Phases 5–7): subscriptions, sync engine, `vira sync`, and docs. Roadmap: `.planning/ROADMAP.md`.
 
@@ -59,7 +59,7 @@ The project is named "viracocha" (package: `org.saltations`). The CLI binary is 
 
 Patterns use Apache Freemarker for template expansion. Variables appear in file content AND in folder/file names. Parameter names are extracted from the pattern source at registration time (by scanning Freemarker directives).
 
-Central config is a single YAML file following the schema in the project description — `version`, `patterns[]`, `publishers[]`, `projects[]`. The XDG config path would be `$XDG_CONFIG_HOME/viracocha/config.yaml` (defaulting to `~/.config/viracocha/config.yaml`).
+Central config is a single YAML file following the schema in the project description — `version`, `patterns[]`, `catalogs[]`, `projects[]`. The XDG config path would be `$XDG_CONFIG_HOME/viracocha/config.yaml` (defaulting to `~/.config/viracocha/config.yaml`).
 
 Project params provide defaults; mapping `values` override per-mapping.
 

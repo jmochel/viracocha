@@ -55,7 +55,7 @@ Phase 1 delivers exactly:
 6. JSONL logging — `logback.xml` with `FileAppender` + `LogstashEncoder` to `~/.local/share/viracocha/vira.jsonl`; no log output on stdout/stderr
 7. Missing pom.xml dependencies added: `jackson-dataformat-yaml`, `logstash-logback-encoder:7.4`
 
-**Not in Phase 1:** Freemarker, publishers, patterns, projects, generation — all Phase 2+
+**Not in Phase 1:** Freemarker, catalogs, patterns, projects, generation — all Phase 2+
 
 ---
 

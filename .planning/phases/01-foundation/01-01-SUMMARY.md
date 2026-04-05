@@ -40,7 +40,7 @@ key-files:
 
 key-decisions:
   - "logstash-logback-encoder must be pinned at 7.4 (not BOM-managed) — Micronaut BOM does not include it"
-  - "ViracochaConfig uses List<Object> for publishers/patterns/projects in Phase 1 — typed entries added in Phase 2"
+  - "ViracochaConfig uses List<Object> for catalogs/patterns/projects in Phase 1 — typed entries added in Phase 2"
   - "logback.xml uses ${user.home} property (not XDG path) for log file — XdgPaths.logFile() used at runtime by ConfigService to ensure dir exists"
 
 patterns-established:
@@ -90,7 +90,7 @@ Each task was committed atomically:
 - `pom.xml` — Added jackson-dataformat-yaml (compile) and logstash-logback-encoder 7.4 (runtime) after logback-classic
 - `src/main/resources/logback.xml` — Replaced ConsoleAppender with JSONL FileAppender using LogstashEncoder
 - `src/main/java/org/saltations/infra/XdgPaths.java` — @Singleton XDG path resolver with 4 public methods
-- `src/main/java/org/saltations/model/ViracochaConfig.java` — @Data POJO with version, publishers, patterns, projects
+- `src/main/java/org/saltations/model/ViracochaConfig.java` — @Data POJO with version, catalogs, patterns, projects
 - `src/test/java/org/saltations/infra/XdgPathsTest.java` — 4 unit tests for path segment and fallback behavior
 - `src/test/java/org/saltations/model/ViracochaConfigTest.java` — 2 unit tests for YAML serialization and round-trip
 - `src/test/resources/logback-test.xml` — NOPAppender root suppresses all log output in test JVM
@@ -98,7 +98,7 @@ Each task was committed atomically:
 ## Decisions Made
 
 - logstash-logback-encoder pinned at version 7.4 — the Micronaut BOM does not include it, so an explicit version is required
-- ViracochaConfig uses `List<Object>` for the three list fields in Phase 1 — typed domain entries (PublisherEntry, PatternEntry, ProjectEntry) will be added in Phase 2 when those models are defined
+- ViracochaConfig uses `List<Object>` for the three list fields in Phase 1 — typed domain entries (CatalogEntry, PatternEntry, ProjectEntry) will be added in Phase 2 when those models are defined
 - logback.xml uses `${user.home}` system property (not XdgPaths) for the file path because logback resolves paths at startup before Micronaut DI is initialized; XdgPaths.logFile() is used by ConfigService.init() to ensure the directory exists
 
 ## Deviations from Plan

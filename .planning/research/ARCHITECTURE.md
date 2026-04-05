@@ -13,7 +13,7 @@ Five service layers beneath the command layer:
 |-----------|---------|----------------|
 | Command Layer | `org.saltations.*Command` | Thin CLI dispatchers — parse args, call services, print output |
 | Config Service | `org.saltations.config` | Read/write central YAML config; XDG path resolution |
-| Publisher Service | `org.saltations.publisher` | Register/list publishers in config |
+| Catalog Service | `org.saltations.catalog` | Register/list catalogs in config |
 | Pattern Service | `org.saltations.pattern` | Register/list patterns; extract Freemarker variables |
 | Project Service | `org.saltations.project` | Create/list projects; add/list mappings |
 | Generator Service | `org.saltations.generate` | Expand patterns into workspace; skip-existing logic |
@@ -31,11 +31,11 @@ org.saltations/
     InitCommand.java                 ← vira config init
     ConfigService.java               ← @Singleton: load/save ViracochaConfig
 
-  publisher/
-    PublisherCommand.java            ← group command: vira publisher
-    RegisterPublisherCommand.java    ← vira publisher register
-    ListPublishersCommand.java       ← vira publisher list
-    PublisherService.java            ← @Singleton: publisher CRUD
+  catalog/
+    CatalogCommand.java            ← group command: vira catalog
+    RegisterCatalogCommand.java    ← vira catalog register
+    ListCatalogsCommand.java       ← vira catalog list
+    CatalogService.java            ← @Singleton: catalog CRUD (if extracted)
 
   pattern/
     PatternCommand.java              ← group command: vira pattern
@@ -57,7 +57,7 @@ org.saltations/
 
   model/
     ViracochaConfig.java             ← root config POJO
-    PublisherEntry.java
+    CatalogEntry.java
     PatternEntry.java                ← includes List<String> parameters
     ProjectEntry.java
     MappingEntry.java                ← includes Map<String,String> values
@@ -70,17 +70,17 @@ org.saltations/
 
 ## Data Flow
 
-### `vira publisher register -name aia -path /opt/aia`
+### `vira catalog register -name aia -path /opt/aia`
 
 ```
-RegisterPublisherCommand.run()
+RegisterCatalogCommand.run()
   → ConfigService.load()           // read ViracochaConfig from YAML
   → validate: path exists on disk
   → validate: name not already registered
-  → PublisherEntry{name, path}
-  → config.publishers.add(entry)
+  → CatalogEntry{name, path}
+  → config.catalogs.add(entry)
   → ConfigService.save(config)     // write back to YAML
-  → print: "Registered publisher 'aia' at /opt/aia"
+  → print: "Catalog 'aia' registered."
 ```
 
 ### `vira pattern register -name svc-bp -path /opt/patterns/svc`
@@ -129,7 +129,7 @@ GenerateCommand.run()
     mixinStandardHelpOptions = true,
     subcommands = {
         ConfigCommand.class,
-        PublisherCommand.class,
+        CatalogCommand.class,
         PatternCommand.class,
         ProjectCommand.class,
         GenerateCommand.class
@@ -140,16 +140,16 @@ public class ViracochaCommand implements Runnable { ... }
 
 // Group command (no logic, just subcommand grouping)
 @Command(
-    name = "publisher",
-    subcommands = {RegisterPublisherCommand.class, ListPublishersCommand.class}
+    name = "catalog",
+    subcommands = {RegisterCatalogCommand.class, ListCatalogsCommand.class}
 )
 @Singleton
-public class PublisherCommand implements Runnable { ... }
+public class CatalogCommand implements Runnable { ... }
 
 // Leaf command (has logic, injects services)
 @Command(name = "register")
 @Singleton
-public class RegisterPublisherCommand implements Runnable {
+public class RegisterCatalogCommand implements Runnable {
     @Inject ConfigService configService;
     @Option(names = {"-n", "--name"}, required = true) String name;
     @Option(names = {"-p", "--path"}, required = true) String path;
@@ -241,13 +241,13 @@ Dependencies determine the correct build sequence:
 
 ```
 Phase 1: Foundation
-  model POJOs (ViracochaConfig, PublisherEntry, PatternEntry, ProjectEntry, MappingEntry)
+  model POJOs (ViracochaConfig, CatalogEntry, PatternEntry, ProjectEntry, MappingEntry)
   infra/XdgPaths
   config/ConfigService + InitCommand
   Add missing pom.xml deps (freemarker, jackson-dataformat-yaml, logstash-logback-encoder)
 
-Phase 2: Publishers + Patterns
-  publisher/* (service + commands)
+Phase 2: Catalogs + Patterns
+  catalog/* (commands)
   infra/FreemarkerFactory
   pattern/* (service + commands, including param extraction)
 
@@ -264,7 +264,7 @@ ConfigService is the **critical path blocker** — nothing else can be built unt
 ## Error Handling Strategy
 
 - `ConfigNotInitializedException` → "Config not initialized. Run 'vira config init' first." (exit 1)
-- `PublisherNotFoundException` → "Publisher 'name' not found. Run 'vira publisher list'." (exit 1)
+- `CatalogNotFoundException` → "Catalog 'name' not found. Run 'vira catalog list'." (exit 1)
 - `PatternNotFoundException` → same pattern
 - `MissingParameterException` → "Pattern 'name' requires parameter 'varName' — not provided in mapping values or project params." (exit 2)
 - All exceptions caught at command `run()` level; stack trace to log only, friendly message to stderr

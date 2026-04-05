@@ -6,7 +6,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.saltations.config.ConfigService;
 import org.saltations.infra.XdgPaths;
 import org.saltations.model.ProjectEntry;
-import org.saltations.model.PublisherEntry;
+import org.saltations.model.CatalogEntry;
 import org.saltations.model.SubscriptionEntry;
 import org.saltations.model.SubscriptionSyncDirection;
 import org.saltations.model.ViracochaConfig;
@@ -53,13 +53,13 @@ class DefaultSyncServiceOneWayTest {
     }
 
     @Test
-    void publishToWorkspace_copiesFileFromPublisherToWorkspace() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+    void catalogToWorkspace_copiesFileFromCatalogToWorkspace() throws Exception {
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(pubRoot.resolve("src/sub"));
         Files.writeString(pubRoot.resolve("src/sub/a.txt"), "hello", StandardCharsets.UTF_8);
 
-        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, "src", "out");
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.CATALOG_TO_WORKSPACE, "src", "out");
 
         SyncEngineResult r = syncService.syncProject("proj1");
         SyncSubscriptionResult sub = single(r);
@@ -72,13 +72,13 @@ class DefaultSyncServiceOneWayTest {
     }
 
     @Test
-    void workspaceToPublish_copiesFileFromWorkspaceToPublisher() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+    void workspaceToCatalog_copiesFileFromWorkspaceToCatalog() throws Exception {
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(wsRoot.resolve("out/sub"));
         Files.writeString(wsRoot.resolve("out/sub/w.txt"), "ws-only", StandardCharsets.UTF_8);
 
-        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.WORKSPACE_TO_PUBLISH, "src", "out");
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.WORKSPACE_TO_CATALOG, "src", "out");
 
         SyncEngineResult r = syncService.syncProject("proj1");
         SyncSubscriptionResult sub = single(r);
@@ -92,14 +92,14 @@ class DefaultSyncServiceOneWayTest {
 
     @Test
     void contentMismatch_doesNotOverwriteWorkspaceFile() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(pubRoot.resolve("src/sub"));
         Files.writeString(pubRoot.resolve("src/sub/x.txt"), "aaa", StandardCharsets.UTF_8);
         Files.createDirectories(wsRoot.resolve("out/sub"));
         Files.writeString(wsRoot.resolve("out/sub/x.txt"), "bbb", StandardCharsets.UTF_8);
 
-        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, "src", "out");
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.CATALOG_TO_WORKSPACE, "src", "out");
 
         SyncEngineResult r = syncService.syncProject("proj1");
         SyncSubscriptionResult sub = single(r);
@@ -111,12 +111,12 @@ class DefaultSyncServiceOneWayTest {
 
     @Test
     void dryRun_doesNotCopyButCountsWouldCopy() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(pubRoot.resolve("src/sub"));
         Files.writeString(pubRoot.resolve("src/sub/dry.txt"), "dry-run", StandardCharsets.UTF_8);
 
-        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, "src", "out");
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.CATALOG_TO_WORKSPACE, "src", "out");
 
         SyncEngineResult r = syncService.syncProject("proj1", null, true, false);
         SyncSubscriptionResult sub = single(r);
@@ -127,9 +127,9 @@ class DefaultSyncServiceOneWayTest {
 
     @Test
     void unknownSubscriptionId_throwsIllegalArgument() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
-        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, "src", "out");
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.CATALOG_TO_WORKSPACE, "src", "out");
 
         IllegalArgumentException ex = assertThrows(
             IllegalArgumentException.class,
@@ -139,12 +139,12 @@ class DefaultSyncServiceOneWayTest {
 
     @Test
     void hiddenPathSegment_isNotPropagated() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(pubRoot.resolve("src/.secret"));
         Files.writeString(pubRoot.resolve("src/.secret/h.txt"), "hidden", StandardCharsets.UTF_8);
 
-        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, "src", "out");
+        saveConfig(pubRoot, wsRoot, SubscriptionSyncDirection.CATALOG_TO_WORKSPACE, "src", "out");
 
         SyncEngineResult r = syncService.syncProject("proj1");
         SyncSubscriptionResult sub = single(r);
@@ -160,7 +160,7 @@ class DefaultSyncServiceOneWayTest {
         String workspacePath
     ) throws Exception {
         ViracochaConfig cfg = new ViracochaConfig();
-        cfg.getPublishers().add(new PublisherEntry("pub1", pubRoot.toString()));
+        cfg.getCatalogs().add(new CatalogEntry("pub1", pubRoot.toString()));
         SubscriptionEntry sub = new SubscriptionEntry(
             "11111111-1111-1111-1111-111111111111",
             "pub1",

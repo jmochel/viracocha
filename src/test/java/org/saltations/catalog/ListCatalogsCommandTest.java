@@ -1,4 +1,4 @@
-package org.saltations.publisher;
+package org.saltations.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,10 +14,10 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ShowPublisherCommandTest {
+class ListCatalogsCommandTest {
 
     @TempDir Path tempDir;
-    private CommandLine commandLine;
+    private CommandLine listCommandLine;
     private ByteArrayOutputStream stdout;
     private ByteArrayOutputStream stderr;
     private ConfigService configService;
@@ -31,34 +31,39 @@ class ShowPublisherCommandTest {
         };
         configService = new ConfigService(xdgPaths);
         configService.init();
-        ShowPublisherCommand command = new ShowPublisherCommand(configService);
-        commandLine = new CommandLine(command);
+        ListCatalogsCommand command = new ListCatalogsCommand(configService);
+        listCommandLine = new CommandLine(command);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
-        commandLine.setOut(new PrintWriter(stdout, true));
-        commandLine.setErr(new PrintWriter(stderr, true));
+        listCommandLine.setOut(new PrintWriter(stdout, true));
+        listCommandLine.setErr(new PrintWriter(stderr, true));
     }
 
     @Test
-    void showExistingPublisherPrintsKeyValueBlock() throws Exception {
-        Path pubDir = Files.createDirectory(tempDir.resolve("mypub"));
-        new CommandLine(new RegisterPublisherCommand(configService))
-            .execute("--name", "mypub", "--path", pubDir.toString());
+    void listWithTwoCatalogsPrintsBothEntries() throws Exception {
+        Path d1 = Files.createDirectory(tempDir.resolve("pub1"));
+        Path d2 = Files.createDirectory(tempDir.resolve("pub2"));
+        RegisterCatalogCommand reg = new RegisterCatalogCommand(configService);
+        CommandLine regCl = new CommandLine(reg);
+        regCl.execute("--name", "alpha", "--path", d1.toString());
+        regCl.execute("--name", "beta", "--path", d2.toString());
 
-        int exit = commandLine.execute("--name", "mypub");
+        int exit = listCommandLine.execute();
         assertEquals(0, exit);
         String out = stdout.toString();
-        assertTrue(out.contains("Name: mypub"), "Output must contain 'Name: mypub'");
-        assertTrue(out.contains("Path: " + pubDir), "Output must contain 'Path: ' followed by path");
+        assertTrue(out.contains("alpha"));
+        assertTrue(out.contains("beta"));
+        assertTrue(out.contains(d1.toString()));
+        assertTrue(out.contains(d2.toString()));
     }
 
     @Test
-    void showWithJsonFlagOutputsSingleJsonObject() throws Exception {
-        Path pubDir = Files.createDirectory(tempDir.resolve("mypub"));
-        new CommandLine(new RegisterPublisherCommand(configService))
-            .execute("--name", "mypub", "--path", pubDir.toString());
+    void listWithJsonFlagOutputsJsonObjects() throws Exception {
+        Path d1 = Files.createDirectory(tempDir.resolve("pub1"));
+        RegisterCatalogCommand reg = new RegisterCatalogCommand(configService);
+        new CommandLine(reg).execute("--name", "mypub", "--path", d1.toString());
 
-        int exit = commandLine.execute("--name", "mypub", "--json");
+        int exit = listCommandLine.execute("--json");
         assertEquals(0, exit);
         String out = stdout.toString();
         assertTrue(out.contains("\"name\""), "JSON output must contain 'name' field");
@@ -67,24 +72,24 @@ class ShowPublisherCommandTest {
     }
 
     @Test
-    void showNotFoundNameExitsOneWithMessage() {
-        int exit = commandLine.execute("--name", "notfound");
-        assertEquals(1, exit);
-        assertTrue(stderr.toString().contains("Publisher 'notfound' not found."));
+    void listWhenEmptyExitsZeroWithNoOutput() {
+        int exit = listCommandLine.execute();
+        assertEquals(0, exit);
+        assertEquals("", stdout.toString().trim());
     }
 
     @Test
-    void showWhenConfigNotInitializedExitsOne() {
+    void listWhenConfigNotInitializedExitsOne() {
         XdgPaths uninitXdg = new XdgPaths() {
             @Override public Path configFile() { return tempDir.resolve("uninit/config.yaml"); }
             @Override public Path configDir() { return tempDir.resolve("uninit"); }
             @Override public Path dataDir() { return tempDir.resolve("uninit/share"); }
         };
-        ShowPublisherCommand cmd = new ShowPublisherCommand(new ConfigService(uninitXdg));
+        ListCatalogsCommand cmd = new ListCatalogsCommand(new ConfigService(uninitXdg));
         CommandLine cl = new CommandLine(cmd);
         ByteArrayOutputStream err = new ByteArrayOutputStream();
         cl.setErr(new PrintWriter(err, true));
-        int exit = cl.execute("--name", "x");
+        int exit = cl.execute();
         assertEquals(1, exit);
         assertTrue(err.toString().contains("Config not initialized"));
     }

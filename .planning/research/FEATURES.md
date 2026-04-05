@@ -20,7 +20,7 @@ Features without which the tool feels incomplete or unprofessional:
 | Dry-run for generate | `--dry-run` flag shows what would be written without touching filesystem | Medium |
 | Idempotent generate with skip logging | Log each skipped file explicitly: "Skipped (exists): path/to/file" | Low |
 | Consistent option naming | `--name`, `--path`, `--project` used consistently across all subcommands | Low |
-| Confirmation on mutating commands | Print "Registered publisher 'ai-idioms' at /home/.../ai-idioms" after each mutation | Low |
+| Confirmation on mutating commands | Print "Registered catalog 'ai-idioms' at /home/.../ai-idioms" after each mutation | Low |
 | Config path transparency | `config init` prints the full path where config was created | Low |
 
 ## Differentiators
@@ -47,7 +47,7 @@ Things to explicitly not build yet:
 | Interactive prompts during generate | Breaks scripting; user supplies all values up front via `add-mapping` |
 | `vira config edit` (opens editor) | Complexity without value; users can edit YAML directly |
 | `--force` overwrite on generate | Dangerous; out of scope for v1 (skip-existing is the contract) |
-| Remote publishers (HTTP/Git) | Local paths only in v1 |
+| Remote catalogs (HTTP/Git) | Local paths only in v1 |
 | Watch/sync mode | v2 feature |
 | Subscriptions | v2 feature |
 | Config migration tooling | Not needed until schema evolves |
@@ -58,10 +58,10 @@ Things to explicitly not build yet:
 
 Conventions from comparable scaffolding tools that apply here:
 
-- **Noun-verb subcommand structure**: `vira publisher register`, NOT `vira register-publisher` — matches git, kubectl, docker conventions
+- **Noun-verb subcommand structure**: `vira catalog register`, NOT `vira register-publisher` — matches git, kubectl, docker conventions
 - **Root command is `vira`**, not `viracocha` — short, typeable
 - **Confirmation lines on every write**: Users need to know the tool did something
-- **Empty-state messages on list**: "No publishers registered. Run 'vira publisher register' to add one."
+- **Empty-state messages on list**: "No catalogs registered. Run 'vira catalog register' to add one."
 - **Errors go to stderr, output to stdout** — enables piping and scripting
 - **No color by default** — JSONL logging is colorless; respect `NO_COLOR` env var if adding color
 

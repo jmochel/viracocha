@@ -66,7 +66,7 @@ public class ShowSubscriptionCommand implements Callable<Integer> {
                 Map<String, Object> row = new LinkedHashMap<>();
                 row.put("id", found.getId());
                 row.put("project", owner.getName());
-                row.put("publisher", found.getPublisherName());
+                row.put("catalog", found.getCatalogName());
                 row.put("source", found.getSourcePath());
                 row.put("workspacePath", found.getWorkspacePath());
                 row.put("direction", found.getDirection().name());
@@ -74,7 +74,7 @@ public class ShowSubscriptionCommand implements Callable<Integer> {
             } else {
                 spec.commandLine().getOut().println("id: " + found.getId());
                 spec.commandLine().getOut().println("project: " + owner.getName());
-                spec.commandLine().getOut().println("publisher: " + found.getPublisherName());
+                spec.commandLine().getOut().println("catalog: " + found.getCatalogName());
                 spec.commandLine().getOut().println("source: " + found.getSourcePath());
                 spec.commandLine().getOut().println("workspacePath: " + found.getWorkspacePath());
                 spec.commandLine().getOut().println("direction: " + found.getDirection().name());

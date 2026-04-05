@@ -6,7 +6,7 @@ import org.junit.jupiter.api.io.TempDir;
 import org.saltations.config.ConfigService;
 import org.saltations.infra.XdgPaths;
 import org.saltations.model.ProjectEntry;
-import org.saltations.model.PublisherEntry;
+import org.saltations.model.CatalogEntry;
 import org.saltations.model.SubscriptionEntry;
 import org.saltations.model.SubscriptionSyncDirection;
 import org.saltations.model.ViracochaConfig;
@@ -55,7 +55,7 @@ class DefaultSyncServiceBidirectionalTest {
 
     @Test
     void bidirectional_contentConflict_abortsApply() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(pubRoot.resolve("src"));
         Files.createDirectories(wsRoot.resolve("out"));
@@ -79,7 +79,7 @@ class DefaultSyncServiceBidirectionalTest {
 
     @Test
     void bidirectional_fillsBothSides() throws Exception {
-        Path pubRoot = Files.createDirectories(tempDir.resolve("publisher"));
+        Path pubRoot = Files.createDirectories(tempDir.resolve("catalog"));
         Path wsRoot = Files.createDirectories(tempDir.resolve("workspace"));
         Files.createDirectories(pubRoot.resolve("src/a"));
         Files.createDirectories(wsRoot.resolve("out/b"));
@@ -99,7 +99,7 @@ class DefaultSyncServiceBidirectionalTest {
 
     private void saveConfig(Path pubRoot, Path wsRoot) throws Exception {
         ViracochaConfig cfg = new ViracochaConfig();
-        cfg.getPublishers().add(new PublisherEntry("pub1", pubRoot.toString()));
+        cfg.getCatalogs().add(new CatalogEntry("pub1", pubRoot.toString()));
         SubscriptionEntry sub = new SubscriptionEntry(
             "22222222-2222-2222-2222-222222222222",
             "pub1",

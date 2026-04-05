@@ -11,7 +11,7 @@ import java.util.concurrent.Callable;
 @Command(
     name = "subscription",
     aliases = {"sub"},
-    description = "Manage publisher↔workspace subscriptions.",
+    description = "Manage catalog↔workspace subscriptions.",
     mixinStandardHelpOptions = true,
     subcommands = {
         AddSubscriptionCommand.class,

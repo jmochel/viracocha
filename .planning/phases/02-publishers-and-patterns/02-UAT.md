@@ -17,14 +17,14 @@ updated: "2026-04-04T18:00:00Z"
 
 ### 1. Publisher and pattern help surfaces
 expected: |
-  Help for `vira publisher` and `vira pattern` shows four subcommands each (register, list, show, unregister)
-  with descriptions; `vira publisher register --help` shows --name and --path options.
+  Help for `vira catalog` and `vira pattern` shows four subcommands each (register, list, show, unregister)
+  with descriptions; `vira catalog register --help` shows --name and --path options.
 result: pass
 
 ### 2. Config gate before publisher/pattern commands
 expected: |
   With XDG config pointing at a directory where config has never been initialized
-  (e.g. empty `XDG_CONFIG_HOME` temp dir), `vira publisher list` exits non-zero and stderr contains
+  (e.g. empty `XDG_CONFIG_HOME` temp dir), `vira catalog list` exits non-zero and stderr contains
   a clear message to run config init first (e.g. contains "Config not initialized").
 result: pass
 

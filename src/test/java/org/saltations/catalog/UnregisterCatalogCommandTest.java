@@ -1,4 +1,4 @@
-package org.saltations.publisher;
+package org.saltations.catalog;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,7 +14,7 @@ import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class UnregisterPublisherCommandTest {
+class UnregisterCatalogCommandTest {
 
     @TempDir Path tempDir;
     private CommandLine commandLine;
@@ -31,7 +31,7 @@ class UnregisterPublisherCommandTest {
         };
         configService = new ConfigService(xdgPaths);
         configService.init();
-        UnregisterPublisherCommand command = new UnregisterPublisherCommand(configService);
+        UnregisterCatalogCommand command = new UnregisterCatalogCommand(configService);
         commandLine = new CommandLine(command);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
@@ -40,22 +40,22 @@ class UnregisterPublisherCommandTest {
     }
 
     @Test
-    void unregisterExistingPublisherExitsZeroAndRemovesEntry() throws Exception {
+    void unregisterExistingCatalogExitsZeroAndRemovesEntry() throws Exception {
         Path pubDir = Files.createDirectory(tempDir.resolve("mypub"));
-        new CommandLine(new RegisterPublisherCommand(configService))
+        new CommandLine(new RegisterCatalogCommand(configService))
             .execute("--name", "mypub", "--path", pubDir.toString());
 
         int exit = commandLine.execute("--name", "mypub");
         assertEquals(0, exit);
-        assertTrue(stdout.toString().contains("Publisher 'mypub' unregistered."));
-        assertEquals(0, configService.load().getPublishers().size());
+        assertTrue(stdout.toString().contains("Catalog 'mypub' unregistered."));
+        assertEquals(0, configService.load().getCatalogs().size());
     }
 
     @Test
     void unregisterNotFoundNameExitsOneWithMessage() {
         int exit = commandLine.execute("--name", "notfound");
         assertEquals(1, exit);
-        assertTrue(stderr.toString().contains("Publisher 'notfound' not found."));
+        assertTrue(stderr.toString().contains("Catalog 'notfound' not found."));
     }
 
     @Test
@@ -65,7 +65,7 @@ class UnregisterPublisherCommandTest {
             @Override public Path configDir() { return tempDir.resolve("uninit"); }
             @Override public Path dataDir() { return tempDir.resolve("uninit/share"); }
         };
-        UnregisterPublisherCommand cmd = new UnregisterPublisherCommand(new ConfigService(uninitXdg));
+        UnregisterCatalogCommand cmd = new UnregisterCatalogCommand(new ConfigService(uninitXdg));
         CommandLine cl = new CommandLine(cmd);
         ByteArrayOutputStream err = new ByteArrayOutputStream();
         cl.setErr(new PrintWriter(err, true));

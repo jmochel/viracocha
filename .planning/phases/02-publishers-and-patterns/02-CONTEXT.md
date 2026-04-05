@@ -1,4 +1,4 @@
-# Phase 2: Publishers and Patterns - Context
+# Phase 2: Catalogs and Patterns - Context
 
 **Gathered:** 2026-03-28
 **Status:** Ready for planning
@@ -6,9 +6,9 @@
 <domain>
 ## Phase Boundary
 
-CLI commands to register, list, show, and unregister named publishers and named patterns. At pattern registration time, Freemarker variable names are automatically extracted from template file content and path segments, and stored in central config. No generation logic — that is Phase 4.
+CLI commands to register, list, show, and unregister named catalogs and named patterns. At pattern registration time, Freemarker variable names are automatically extracted from template file content and path segments, and stored in central config. No generation logic — that is Phase 4.
 
-Delivers: `vira publisher register/list/show/unregister` and `vira pattern register/list/show/unregister`.
+Delivers: `vira catalog register/list/show/unregister` and `vira pattern register/list/show/unregister`.
 
 </domain>
 
@@ -35,7 +35,7 @@ Delivers: `vira publisher register/list/show/unregister` and `vira pattern regis
 - Exact column alignment widths for plain text output
 - Precise JSON field names for `--json` output (should be camelCase, e.g., `name`, `path`, `parameters`)
 - Internal package structure for publisher/pattern commands and model POJOs
-- Whether `PublisherCommand` and `PatternCommand` are in separate packages or a shared `commands` package
+- Whether `CatalogCommand` and `PatternCommand` are in separate packages or a shared `commands` package
 - Freemarker extraction regex implementation detail (character class for valid identifier chars)
 
 </decisions>
@@ -51,7 +51,7 @@ No external specs — requirements fully captured in decisions above and REQUIRE
 - `src/main/java/org/saltations/config/InitCommand.java` — command class pattern (`@Singleton`, `@Inject`, `@Spec CommandSpec`, `Callable<Integer>`)
 - `src/main/java/org/saltations/config/ConfigService.java` — config load/save persistence pattern
 - `src/main/java/org/saltations/model/ViracochaConfig.java` — root config model (lists must change from `List<Object>` to typed entries in Phase 2)
-- `src/main/java/org/saltations/ViracochaCommand.java` — root command (must add `PublisherCommand` and `PatternCommand` to `subcommands`)
+- `src/main/java/org/saltations/ViracochaCommand.java` — root command (must add `CatalogCommand` and `PatternCommand` to `subcommands`)
 - `.planning/phases/01-foundation/01-CONTEXT.md` — all Phase 1 locked decisions carry forward
 
 ### Requirements
@@ -75,8 +75,8 @@ No external specs — requirements fully captured in decisions above and REQUIRE
 - Config guard: call `configService.load()` at the start of every command that reads/mutates config; `ConfigNotInitializedException` propagates the CONF-03 error
 
 ### Integration Points
-- `ViracochaConfig.publishers` and `ViracochaConfig.patterns` change from `List<Object>` to `List<PublisherEntry>` and `List<PatternEntry>` in Phase 2
-- `ViracochaCommand.subcommands` must include `PublisherCommand.class` and `PatternCommand.class`
+- `ViracochaConfig.publishers` and `ViracochaConfig.patterns` change from `List<Object>` to `List<CatalogEntry>` and `List<PatternEntry>` in Phase 2
+- `ViracochaCommand.subcommands` must include `CatalogCommand.class` and `PatternCommand.class`
 - `freemarker` dependency must be added to `pom.xml` (noted as Phase 2 prerequisite in STATE.md)
 
 </code_context>

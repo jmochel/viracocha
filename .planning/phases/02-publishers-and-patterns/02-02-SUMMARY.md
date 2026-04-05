@@ -7,10 +7,10 @@ tags: [picocli, config, publisher]
 # Dependency graph
 requires:
   - phase: 02-publishers-and-patterns plan 01
-    provides: Typed PublisherEntry, stub publisher leaves, ConfigService
+    provides: Typed CatalogEntry, stub publisher leaves, ConfigService
 provides:
-  - RegisterPublisherCommand, ListPublishersCommand, ShowPublisherCommand, UnregisterPublisherCommand (full implementations)
-  - Four integration test classes for publisher commands
+  - RegisterCatalogCommand, ListCatalogsCommand, ShowCatalogCommand, UnregisterCatalogCommand (full implementations)
+  - Four integration test classes for catalog commands
 affects: [02-03]
 
 # Tech tracking
@@ -22,15 +22,15 @@ tech-stack:
 
 key-files:
   created:
-    - src/test/java/org/saltations/publisher/RegisterPublisherCommandTest.java
-    - src/test/java/org/saltations/publisher/ListPublishersCommandTest.java
-    - src/test/java/org/saltations/publisher/ShowPublisherCommandTest.java
-    - src/test/java/org/saltations/publisher/UnregisterPublisherCommandTest.java
+    - src/test/java/org/saltations/catalog/RegisterCatalogCommandTest.java
+    - src/test/java/org/saltations/catalog/ListCatalogsCommandTest.java
+    - src/test/java/org/saltations/catalog/ShowCatalogCommandTest.java
+    - src/test/java/org/saltations/catalog/UnregisterCatalogCommandTest.java
   modified:
-    - src/main/java/org/saltations/publisher/RegisterPublisherCommand.java
-    - src/main/java/org/saltations/publisher/ListPublishersCommand.java
-    - src/main/java/org/saltations/publisher/ShowPublisherCommand.java
-    - src/main/java/org/saltations/publisher/UnregisterPublisherCommand.java
+    - src/main/java/org/saltations/catalog/RegisterCatalogCommand.java
+    - src/main/java/org/saltations/catalog/ListCatalogsCommand.java
+    - src/main/java/org/saltations/catalog/ShowCatalogCommand.java
+    - src/main/java/org/saltations/catalog/UnregisterCatalogCommand.java
 
 key-decisions:
   - "Publisher commands follow InitCommand-style error handling and @Spec for testable stdout/stderr"
@@ -47,7 +47,7 @@ completed: 2026-04-04
 
 # Phase 02 Plan 02: Publisher Commands Summary
 
-**All four publisher leaf commands implemented with tests: register (path + duplicate validation), list (plain + JSON), show (plain + JSON), unregister — PUB-01 through PUB-05.**
+**All four catalog leaf commands implemented with tests: register (path + duplicate validation), list (plain + JSON), show (plain + JSON), unregister — PUB-01 through PUB-05.**
 
 ## Performance
 

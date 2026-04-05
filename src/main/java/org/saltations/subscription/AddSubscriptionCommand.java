@@ -4,8 +4,8 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigNotInitializedException;
 import org.saltations.config.ConfigService;
+import org.saltations.model.CatalogEntry;
 import org.saltations.model.ProjectEntry;
-import org.saltations.model.PublisherEntry;
 import org.saltations.model.SubscriptionEntry;
 import org.saltations.model.SubscriptionSyncDirection;
 import org.saltations.model.ViracochaConfig;
@@ -25,7 +25,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "add",
-    description = "Add a subscription linking a publisher path into a project workspace path.",
+    description = "Add a subscription linking a catalog path into a project workspace path.",
     mixinStandardHelpOptions = true)
 @Singleton
 public class AddSubscriptionCommand implements Callable<Integer> {
@@ -35,10 +35,10 @@ public class AddSubscriptionCommand implements Callable<Integer> {
     @Option(names = {"--project"}, required = true, description = "Project name")
     private String project;
 
-    @Option(names = {"--publisher"}, required = true, description = "Registered publisher name")
-    private String publisher;
+    @Option(names = {"--catalog"}, required = true, description = "Registered catalog name")
+    private String catalog;
 
-    @Option(names = {"--source"}, required = true, description = "Path relative to publisher root")
+    @Option(names = {"--source"}, required = true, description = "Path relative to catalog root")
     private String source;
 
     @Option(names = {"-w", "--workspace"}, required = true, description = "Path relative to project workspace")
@@ -76,12 +76,12 @@ public class AddSubscriptionCommand implements Callable<Integer> {
                 return 1;
             }
 
-            PublisherEntry pub = config.getPublishers().stream()
-                .filter(e -> e.getName().equals(publisher))
+            CatalogEntry cat = config.getCatalogs().stream()
+                .filter(e -> e.getName().equals(catalog))
                 .findFirst()
                 .orElse(null);
-            if (pub == null) {
-                spec.commandLine().getErr().println("Publisher '" + publisher + "' not found.");
+            if (cat == null) {
+                spec.commandLine().getErr().println("Catalog '" + catalog + "' not found.");
                 return 1;
             }
 
@@ -93,18 +93,18 @@ public class AddSubscriptionCommand implements Callable<Integer> {
             }
 
             for (SubscriptionEntry existing : proj.getSubscriptions()) {
-                if (existing.getPublisherName().equals(publisher)
+                if (existing.getCatalogName().equals(catalog)
                     && existing.getSourcePath().equals(src)
                     && existing.getWorkspacePath().equals(workspacePath)) {
                     spec.commandLine().getErr().println(
-                        "Subscription already exists for this project with the same publisher, source, and workspace path.");
+                        "Subscription already exists for this project with the same catalog, source, and workspace path.");
                     return 1;
                 }
             }
 
-            String publisherPath = pub.getPath();
-            if (!Files.exists(Path.of(publisherPath))) {
-                spec.commandLine().getErr().println("Warning: publisher path does not exist on disk: " + publisherPath);
+            String catalogPath = cat.getPath();
+            if (!Files.exists(Path.of(catalogPath))) {
+                spec.commandLine().getErr().println("Warning: catalog path does not exist on disk: " + catalogPath);
             }
 
             String newId = UUID.randomUUID().toString();
@@ -112,7 +112,7 @@ public class AddSubscriptionCommand implements Callable<Integer> {
                 newId = UUID.randomUUID().toString();
             }
 
-            SubscriptionEntry entry = new SubscriptionEntry(newId, publisher, src, workspacePath, direction);
+            SubscriptionEntry entry = new SubscriptionEntry(newId, catalog, src, workspacePath, direction);
             proj.getSubscriptions().add(entry);
             configService.save(config);
             spec.commandLine().getOut().println("Subscription added (id=" + newId + ").");

@@ -19,7 +19,7 @@ progress:
 
 See: `.planning/PROJECT.md`
 
-**Core value:** A developer can register patterns and publishers once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
+**Core value:** A developer can register patterns and catalogs once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
 
 **Current focus:** Milestone v2.0 complete (Phases 5–7)
 

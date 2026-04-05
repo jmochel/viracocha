@@ -17,7 +17,7 @@ class ViracochaConfigTest {
         ViracochaConfig config = new ViracochaConfig();
         String serialized = yaml.writeValueAsString(config);
         assertTrue(serialized.contains("version: 1"), "Serialized YAML must contain 'version: 1'");
-        assertTrue(serialized.contains("publishers"), "Serialized YAML must contain 'publishers'");
+        assertTrue(serialized.contains("catalogs"), "Serialized YAML must contain 'catalogs'");
         assertTrue(serialized.contains("patterns"), "Serialized YAML must contain 'patterns'");
         assertTrue(serialized.contains("projects"), "Serialized YAML must contain 'projects'");
     }

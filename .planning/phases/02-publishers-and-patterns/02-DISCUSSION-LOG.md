@@ -1,4 +1,4 @@
-# Phase 2: Publishers and Patterns - Discussion Log
+# Phase 2: Catalogs and Patterns - Discussion Log
 
 > **Audit trail only.** Do not use as input to planning, research, or execution agents.
 > Decisions captured in 02-CONTEXT.md — this log preserves the Q&A.

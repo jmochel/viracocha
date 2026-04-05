@@ -24,7 +24,7 @@ class SubscriptionEntryYamlTest {
             "pub1",
             "src",
             "out",
-            SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE);
+            SubscriptionSyncDirection.CATALOG_TO_WORKSPACE);
         config.getProjects().add(new ProjectEntry("p1", "/ws", List.of(), new LinkedHashMap<>(), List.of(sub)));
 
         String serialized = yaml.writeValueAsString(config);
@@ -34,8 +34,8 @@ class SubscriptionEntryYamlTest {
         ProjectEntry p = deserialized.getProjects().get(0);
         assertEquals(1, p.getSubscriptions().size());
         SubscriptionEntry s = p.getSubscriptions().get(0);
-        assertEquals(SubscriptionSyncDirection.PUBLISH_TO_WORKSPACE, s.getDirection());
-        assertEquals("pub1", s.getPublisherName());
+        assertEquals(SubscriptionSyncDirection.CATALOG_TO_WORKSPACE, s.getDirection());
+        assertEquals("pub1", s.getCatalogName());
         assertEquals("out", s.getWorkspacePath());
     }
 }

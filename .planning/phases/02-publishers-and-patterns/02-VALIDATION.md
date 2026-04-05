@@ -57,7 +57,7 @@ created: 2026-03-28
 
 ## Wave 0 Requirements
 
-- [ ] `src/test/java/org/saltations/PublisherCommandTest.java` — stubs for PUB-01..05
+- [ ] `src/test/java/org/saltations/CatalogCommandTest.java` — stubs for PUB-01..05
 - [ ] `src/test/java/org/saltations/PatternCommandTest.java` — stubs for PAT-01..06
 - [ ] `src/test/java/org/saltations/FreemarkerVariableExtractorTest.java` — stubs for PAT-03, PAT-04
 
@@ -69,7 +69,7 @@ created: 2026-03-28
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| CLI help text for publisher/pattern subcommands | PUB-01, PAT-01 | Picocli-generated help output not easily asserted in unit | Run `vira publisher --help` and `vira pattern --help`; verify subcommand list |
+| CLI help text for publisher/pattern subcommands | PUB-01, PAT-01 | Picocli-generated help output not easily asserted in unit | Run `vira catalog --help` and `vira pattern --help`; verify subcommand list |
 
 ---
 

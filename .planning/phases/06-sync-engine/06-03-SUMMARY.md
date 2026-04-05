@@ -36,7 +36,7 @@ completed: 2026-04-04
 
 # Phase 6: Sync engine — Plan 03 Summary
 
-**Bidirectional two-phase sync: analyze union of paths for conflicts; apply publisher→workspace then workspace→publisher**
+**Bidirectional two-phase sync: analyze union of paths for conflicts; apply catalog→workspace then workspace→catalog**
 
 ## Performance
 

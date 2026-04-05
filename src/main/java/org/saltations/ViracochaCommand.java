@@ -5,7 +5,7 @@ import jakarta.inject.Singleton;
 import org.saltations.config.ConfigCommand;
 import org.saltations.pattern.PatternCommand;
 import org.saltations.project.ProjectCommand;
-import org.saltations.publisher.PublisherCommand;
+import org.saltations.catalog.CatalogCommand;
 import org.saltations.generate.GenerateCommand;
 import org.saltations.subscription.SubscriptionCommand;
 import org.saltations.sync.SyncCommand;
@@ -22,15 +22,15 @@ import java.util.concurrent.Callable;
     name = "vira",
     description = { 
         "Workspace manager for AI-assisted development.", 
-        "   - Syncs project's AI config artifacts FROM 'Publisher' folders",
-        "   - Syncs project's AI config artifacts TO 'Publisher' folders (if desired)",
+        "   - Syncs project's AI config artifacts FROM 'Catalog' folders",
+        "   - Syncs project's AI config artifacts TO 'Catalog' folders (if desired)",
         "   - Generates folders/files FROM 'Pattern' folders/files into a project folder", 
-        "   - Mapping between 'Patterns' and 'Publishers' is defined in a 'Project' file"
+        "   - Mapping between 'Patterns' and 'Catalogs' is defined in a 'Project' file"
     },
     mixinStandardHelpOptions = true,
     subcommands = {
         ConfigCommand.class,
-        PublisherCommand.class,
+        CatalogCommand.class,
         PatternCommand.class,
         ProjectCommand.class,
         SubscriptionCommand.class,
