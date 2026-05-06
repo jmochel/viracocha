@@ -18,7 +18,7 @@ Delivers: CFG-01, CFG-02, SUB-01 through SUB-07 per `.planning/REQUIREMENTS.md`.
 ## Implementation Decisions
 
 ### Command surface (gray area: top-level vs under `project`)
-- **D-01:** Use a **top-level** command group `vira subscription` with leaf commands `add`, `list`, `show`, `remove` — matches `.planning/ROADMAP.md` Phase 5 design notes and keeps subscription CRUD discoverable alongside `catalog` / `pattern` / `project`.
+- **D-01:** Use a **top-level** command group `vira subscription` with leaf commands `add`, `list`, `show`, `remove` — matches `.planning/ROADMAP.md` Phase 5 design notes and keeps subscription CRUD discoverable alongside `catalog` / `archetype` / `project`.
 - **D-02:** `add` requires **`--project <name>`** and **`--catalog <name>`** (registered names), plus **`--source`** (path relative to catalog root), **`--workspace`** (path relative to project workspace), and **`--direction`** (see D-06). Mirrors the explicit-flag style of `project add-mapping`.
 
 ### Data model & YAML

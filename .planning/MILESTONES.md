@@ -1,5 +1,23 @@
 # Milestones
 
+## v2.0 Subscriptions & sync (Shipped: 2026-05-06)
+
+**Phases completed:** 3 phases, 9 plans, 19 tasks
+
+**Key accomplishments:**
+
+- Subscription model types and YAML round-trip for nested subscriptions under projects
+- `vira subscription add` with validation, path guards, and persistence tests
+- List, show, and remove subscription subcommands with plain + JSON output and integration test
+- Stable `org.saltations.sync` API: conflict kinds, per-subscription results, `SyncEngineResult`, and `SyncService.syncProject` — no filesystem logic yet
+- `DefaultSyncService` one-way sync with hidden filtering, lexicographic walks, and conflict detection via `Files.mismatch`
+- Bidirectional two-phase sync: analyze union of paths for conflicts; apply catalog→workspace then workspace→catalog
+- Sync engine accepts subscription filter, dry-run, and verbose; counts and conflicts match prior behavior when using defaults.
+- `vira sync` invokes the sync engine with project, optional subscription, dry-run, verbose, and JSON output; exit 1 on conflicts or failures.
+- README documents subscriptions and `vira sync`; integration tests cover publish-to-workspace, workspace-to-publish, and bidirectional conflict exit code.
+
+---
+
 ## v1.0 MVP (Shipped: 2026-04-04)
 
 **Phases completed:** 4 phases, 11 plans, 17 tasks
