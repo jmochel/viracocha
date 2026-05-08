@@ -48,7 +48,10 @@
   2. A v2 config file (missing version field) causes `vira` to print a clear error message instructing the user to recreate their config and exits with a non-zero code
   3. Running any old v2 command name (`vira catalog`, `vira archetype`, `vira project`, `vira subscription`) produces an "unknown command" error
   4. All v3 POJO fields (SourceEntry, DestinationEntry, MappingEntry) survive a YAML write-then-read cycle with no data loss
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 08-01-PLAN.md — Infra relocation, v3 POJOs, ViracochaConfig replacement, test scaffolding (CFG-01)
+- [ ] 08-02-PLAN.md — Version guard (ConfigVersionException), v2 package deletion, ViracochaCommand cleanup (CFG-02, CFG-03)
 
 ### Phase 9: Source Commands
 **Goal**: Users can register and manage named local directory sources, including automatic Freemarker variable extraction for template sources
@@ -112,7 +115,7 @@
 | 5. Subscription model & CLI | v2.0 | 3/3 | Complete | 2026-04-04 |
 | 6. Sync engine | v2.0 | 3/3 | Complete | 2026-04-04 |
 | 7. `vira sync` & docs | v2.0 | 3/3 | Complete | 2026-04-04 |
-| 8. Model & Config Foundation | v3.0 | 0/TBD | Not started | - |
+| 8. Model & Config Foundation | v3.0 | 0/2 | Not started | - |
 | 9. Source Commands | v3.0 | 0/TBD | Not started | - |
 | 10. Destination & Mapping Commands | v3.0 | 0/TBD | Not started | - |
 | 11. Generate Rewrite | v3.0 | 0/TBD | Not started | - |
