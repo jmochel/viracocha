@@ -87,51 +87,49 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 
 ## Traceability
 
-Updated during roadmap creation.
-
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CFG-01 | — | Pending |
-| CFG-02 | — | Pending |
-| CFG-03 | — | Pending |
-| SRC-01 | — | Pending |
-| SRC-02 | — | Pending |
-| SRC-03 | — | Pending |
-| SRC-04 | — | Pending |
-| SRC-05 | — | Pending |
-| SRC-06 | — | Pending |
-| SRC-07 | — | Pending |
-| DEST-01 | — | Pending |
-| DEST-02 | — | Pending |
-| DEST-03 | — | Pending |
-| DEST-04 | — | Pending |
-| DEST-05 | — | Pending |
-| DEST-06 | — | Pending |
-| MAP-01 | — | Pending |
-| MAP-02 | — | Pending |
-| MAP-03 | — | Pending |
-| MAP-04 | — | Pending |
-| MAP-05 | — | Pending |
-| GEN-01 | — | Pending |
-| GEN-02 | — | Pending |
-| GEN-03 | — | Pending |
-| GEN-04 | — | Pending |
-| GEN-05 | — | Pending |
-| GEN-06 | — | Pending |
-| GEN-07 | — | Pending |
-| SYN-01 | — | Pending |
-| SYN-02 | — | Pending |
-| SYN-03 | — | Pending |
-| SYN-04 | — | Pending |
-| SYN-05 | — | Pending |
-| SYN-06 | — | Pending |
-| SYN-07 | — | Pending |
+| CFG-01 | Phase 8 | Pending |
+| CFG-02 | Phase 8 | Pending |
+| CFG-03 | Phase 8 | Pending |
+| SRC-01 | Phase 9 | Pending |
+| SRC-02 | Phase 9 | Pending |
+| SRC-03 | Phase 9 | Pending |
+| SRC-04 | Phase 9 | Pending |
+| SRC-05 | Phase 9 | Pending |
+| SRC-06 | Phase 9 | Pending |
+| SRC-07 | Phase 9 | Pending |
+| DEST-01 | Phase 10 | Pending |
+| DEST-02 | Phase 10 | Pending |
+| DEST-03 | Phase 10 | Pending |
+| DEST-04 | Phase 10 | Pending |
+| DEST-05 | Phase 10 | Pending |
+| DEST-06 | Phase 10 | Pending |
+| MAP-01 | Phase 10 | Pending |
+| MAP-02 | Phase 10 | Pending |
+| MAP-03 | Phase 10 | Pending |
+| MAP-04 | Phase 10 | Pending |
+| MAP-05 | Phase 10 | Pending |
+| GEN-01 | Phase 11 | Pending |
+| GEN-02 | Phase 11 | Pending |
+| GEN-03 | Phase 11 | Pending |
+| GEN-04 | Phase 11 | Pending |
+| GEN-05 | Phase 11 | Pending |
+| GEN-06 | Phase 11 | Pending |
+| GEN-07 | Phase 11 | Pending |
+| SYN-01 | Phase 12 | Pending |
+| SYN-02 | Phase 12 | Pending |
+| SYN-03 | Phase 12 | Pending |
+| SYN-04 | Phase 12 | Pending |
+| SYN-05 | Phase 12 | Pending |
+| SYN-06 | Phase 12 | Pending |
+| SYN-07 | Phase 12 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 35 total
-- Mapped to phases: 0
-- Unmapped: 35 ⚠️
+- Mapped to phases: 35
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-05-08*
-*Last updated: 2026-05-08 after initial definition*
+*Last updated: 2026-05-08 — traceability filled after roadmap creation*
