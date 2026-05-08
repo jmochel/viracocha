@@ -13,11 +13,11 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 
 /**
- * Command: vira sync — run subscription sync for a project.
+ * Command: vira sync — sync mapped files from sources to destinations.
  */
 @Command(
     name = "sync",
-    description = "Sync files between catalogs and project workspace per subscriptions.",
+    description = "Sync files from source directories to destination workspaces per mapping rules.",
     mixinStandardHelpOptions = true)
 @Singleton
 public class SyncCommand implements Callable<Integer> {
@@ -25,10 +25,10 @@ public class SyncCommand implements Callable<Integer> {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"--project-name"}, description = "Project name in configuration")
+    @Option(names = {"--destination-name"}, description = "Destination name in configuration")
     private String projectName;
 
-    @Option(names = {"--subscription"}, description = "Limit to this subscription id (UUID)")
+    @Option(names = {"--mapping-id"}, description = "Limit sync to this mapping id")
     private String subscriptionId;
 
     @Option(names = {"--dry-run"}, description = "Analyze only; do not copy files or create directories")
@@ -50,7 +50,7 @@ public class SyncCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         if (projectName == null || projectName.isBlank()) {
-            spec.commandLine().getErr().println("Missing required option: '--project-name'");
+            spec.commandLine().getErr().println("Missing required option: '--destination-name'");
             return 2;
         }
         String subId = (subscriptionId == null || subscriptionId.isBlank()) ? null : subscriptionId;

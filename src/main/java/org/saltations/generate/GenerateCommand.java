@@ -17,7 +17,7 @@ import java.util.concurrent.Callable;
 @Command(
     name = "generate",
     aliases = {"gen"},
-    description = "Generate workspace files from project mappings.",
+    description = "Generate workspace files from sources to a destination.",
     mixinStandardHelpOptions = true)
 @Singleton
 public class GenerateCommand implements Callable<Integer> {
@@ -25,7 +25,7 @@ public class GenerateCommand implements Callable<Integer> {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"--project-name"}, description = "Project name to generate")
+    @Option(names = {"--destination-name"}, description = "Destination name in configuration")
     private String projectName;
 
     @Option(names = {"--dry-run"}, description = "Show actions without writing files")
@@ -44,7 +44,7 @@ public class GenerateCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         if (projectName == null || projectName.isBlank()) {
-            spec.commandLine().getErr().println("Missing required option: '--project-name'");
+            spec.commandLine().getErr().println("Missing required option: '--destination-name'");
             return 2;
         }
         try {

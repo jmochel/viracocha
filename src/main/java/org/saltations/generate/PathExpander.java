@@ -15,7 +15,7 @@ import java.util.Map;
 /**
  * Expands Freemarker expressions in a single path segment string (e.g. {@code foo-${bar}-baz})
  * using a string-keyed model. Uses the same {@code ${name}} style as path scanning in
- * {@link org.saltations.pattern.FreemarkerVariableExtractor}; full Freemarker template syntax
+ * {@link org.saltations.infra.FreemarkerVariableExtractor}; full Freemarker template syntax
  * in the segment is supported via Freemarker processing.
  */
 @Singleton
