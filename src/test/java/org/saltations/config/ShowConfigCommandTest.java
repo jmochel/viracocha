@@ -7,7 +7,9 @@ import org.saltations.infra.XdgPaths;
 import picocli.CommandLine;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -81,5 +83,22 @@ class ShowConfigCommandTest {
         assertEquals(1, exitCode, "show before init must exit 1");
         assertTrue(stderr.toString().contains("Config not initialized"),
             "Stderr must contain 'Config not initialized'");
+    }
+
+    @Test
+    void showPrintsVersionErrorForV2Config() throws IOException {
+        // Write a v1 config file to simulate a developer's existing v2 config
+        Path configDir = configService.xdgPaths().configDir();
+        Files.createDirectories(configDir);
+        Path configFile = configService.xdgPaths().configFile();
+        Files.writeString(configFile, "version: 1\ncatalogs: []\n");
+
+        int exitCode = buildCommandLine().execute();
+        assertEquals(1, exitCode, "show with v1 config must exit 1");
+        String err = stderr.toString();
+        assertTrue(err.contains("v3 format required"),
+            "Stderr must contain 'v3 format required' for a v1 config file");
+        assertTrue(err.contains("Error reading config:"),
+            "Stderr must contain 'Error reading config:' prefix from IOException handler");
     }
 }
