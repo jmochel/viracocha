@@ -2,11 +2,11 @@
 
 ## What This Is
 
-A personal CLI workspace manager (`vira`) for AI-assisted development workflows. It manages how developer workspaces are populated — by registering reusable Freemarker-templated archetypes and folder sources (catalogs), then generating workspace content from those registrations and keeping catalog artifacts in sync with workspace copies via subscriptions. Aimed at eliminating manual copy-paste when bootstrapping or updating AI assistant configuration across multiple projects.
+A personal CLI workspace manager (`vira`) for AI-assisted development workflows. It manages how developer workspaces are populated — by registering reusable named **sources** (local folder paths or remote URLs, optionally Freemarker-templated) and **destinations** (workspace root paths), then populating destination paths from sources via **mappings** that specify glob filtering, recursion, and sync behavior. Aimed at eliminating manual copy-paste when bootstrapping or updating AI assistant configuration across multiple projects.
 
 ## Core Value
 
-A developer can register archetypes and catalogs once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files). Subscriptions keep catalog-published files in sync with the workspace on demand via `vira sync`.
+A developer registers sources and destinations once, then populates any workspace with a single command — and regeneration is safe (skips existing files). Mappings with `sync: true` keep destination copies up to date with their source on demand via `vira sync`.
 
 ## Requirements
 
@@ -26,18 +26,32 @@ A developer can register archetypes and catalogs once, then generate a correctly
 - ✓ SYN-01–SYN-05: `DefaultSyncService` with one-way (catalog→ws, ws→catalog) and bidirectional sync; `Files.mismatch` conflict detection; hidden-path parity with `generate` — v2.0
 - ✓ SYN-06–SYN-09: `vira sync --project-name` with `--subscription`, `--dry-run`, `--verbose`, `--json`; summary line (copied/skipped/failed/conflicts); exit 1 on failure — v2.0
 - ✓ X-01/X-02: Integration tests for all three sync directions; README documents subscriptions, sync directions, conflict policy, and example workflow — v2.0
+- ✓ Full detail: `.planning/milestones/v2.0-REQUIREMENTS.md`
 
-### Active
+### Active (v3.0 — in progress)
 
-*(No active requirements — start fresh with `/gsd:new-milestone` to define v3.0 requirements)*
+## Current Milestone: v3.0 Unified Sources & Destinations
+
+**Goal:** Replace the catalog/archetype/project/subscription model with a unified sources/destinations schema — cleaner, simpler, and extensible to remote content.
+
+**Target features:**
+- New config schema: `sources[]` (with `templates: true/false`), `destinations[]` with nested `parameters[]` and `mappings[]`
+- `vira source add/list/show/remove` — supports local paths and http(s) URLs
+- `vira destination add/list/show/remove`
+- `vira mapping add/list/remove` (per destination)
+- `vira generate` updated for new schema
+- `vira sync` updated (source→destination only; per-mapping `sync: true/false` flag)
+- Remote source support: fetch-and-copy from http(s) URLs at generate/sync time (no local caching)
+- Remove all v2 commands (catalog, archetype, project, subscription) — breaking change; no migration
 
 ### Out of Scope
 
-- Remote catalogs (HTTP/Git) — local filesystem paths only; network/auth complexity deferred indefinitely
-- Watch mode / background sync daemon — deferred to v3.0+ (one-shot `vira sync` covers the use case)
-- Graal native image — GraalVM profile exists in pom.xml but native build is not a target for v2.0
+- Sync *to* remote sources (HTTP/Git) — sources are read-only; write operations stay on local filesystem
+- Watch mode / background sync daemon — deferred to v4+ (one-shot `vira sync` covers the use case)
+- Graal native image — GraalVM profile exists in pom.xml but native build is not a current target
 - Multiple config profiles — single XDG config path is sufficient for current use case
-- Interactive merge UI — scriptable CLI-first policy; conflict abort is the correct v2.0 default
+- Interactive merge UI — scriptable CLI-first policy; conflict abort is the correct default
+- Bidirectional sync — v3 sync is source→destination only; the old ws→catalog direction is removed with subscriptions
 
 ## Context
 
@@ -45,18 +59,20 @@ A developer can register archetypes and catalogs once, then generate a correctly
 
 **Shipped v2.0 (2026-04-04):** Subscriptions, sync engine, `vira sync` CLI, and docs. 3 phases, 9 plans. 5,191 LOC Java. Requirements archive: `.planning/milestones/v2.0-REQUIREMENTS.md`.
 
+**v3.0 (in design — 2026-05):** Unified sources/destinations config model. Eliminates catalog, archetype, project, and subscription concepts. Mappings become the single join point between a source and a destination, with glob, recursion, and sync semantics per mapping. Schema migration required from v2 config files.
+
 The project is named "viracocha" (package: `org.saltations`). The CLI binary is `vira`. Micronaut + picocli is intentional and must be preserved.
 
-Archetypes use Apache Freemarker for template expansion. Variables appear in file content AND in folder/file names. Parameter names are extracted from the archetype source at registration time.
+Sources with `templates: true` use Apache Freemarker for template expansion. Variables appear in file content AND in folder/file names. Parameter names are extracted from the source at registration time or declared explicitly.
 
-Central config is a single YAML file: `~/.config/viracocha/config.yaml` (XDG). Schema: `version`, `archetypes[]`, `catalogs[]`, `projects[]` (with nested `subscriptions[]`).
+Central config is a single YAML file: `~/.config/viracocha/config.yaml` (XDG). v3 schema: `version`, `sources[]`, `destinations[]` (with nested `parameters[]` and `mappings[]`).
 
 ## Constraints
 
 - **Tech Stack**: JDK 21, Micronaut (DI), picocli, Project Lombok, Apache Freemarker, jackson-dataformat-yaml, Logback — no deviations
 - **Config format**: YAML only for central config
 - **Regeneration**: `vira generate` keeps skip-existing semantics; sync is a separate code path
-- **Scope**: Local filesystem only — no network, no Git operations
+- **Scope**: Local filesystem reads + remote HTTP(S) reads — no write operations to remote sources
 
 ## Key Decisions
 
@@ -71,6 +87,11 @@ Central config is a single YAML file: `~/.config/viracocha/config.yaml` (XDG). S
 | Conflict default = abort | Safe-by-default; avoids silent data loss | ✓ Good — force flags available for future overrides |
 | Bidirectional as union-then-two-pass | Deterministic ordering; avoids double-counting | ✓ Good — TreeSet union works cleanly |
 | `Files.mismatch` for conflict detection | JDK 12+ NIO; avoids content hashing overhead | ✓ Good — accurate and fast for small files |
+| Collapse catalogs+archetypes into sources (v3) | Two concepts with one distinguishing flag were unnecessary complexity; `templates: true/false` captures the difference cleanly | ⏳ Pending validation |
+| Collapse projects into destinations (v3) | Projects were destinations with extra ceremony; flat `destinations[]` list is simpler and more general (covers user-level dirs, not just projects) | ⏳ Pending validation |
+| Eliminate subscriptions in favor of per-mapping sync flag (v3) | Subscriptions as a separate top-level concept added indirection; `sync: true` on a mapping is the natural place for this intent | ⏳ Pending validation |
+| Add glob + recurse per mapping (v3) | Enables fine-grained selection from a single source into multiple destinations without multiplying source registrations | ⏳ Pending validation |
+| Remote sources read-only (v3) | Writing to remote repos is out of scope; sources are always the authoritative origin | ⏳ Pending validation |
 
 ## Evolution
 
@@ -83,4 +104,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-06 after v2.0 milestone — Subscriptions & sync shipped*
+*Last updated: 2026-05-08 — v3.0 design direction established; sources/destinations model replacing catalog/archetype/project/subscription*

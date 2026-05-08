@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: — Subscriptions & sync
-status: completed
-stopped_at: v2.0 milestone complete
-last_updated: "2026-05-06T23:12:59.373Z"
-last_activity: 2026-05-06
+milestone: v3.0
+milestone_name: Unified Sources & Destinations
+status: active
+stopped_at: —
+last_updated: "2026-05-08T00:00:00.000Z"
+last_activity: 2026-05-08
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -19,20 +19,22 @@ progress:
 
 See: `.planning/PROJECT.md`
 
-**Core value:** A developer can register archetypes and catalogs once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files). Subscriptions keep catalog artifacts in sync via `vira sync`.
+**Core value:** A developer registers sources and destinations once, then populates any workspace with a single command — and regeneration is safe (skips existing files). Mappings with `sync: true` keep destination copies up to date on demand via `vira sync`.
 
-**Current focus:** Planning next milestone
+**Current focus:** Defining requirements for v3.0
 
 ## Current Position
 
-Status: v2.0 milestone archived — ready for next milestone planning
-Last activity: 2026-05-06
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-05-08 — Milestone v3.0 started
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions logged in PROJECT.md Key Decisions table. v1.0 and v2.0 decisions finalized.
+Decisions logged in PROJECT.md Key Decisions table. v1.0, v2.0, and v3.0 design decisions recorded.
 
 ### Pending Todos
 
@@ -44,6 +46,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-06
-Stopped at: v2.0 milestone complete and archived
+Last session: 2026-05-08
+Stopped at: Milestone v3.0 started — defining requirements
 Resume file: —
