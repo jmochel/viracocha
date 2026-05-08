@@ -7,7 +7,7 @@ import org.saltations.model.CatalogEntry;
 import org.saltations.model.ProjectEntry;
 import org.saltations.model.SubscriptionEntry;
 import org.saltations.model.ViracochaConfig;
-import org.saltations.pattern.PatternPathUtils;
+import org.saltations.infra.HiddenPathFilter;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -268,7 +268,7 @@ public class DefaultSyncService implements SyncService {
         try (Stream<Path> walk = Files.walk(root)) {
             List<Path> paths = walk
                 .filter(p -> !p.equals(root))
-                .filter(p -> !PatternPathUtils.hasHiddenPathSegment(root, p))
+                .filter(p -> !HiddenPathFilter.hasHiddenPathSegment(root, p))
                 .toList();
             for (Path p : paths) {
                 if (Files.isSymbolicLink(p) || Files.isRegularFile(p)) {
@@ -285,7 +285,7 @@ public class DefaultSyncService implements SyncService {
         try (Stream<Path> walk = Files.walk(root)) {
             return walk
                 .filter(p -> !p.equals(root))
-                .filter(p -> !PatternPathUtils.hasHiddenPathSegment(root, p))
+                .filter(p -> !HiddenPathFilter.hasHiddenPathSegment(root, p))
                 .filter(p -> {
                     try {
                         return Files.isSymbolicLink(p) || Files.isRegularFile(p);

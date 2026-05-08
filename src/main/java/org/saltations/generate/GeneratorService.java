@@ -9,10 +9,10 @@ import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigService;
 import org.saltations.model.MappingEntry;
-import org.saltations.model.PatternEntry;
+import org.saltations.model.ArchetypeEntry;
 import org.saltations.model.ProjectEntry;
 import org.saltations.model.ViracochaConfig;
-import org.saltations.pattern.PatternPathUtils;
+import org.saltations.infra.HiddenPathFilter;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Walks pattern trees, merges parameters, expands path segments and template bodies, and writes
+ * Walks archetype trees, merges parameters, expands path segments and template bodies, and writes
  * into the project workspace (or simulates with {@code dryRun}).
  */
 @Singleton
@@ -70,16 +70,16 @@ public class GeneratorService {
         List<String> verboseLines = verbose ? new ArrayList<>() : null;
 
         for (MappingEntry mapping : project.getMappings()) {
-            PatternEntry pattern = config.getPatterns().stream()
-                .filter(pe -> pe.getName().equals(mapping.getPatternName()))
+            ArchetypeEntry archetype = config.getArchetypes().stream()
+                .filter(pe -> pe.getName().equals(mapping.getArchetypeName()))
                 .findFirst()
                 .orElse(null);
-            if (pattern == null) {
-                throw new IllegalArgumentException("Pattern '" + mapping.getPatternName() + "' not found in config.");
+            if (archetype == null) {
+                throw new IllegalArgumentException("Archetype '" + mapping.getArchetypeName() + "' not found in config.");
             }
 
             Map<String, String> model = mergeParameters(project, mapping);
-            Path patternRoot = Path.of(pattern.getPath()).normalize().toAbsolutePath();
+            Path archetypeRoot = Path.of(archetype.getPath()).normalize().toAbsolutePath();
 
             Path destRoot;
             try {
@@ -93,24 +93,24 @@ public class GeneratorService {
             }
 
             List<Path> files;
-            try (Stream<Path> walk = Files.walk(patternRoot)) {
+            try (Stream<Path> walk = Files.walk(archetypeRoot)) {
                 files = walk
                     .filter(Files::isRegularFile)
-                    .filter(p -> !PatternPathUtils.hasHiddenPathSegment(patternRoot, p))
-                    .sorted(Comparator.comparing(p -> patternRoot.relativize(p).toString()))
+                    .filter(p -> !HiddenPathFilter.hasHiddenPathSegment(archetypeRoot, p))
+                    .sorted(Comparator.comparing(p -> archetypeRoot.relativize(p).toString()))
                     .collect(Collectors.toList());
             }
 
             for (Path sourceFile : files) {
-                Path relFromPattern = patternRoot.relativize(sourceFile);
+                Path relFromArchetype = archetypeRoot.relativize(sourceFile);
 
                 Path expandedRel;
                 try {
-                    expandedRel = expandRelativePath(relFromPattern, model);
+                    expandedRel = expandRelativePath(relFromArchetype, model);
                 } catch (IllegalArgumentException e) {
                     failed++;
                     if (verbose) {
-                        String hint = Path.of(mapping.getWorkspacePath()).resolve(relFromPattern).toString().replace('\\', '/');
+                        String hint = Path.of(mapping.getWorkspacePath()).resolve(relFromArchetype).toString().replace('\\', '/');
                         verboseLines.add("Failed " + hint + " (path expansion: " + e.getMessage() + ")");
                     }
                     continue;
