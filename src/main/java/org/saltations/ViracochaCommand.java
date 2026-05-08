@@ -3,11 +3,7 @@ package org.saltations;
 import io.micronaut.configuration.picocli.PicocliRunner;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigCommand;
-import org.saltations.pattern.PatternCommand;
-import org.saltations.project.ProjectCommand;
-import org.saltations.catalog.CatalogCommand;
 import org.saltations.generate.GenerateCommand;
-import org.saltations.subscription.SubscriptionCommand;
 import org.saltations.sync.SyncCommand;
 import picocli.CommandLine.Command;
 
@@ -20,20 +16,12 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "vira",
-    description = { 
-        "Workspace manager for AI-assisted development.", 
-        "   - Syncs project's AI config artifacts FROM 'Catalog' folders",
-        "   - Syncs project's AI config artifacts TO 'Catalog' folders (if desired)",
-        "   - Generates folders/files FROM 'Pattern' folders/files into a project folder", 
-        "   - Mapping between 'Patterns' and 'Catalogs' is defined in a 'Project' file"
+    description = {
+        "Workspace manager for AI-assisted development."
     },
     mixinStandardHelpOptions = true,
     subcommands = {
         ConfigCommand.class,
-        CatalogCommand.class,
-        PatternCommand.class,
-        ProjectCommand.class,
-        SubscriptionCommand.class,
         GenerateCommand.class,
         SyncCommand.class
     }

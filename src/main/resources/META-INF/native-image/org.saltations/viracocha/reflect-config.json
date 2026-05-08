@@ -6,19 +6,13 @@
     "allDeclaredMethods": true
   },
   {
-    "name": "org.saltations.model.CatalogEntry",
+    "name": "org.saltations.model.SourceEntry",
     "allDeclaredConstructors": true,
     "allDeclaredFields": true,
     "allDeclaredMethods": true
   },
   {
-    "name": "org.saltations.model.PatternEntry",
-    "allDeclaredConstructors": true,
-    "allDeclaredFields": true,
-    "allDeclaredMethods": true
-  },
-  {
-    "name": "org.saltations.model.ProjectEntry",
+    "name": "org.saltations.model.DestinationEntry",
     "allDeclaredConstructors": true,
     "allDeclaredFields": true,
     "allDeclaredMethods": true

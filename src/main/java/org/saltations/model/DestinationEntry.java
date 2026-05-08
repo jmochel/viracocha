@@ -10,19 +10,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A named project with workspace root path and pattern mappings.
+ * A named destination workspace path with parameter defaults and source mappings.
  * Serialized to/from YAML by jackson-dataformat-yaml.
  */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProjectEntry {
-
+public class DestinationEntry {
     private String name;
     private String path;
-    private List<MappingEntry> mappings = new ArrayList<>();
-    /** Default parameter values for this project; mapping-level params override at generation time. */
+    /** Default parameter values for template expansion at this destination. */
     private Map<String, String> parameters = new LinkedHashMap<>();
-    /** Optional subscription rows for catalog↔workspace sync (Phase 6+). */
-    private List<SubscriptionEntry> subscriptions = new ArrayList<>();
+    /** Mappings from sources into this destination. */
+    private List<MappingEntry> mappings = new ArrayList<>();
 }

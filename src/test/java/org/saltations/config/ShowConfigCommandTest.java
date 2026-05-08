@@ -71,8 +71,8 @@ class ShowConfigCommandTest {
         configService.init();
         int exitCode = buildCommandLine().execute();
         assertEquals(0, exitCode);
-        assertTrue(stdout.toString().contains("version: 1"),
-            "Output must contain 'version: 1' from raw YAML");
+        assertTrue(stdout.toString().contains("version: 3"),
+            "Output must contain 'version: 3' from raw YAML");
     }
 
     @Test

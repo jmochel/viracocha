@@ -50,7 +50,7 @@ class ConfigServiceTest {
         Path created = configService.init();
         assertTrue(Files.exists(created), "init() must create config file");
         String contents = Files.readString(created);
-        assertTrue(contents.contains("version: 1"), "Config file must contain 'version: 1'");
+        assertTrue(contents.contains("version: 3"), "Config file must contain 'version: 3'");
     }
 
     @Test
@@ -75,7 +75,7 @@ class ConfigServiceTest {
     void loadAfterInitReturnsDefaultConfig() throws IOException {
         configService.init();
         ViracochaConfig config = configService.load();
-        assertEquals(1, config.getVersion(), "Loaded config must have version=1");
+        assertEquals(3, config.getVersion(), "Loaded config must have version=3");
     }
 
     @Test
