@@ -9,7 +9,7 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 
 ### Config
 
-- [ ] **CFG-01**: v3 config POJOs — `SourceEntry` (name, path, templates boolean, parameters), `DestinationEntry` (name, path, parameters, mappings), `MappingEntry` v3 (sourceRef, glob, recurse, sync, params) — with YAML round-trip and no data loss
+- [x] **CFG-01**: v3 config POJOs — `SourceEntry` (name, path, templates boolean, parameters), `DestinationEntry` (name, path, parameters, mappings), `MappingEntry` v3 (sourceRef, glob, recurse, sync, params) — with YAML round-trip and no data loss
 - [ ] **CFG-02**: `ConfigService.load()` detects a v2 config (missing version field or version < 3) and fails with a clear error message instructing the user to recreate their config
 - [ ] **CFG-03**: All v2 CLI command packages (catalog, archetype, project, subscription) are removed from the codebase; running old command names produces "unknown command" error
 
@@ -89,7 +89,7 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CFG-01 | Phase 8 | Pending |
+| CFG-01 | Phase 8 | Complete |
 | CFG-02 | Phase 8 | Pending |
 | CFG-03 | Phase 8 | Pending |
 | SRC-01 | Phase 9 | Pending |

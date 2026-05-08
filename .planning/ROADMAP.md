@@ -50,7 +50,7 @@
   4. All v3 POJO fields (SourceEntry, DestinationEntry, MappingEntry) survive a YAML write-then-read cycle with no data loss
 **Plans**: 2 plans
 Plans:
-- [ ] 08-01-PLAN.md — Infra relocation, v3 POJOs, ViracochaConfig replacement, test scaffolding (CFG-01)
+- [x] 08-01-PLAN.md — Infra relocation, v3 POJOs, ViracochaConfig replacement, test scaffolding (CFG-01)
 - [ ] 08-02-PLAN.md — Version guard (ConfigVersionException), v2 package deletion, ViracochaCommand cleanup (CFG-02, CFG-03)
 
 ### Phase 9: Source Commands
