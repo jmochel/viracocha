@@ -28,6 +28,12 @@ A developer registers sources and destinations once, then populates any workspac
 - ✓ X-01/X-02: Integration tests for all three sync directions; README documents subscriptions, sync directions, conflict policy, and example workflow — v2.0
 - ✓ Full detail: `.planning/milestones/v2.0-REQUIREMENTS.md`
 
+### Validated (v3.0 — in progress)
+
+- ✓ CFG-01: v3 config POJOs (SourceEntry, DestinationEntry, MappingEntry, ViracochaConfig v3); YAML round-trip without data loss — Phase 8
+- ✓ CFG-02: ConfigService.load() version guard; ConfigVersionException for v2 config files — Phase 8
+- ✓ CFG-03: All v2 command packages (archetype, catalog, project, subscription) removed; ViracochaCommand registers only config/generate/sync — Phase 8
+
 ### Active (v3.0 — in progress)
 
 ## Current Milestone: v3.0 Unified Sources & Destinations
@@ -104,4 +110,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-08 — v3.0 design direction established; sources/destinations model replacing catalog/archetype/project/subscription*
+*Last updated: 2026-05-09 — Phase 8 complete; v3 model foundation in place; v2 command packages removed*
