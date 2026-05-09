@@ -63,7 +63,12 @@ Plans:
   3. `vira source list` displays all registered sources in plain and `--json` output formats
   4. `vira source remove my-source` removes the source and confirms deletion
   5. Adding a duplicate source name or a path containing `..` produces a clear error and leaves config unchanged
-**Plans**: TBD
+**Plans**: 4 plans
+Plans:
+- [ ] 09-01-PLAN.md — @Singleton on FreemarkerVariableExtractor, SourceService with full CRUD and validation (SRC-05, SRC-06, SRC-07)
+- [ ] 09-02-PLAN.md — SourceAddCommand and SourceListCommand with integration tests (SRC-01, SRC-02)
+- [ ] 09-03-PLAN.md — SourceShowCommand and SourceRemoveCommand with integration tests (SRC-03, SRC-04)
+- [ ] 09-04-PLAN.md — SourceCommand group wiring into ViracochaCommand, end-to-end smoke test (SRC-01, SRC-02, SRC-03, SRC-04)
 
 ### Phase 10: Destination & Mapping Commands
 **Goal**: Users can register destinations and attach mappings that reference sources, with glob filtering, recurse, and sync flags per mapping
@@ -116,7 +121,7 @@ Plans:
 | 6. Sync engine | v2.0 | 3/3 | Complete | 2026-04-04 |
 | 7. `vira sync` & docs | v2.0 | 3/3 | Complete | 2026-04-04 |
 | 8. Model & Config Foundation | v3.0 | 0/2 | Not started | - |
-| 9. Source Commands | v3.0 | 0/TBD | Not started | - |
+| 9. Source Commands | v3.0 | 0/4 | Not started | - |
 | 10. Destination & Mapping Commands | v3.0 | 0/TBD | Not started | - |
 | 11. Generate Rewrite | v3.0 | 0/TBD | Not started | - |
 | 12. Sync Rewrite | v3.0 | 0/TBD | Not started | - |
