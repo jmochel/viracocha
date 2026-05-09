@@ -8,7 +8,6 @@ import org.saltations.infra.FreemarkerVariableExtractor;
 import org.saltations.infra.XdgPaths;
 import org.saltations.model.SourceEntry;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
