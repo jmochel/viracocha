@@ -17,8 +17,8 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 
 - [ ] **SRC-01**: User can add a named local directory source with `--name`, `--path`, and optional `--templates` flag (`vira source add`)
 - [ ] **SRC-02**: User can list all registered sources in plain or JSON output (`vira source list [--json]`)
-- [ ] **SRC-03**: User can view a source's full details — name, path, templates flag, and extracted parameter names (`vira source show NAME`)
-- [ ] **SRC-04**: User can remove a source by name (`vira source remove NAME`)
+- [x] **SRC-03**: User can view a source's full details — name, path, templates flag, and extracted parameter names (`vira source show NAME`)
+- [x] **SRC-04**: User can remove a source by name (`vira source remove NAME`)
 - [x] **SRC-05**: Source add rejects duplicate source names with a clear error
 - [x] **SRC-06**: Source add rejects paths containing `..` directory traversal sequences
 - [x] **SRC-07**: Source add with `--templates` extracts Freemarker variable names from all template files in the source directory and persists them in config
@@ -94,8 +94,8 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 | CFG-03 | Phase 8 | Complete |
 | SRC-01 | Phase 9 | Pending |
 | SRC-02 | Phase 9 | Pending |
-| SRC-03 | Phase 9 | Pending |
-| SRC-04 | Phase 9 | Pending |
+| SRC-03 | Phase 9 | Complete |
+| SRC-04 | Phase 9 | Complete |
 | SRC-05 | Phase 9 | Complete |
 | SRC-06 | Phase 9 | Complete |
 | SRC-07 | Phase 9 | Complete |

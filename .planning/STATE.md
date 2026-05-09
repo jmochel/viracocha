@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
 status: executing
-stopped_at: Completed 09-01-PLAN.md
-last_updated: "2026-05-09T20:41:54.868Z"
+stopped_at: Completed 09-source-commands/09-03-PLAN.md
+last_updated: "2026-05-09T20:50:11.125Z"
 last_activity: 2026-05-09
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 5
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 09 (source-commands) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-05-09
 
@@ -48,6 +48,7 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 - [Phase 08]: Updated GenerateCommand and SyncCommand to v3 terminology so assertFalse checks on v2 command names pass
 - [Phase 09-01]: Raw-string traversal check (rawPath.contains('..')) before Path.of() to prevent normalization bypass when validating source paths
 - [Phase 09-01]: SourceService stores absolute normalized path in SourceEntry.path for consistent lookup regardless of original input format
+- [Phase 09-source-commands]: Positional NAME parameter for show/remove commands, D-06 double guard for Parameters block, D-07 Jackson ObjectMapper for JSON output
 
 ### Pending Todos
 
@@ -60,6 +61,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-09T20:41:54.866Z
-Stopped at: Completed 09-01-PLAN.md
+Last session: 2026-05-09T20:50:11.123Z
+Stopped at: Completed 09-source-commands/09-03-PLAN.md
 Resume file: None
