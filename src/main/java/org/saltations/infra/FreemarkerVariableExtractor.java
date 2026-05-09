@@ -1,5 +1,6 @@
 package org.saltations.infra;
 
+import jakarta.inject.Singleton;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
  * Skips hidden files and directories (names starting with ".").
  * Returns sorted, deduplicated list for stable YAML output.
  */
+@Singleton
 public class FreemarkerVariableExtractor {
 
     // D-04: matches ${identifier} capturing the top-level name before any . or ?
