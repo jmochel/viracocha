@@ -34,6 +34,8 @@ A developer registers sources and destinations once, then populates any workspac
 - ✓ CFG-02: ConfigService.load() version guard; ConfigVersionException for v2 config files — Phase 8
 - ✓ CFG-03: All v2 command packages (archetype, catalog, project, subscription) removed; ViracochaCommand registers only config/generate/sync — Phase 8
 
+- ✓ SRC-01–SRC-07: `SourceService` with full CRUD + path validation (anti-traversal, existence, duplicate); `vira source add/list/show/remove` commands registered under `SourceCommand` group; Freemarker variable extraction via `@Singleton FreemarkerVariableExtractor`; `--json` output on show/list; aligned column list; exact error messages — Phase 9
+
 ### Active (v3.0 — in progress)
 
 ## Current Milestone: v3.0 Unified Sources & Destinations
