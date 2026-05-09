@@ -32,7 +32,7 @@
 **Milestone Goal:** Replace the catalog/archetype/project/subscription model with a unified sources/destinations schema. Every v2 command package is removed. `vira generate` and `vira sync` are rewritten against the new model.
 
 - [ ] **Phase 8: Model & Config Foundation** - Delete v2 packages, introduce v3 POJOs, add version guard
-- [ ] **Phase 9: Source Commands** - `vira source` CRUD with Freemarker param extraction
+- [x] **Phase 9: Source Commands** - `vira source` CRUD with Freemarker param extraction (completed 2026-05-09)
 - [ ] **Phase 10: Destination & Mapping Commands** - `vira destination` CRUD plus mapping subcommands and GlobMatcher
 - [ ] **Phase 11: Generate Rewrite** - Full GeneratorService rewrite for v3 schema
 - [ ] **Phase 12: Sync Rewrite** - DefaultSyncService rewrite for source-to-destination, mapping-driven sync
@@ -68,7 +68,7 @@ Plans:
 - [x] 09-01-PLAN.md — @Singleton on FreemarkerVariableExtractor, SourceService with full CRUD and validation (SRC-05, SRC-06, SRC-07)
 - [x] 09-02-PLAN.md — SourceAddCommand and SourceListCommand with integration tests (SRC-01, SRC-02)
 - [x] 09-03-PLAN.md — SourceShowCommand and SourceRemoveCommand with integration tests (SRC-03, SRC-04)
-- [ ] 09-04-PLAN.md — SourceCommand group wiring into ViracochaCommand, end-to-end smoke test (SRC-01, SRC-02, SRC-03, SRC-04)
+- [x] 09-04-PLAN.md — SourceCommand group wiring into ViracochaCommand, end-to-end smoke test (SRC-01, SRC-02, SRC-03, SRC-04)
 
 ### Phase 10: Destination & Mapping Commands
 **Goal**: Users can register destinations and attach mappings that reference sources, with glob filtering, recurse, and sync flags per mapping
@@ -121,7 +121,7 @@ Plans:
 | 6. Sync engine | v2.0 | 3/3 | Complete | 2026-04-04 |
 | 7. `vira sync` & docs | v2.0 | 3/3 | Complete | 2026-04-04 |
 | 8. Model & Config Foundation | v3.0 | 0/2 | Not started | - |
-| 9. Source Commands | v3.0 | 3/4 | In Progress|  |
+| 9. Source Commands | v3.0 | 4/4 | Complete   | 2026-05-09 |
 | 10. Destination & Mapping Commands | v3.0 | 0/TBD | Not started | - |
 | 11. Generate Rewrite | v3.0 | 0/TBD | Not started | - |
 | 12. Sync Rewrite | v3.0 | 0/TBD | Not started | - |

@@ -15,8 +15,8 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 
 ### Source
 
-- [ ] **SRC-01**: User can add a named local directory source with `--name`, `--path`, and optional `--templates` flag (`vira source add`)
-- [ ] **SRC-02**: User can list all registered sources in plain or JSON output (`vira source list [--json]`)
+- [x] **SRC-01**: User can add a named local directory source with `--name`, `--path`, and optional `--templates` flag (`vira source add`)
+- [x] **SRC-02**: User can list all registered sources in plain or JSON output (`vira source list [--json]`)
 - [x] **SRC-03**: User can view a source's full details — name, path, templates flag, and extracted parameter names (`vira source show NAME`)
 - [x] **SRC-04**: User can remove a source by name (`vira source remove NAME`)
 - [x] **SRC-05**: Source add rejects duplicate source names with a clear error
@@ -92,8 +92,8 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 | CFG-01 | Phase 8 | Complete |
 | CFG-02 | Phase 8 | Complete |
 | CFG-03 | Phase 8 | Complete |
-| SRC-01 | Phase 9 | Pending |
-| SRC-02 | Phase 9 | Pending |
+| SRC-01 | Phase 9 | Complete |
+| SRC-02 | Phase 9 | Complete |
 | SRC-03 | Phase 9 | Complete |
 | SRC-04 | Phase 9 | Complete |
 | SRC-05 | Phase 9 | Complete |
