@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
-status: verifying
-stopped_at: Phase 9 context gathered
-last_updated: "2026-05-09T20:04:34.442Z"
+status: executing
+stopped_at: Completed 09-01-PLAN.md
+last_updated: "2026-05-09T20:41:54.868Z"
 last_activity: 2026-05-09
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  total_plans: 6
+  completed_plans: 3
   percent: 0
 ---
 
@@ -22,13 +22,13 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 **Core value:** A developer registers sources and destinations once, then populates any workspace with a single command — and regeneration is safe (skips existing files). Mappings with `sync: true` keep destination copies up to date on demand via `vira sync`.
 
-**Current focus:** Phase 08 — model-config-foundation
+**Current focus:** Phase 09 — source-commands
 
 ## Current Position
 
-Phase: 9
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: 09 (source-commands) — EXECUTING
+Plan: 2 of 4
+Status: Ready to execute
 Last activity: 2026-05-09
 
 Progress: [░░░░░░░░░░] 0% (v3.0 — 0/5 phases complete)
@@ -46,6 +46,8 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 - [Phase 08]: Deleted v2 command packages (archetype/catalog/project/subscription) in Plan 01 to achieve compile-clean state after v2 model class deletion
 - [Phase 08]: GeneratorService and DefaultSyncService stubbed with UnsupportedOperationException referencing rewrite phases (11 and 12)
 - [Phase 08]: Updated GenerateCommand and SyncCommand to v3 terminology so assertFalse checks on v2 command names pass
+- [Phase 09-01]: Raw-string traversal check (rawPath.contains('..')) before Path.of() to prevent normalization bypass when validating source paths
+- [Phase 09-01]: SourceService stores absolute normalized path in SourceEntry.path for consistent lookup regardless of original input format
 
 ### Pending Todos
 
@@ -58,6 +60,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-09T20:04:34.440Z
-Stopped at: Phase 9 context gathered
-Resume file: .planning/phases/09-source-commands/09-CONTEXT.md
+Last session: 2026-05-09T20:41:54.866Z
+Stopped at: Completed 09-01-PLAN.md
+Resume file: None

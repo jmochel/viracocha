@@ -19,9 +19,9 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 - [ ] **SRC-02**: User can list all registered sources in plain or JSON output (`vira source list [--json]`)
 - [ ] **SRC-03**: User can view a source's full details — name, path, templates flag, and extracted parameter names (`vira source show NAME`)
 - [ ] **SRC-04**: User can remove a source by name (`vira source remove NAME`)
-- [ ] **SRC-05**: Source add rejects duplicate source names with a clear error
-- [ ] **SRC-06**: Source add rejects paths containing `..` directory traversal sequences
-- [ ] **SRC-07**: Source add with `--templates` extracts Freemarker variable names from all template files in the source directory and persists them in config
+- [x] **SRC-05**: Source add rejects duplicate source names with a clear error
+- [x] **SRC-06**: Source add rejects paths containing `..` directory traversal sequences
+- [x] **SRC-07**: Source add with `--templates` extracts Freemarker variable names from all template files in the source directory and persists them in config
 
 ### Destination
 
@@ -96,9 +96,9 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 | SRC-02 | Phase 9 | Pending |
 | SRC-03 | Phase 9 | Pending |
 | SRC-04 | Phase 9 | Pending |
-| SRC-05 | Phase 9 | Pending |
-| SRC-06 | Phase 9 | Pending |
-| SRC-07 | Phase 9 | Pending |
+| SRC-05 | Phase 9 | Complete |
+| SRC-06 | Phase 9 | Complete |
+| SRC-07 | Phase 9 | Complete |
 | DEST-01 | Phase 10 | Pending |
 | DEST-02 | Phase 10 | Pending |
 | DEST-03 | Phase 10 | Pending |
