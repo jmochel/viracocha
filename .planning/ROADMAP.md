@@ -51,7 +51,7 @@
 **Plans**: 2 plans
 Plans:
 - [x] 08-01-PLAN.md — Infra relocation, v3 POJOs, ViracochaConfig replacement, test scaffolding (CFG-01)
-- [ ] 08-02-PLAN.md — Version guard (ConfigVersionException), v2 package deletion, ViracochaCommand cleanup (CFG-02, CFG-03)
+- [x] 08-02-PLAN.md — Version guard (ConfigVersionException), v2 package deletion, ViracochaCommand cleanup (CFG-02, CFG-03)
 
 ### Phase 9: Source Commands
 **Goal**: Users can register and manage named local directory sources, including automatic Freemarker variable extraction for template sources
