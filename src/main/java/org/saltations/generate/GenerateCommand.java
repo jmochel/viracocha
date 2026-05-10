@@ -9,6 +9,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.concurrent.Callable;
 
 /**
@@ -48,7 +49,8 @@ public class GenerateCommand implements Callable<Integer> {
             return 2;
         }
         try {
-            GenerationResult result = generatorService.generate(projectName, dryRun, verbose);
+            PrintWriter out = spec.commandLine().getOut();
+            GenerationResult result = generatorService.generate(projectName, dryRun, verbose, out, System.in);
             if (verbose) {
                 for (String line : result.verboseLines()) {
                     spec.commandLine().getOut().println(line);
