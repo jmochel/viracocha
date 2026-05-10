@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
 status: executing
-stopped_at: Completed 10-01-PLAN.md
-last_updated: "2026-05-10T14:18:33.869Z"
+stopped_at: Completed 10-02-PLAN.md
+last_updated: "2026-05-10T14:24:31.405Z"
 last_activity: 2026-05-10
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 9
-  completed_plans: 7
+  completed_plans: 8
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 10 (destination-mapping-commands) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-05-10
 
@@ -53,6 +53,8 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 - [Phase 10-01]: GlobMatcher prepends 'glob:' internally — callers pass clean patterns without prefix
 - [Phase 10-01]: Destination paths stored as-is with no normalization or existence check (D-04: destinations may not exist at registration time)
 - [Phase 10-01]: Raw-string traversal check before Path.of() in DestinationService mirrors SourceService DEST-06/D-01 pattern
+- [Phase 10-destination-mapping-commands]: Stub pattern for Plan 03 mapping commands: @Command+@Singleton+Callable<Integer> returning 0 allows DestinationCommand group to compile with all 7 subcommands declared
+- [Phase 10-destination-mapping-commands]: DestinationAddCommand omits --templates and Files.exists check (D-04: destinations may not exist at registration time; differs from SourceAddCommand intentionally)
 
 ### Pending Todos
 
@@ -65,6 +67,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-10T14:18:33.867Z
-Stopped at: Completed 10-01-PLAN.md
+Last session: 2026-05-10T14:24:31.403Z
+Stopped at: Completed 10-02-PLAN.md
 Resume file: None
