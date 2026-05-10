@@ -10,7 +10,11 @@ import org.saltations.model.MappingEntry;
 import org.saltations.model.SourceEntry;
 import org.saltations.model.ViracochaConfig;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,14 +41,7 @@ public class GeneratorService {
     }
 
     /**
-     * Generates destination workspace from registered sources via mappings.
-     *
-     * <ul>
-     *   <li>GEN-01: Files from all mapped sources are written to the destination path.</li>
-     *   <li>GEN-02: Re-running skips already-present files and counts them as skipped.</li>
-     *   <li>GEN-03: Template sources expand Freemarker variables in path segments and file content.</li>
-     *   <li>GEN-04: Binary (non-template) sources are byte-copied using Files.copy() without string read.</li>
-     * </ul>
+     * Convenience overload — delegates to the 5-arg method with System.out and System.in.
      *
      * @param destinationName name of the registered destination to generate
      * @param dryRun          when true, compute what would be generated but do not write files
@@ -54,6 +51,35 @@ public class GeneratorService {
      * @throws IOException              if config cannot be read or files cannot be written
      */
     public GenerationResult generate(String destinationName, boolean dryRun, boolean verbose) throws IOException {
+        return generate(destinationName, dryRun, verbose,
+            new PrintWriter(System.out, true), System.in);
+    }
+
+    /**
+     * Generates destination workspace from registered sources via mappings.
+     *
+     * <ul>
+     *   <li>GEN-01: Files from all mapped sources are written to the destination path.</li>
+     *   <li>GEN-02: Re-running skips already-present files and counts them as skipped.</li>
+     *   <li>GEN-03: Template sources expand Freemarker variables in path segments and file content.</li>
+     *   <li>GEN-04: Binary (non-template) sources are byte-copied using Files.copy() without string read.</li>
+     *   <li>D-05: Prompts user when destination directory does not exist (interactive mode only).</li>
+     *   <li>D-06: User confirms with y/Y — directory is created.</li>
+     *   <li>D-07: Any other response — returns empty result, exits 0, no directory created.</li>
+     *   <li>D-08: --dry-run skips prompt, prints "Would create: &lt;path&gt;".</li>
+     * </ul>
+     *
+     * @param destinationName name of the registered destination to generate
+     * @param dryRun          when true, compute what would be generated but do not write files
+     * @param verbose         when true, populate verboseLines in the result with per-file details
+     * @param out             PrintWriter for output (prompt text, verbose lines, summary)
+     * @param in              InputStream for reading user input (destination-creation prompt)
+     * @return GenerationResult with counts of generated, skipped, and failed files
+     * @throws IllegalArgumentException if destinationName is not found in config
+     * @throws IOException              if config cannot be read or files cannot be written
+     */
+    public GenerationResult generate(String destinationName, boolean dryRun, boolean verbose,
+                                     PrintWriter out, InputStream in) throws IOException {
         // STEP 1 — Load config
         ViracochaConfig config = configService.load();
 
@@ -72,10 +98,20 @@ public class GeneratorService {
         Path destRoot = Path.of(resolvedPath);
 
         // STEP 4 — Missing destination directory check (D-05 through D-09)
-        // Auto-create silently so service tests work without stdin interaction.
-        // Full interactive prompt is handled in Plan 02 (GenerateCommand integration).
         if (!Files.exists(destRoot)) {
-            if (!dryRun) {
+            if (dryRun) {
+                // D-08: In dry-run, report without prompting
+                out.println("Would create: " + destRoot);
+            } else {
+                // D-05: Prompt user
+                out.print("Destination " + destRoot + " does not exist. Create it? [y/N] ");
+                out.flush();  // CRITICAL: prevent buffering hang (Pitfall 5)
+                String answer = new BufferedReader(new InputStreamReader(in)).readLine();
+                if (answer == null || !answer.equalsIgnoreCase("y")) {
+                    // D-07: Any response other than y/Y → exit 0, no directory created
+                    return GenerationResult.empty();
+                }
+                // D-06: User confirmed — create directory
                 Files.createDirectories(destRoot);
             }
         }
