@@ -1,7 +1,6 @@
 package org.saltations.generate;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.saltations.config.ConfigService;
@@ -19,10 +18,13 @@ import java.nio.file.Path;
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Command-level integration tests for GenerateCommand — Wave 0 test scaffold.
+ * Command-level integration tests for GenerateCommand — Wave 2 (fully enabled).
  * Uses picocli test harness (CommandLine.execute) with captured stdout/stderr.
  * Plain JUnit 5, no @MicronautTest, same XdgPaths stub pattern as GeneratorServiceTest.
  * Covers GEN-05 through GEN-07.
+ *
+ * Note: CommandLine is rooted at GenerateCommand directly (not as a subcommand of ViracochaCommand),
+ * so execute() calls do NOT include "generate" as the first argument.
  */
 class GenerateCommandTest {
 
@@ -71,96 +73,96 @@ class GenerateCommandTest {
         int exitCode = commandLine.execute();
         assertEquals(2, exitCode, "Exit code should be 2 when --destination-name is missing");
         assertTrue(stderr.toString().contains("Missing required option: '--destination-name'"),
-            "Stderr should contain the missing option message");
+            "Stderr should contain the missing option message. Was: " + stderr.toString());
     }
 
     // --- GEN-05: routing by destination name ---
 
-    @Disabled("Wave 2: implement after Plan 01")
     @Test
     void generateCommandWithDestinationNameRoutes() throws Exception {
-        // Set up source and destination
+        // Set up source and destination (pre-create destDir so no interactive prompt)
         Path sourceDir = Files.createDirectory(tempDir.resolve("src-route"));
         Files.writeString(sourceDir.resolve("hello.txt"), "hello");
-        sourceService.addSource("route-src", sourceDir.toString(), false);
         Path destDir = Files.createDirectory(tempDir.resolve("dest-route"));
-        destinationService.addDestination("my-dest", destDir.toString());
-        destinationService.addMapping("my-dest", "route-src", null, false, false);
+        sourceService.addSource("route-src", sourceDir.toString(), false);
+        destinationService.addDestination("route-dest", destDir.toString());
+        destinationService.addMapping("route-dest", "route-src", null, false, false);
 
-        int exitCode = commandLine.execute("generate", "--destination-name", "my-dest");
+        // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
+        int exitCode = commandLine.execute("--destination-name", "route-dest");
 
         assertEquals(0, exitCode, "Exit code should be 0 on success");
-        assertTrue(stdout.toString().contains("Generated:"), "Stdout should contain 'Generated:' summary line");
+        assertTrue(stdout.toString().contains("Generated:"), "Stdout should contain 'Generated:' summary line. Was: " + stdout.toString());
+        assertTrue(Files.exists(destDir.resolve("hello.txt")), "hello.txt should be written to destination");
     }
 
     // --- GEN-06: dry-run mode ---
 
-    @Disabled("Wave 2: implement after Plan 01")
     @Test
     void generateCommandDryRunReportsActionsWithoutWriting() throws Exception {
-        // Set up source with one file
-        Path sourceDir = Files.createDirectory(tempDir.resolve("src-dryrun"));
-        Files.writeString(sourceDir.resolve("dryrun.txt"), "dry content");
-        sourceService.addSource("dryrun-src", sourceDir.toString(), false);
-        Path destDir = Files.createDirectory(tempDir.resolve("dest-dryrun"));
-        destinationService.addDestination("dryrun-dest", destDir.toString());
-        destinationService.addMapping("dryrun-dest", "dryrun-src", null, false, false);
+        // Set up source with one file (pre-create destDir so no interactive prompt)
+        Path sourceDir = Files.createDirectory(tempDir.resolve("src-dry"));
+        Files.writeString(sourceDir.resolve("dry.txt"), "dry content");
+        Path destDir = Files.createDirectory(tempDir.resolve("dest-dry"));
+        sourceService.addSource("dry-src", sourceDir.toString(), false);
+        destinationService.addDestination("dry-dest", destDir.toString());
+        destinationService.addMapping("dry-dest", "dry-src", null, false, false);
 
-        int exitCode = commandLine.execute("generate", "--destination-name", "dryrun-dest", "--dry-run");
+        // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
+        int exitCode = commandLine.execute("--destination-name", "dry-dest", "--dry-run");
 
         assertEquals(0, exitCode, "Exit code should be 0 on dry-run");
-        assertTrue(stdout.toString().contains("Would create"), "Stdout should report 'Would create' in dry-run mode");
-        assertFalse(Files.exists(destDir.resolve("dryrun.txt")), "File must NOT be written in dry-run mode");
+        assertTrue(stdout.toString().contains("Would create"), "Stdout should report 'Would create' in dry-run mode. Was: " + stdout.toString());
+        assertFalse(Files.exists(destDir.resolve("dry.txt")), "File must NOT be written in dry-run mode");
     }
 
     // --- GEN-07: verbose per-file lines ---
 
-    @Disabled("Wave 2: implement after Plan 01")
     @Test
     void generateCommandVerbosePrintsPerFileLines() throws Exception {
-        // Set up source with one file
+        // Set up source with one file (pre-create destDir so no interactive prompt)
         Path sourceDir = Files.createDirectory(tempDir.resolve("src-verbose"));
         Files.writeString(sourceDir.resolve("verbose.txt"), "verbose content");
-        sourceService.addSource("verbose-src", sourceDir.toString(), false);
         Path destDir = Files.createDirectory(tempDir.resolve("dest-verbose"));
+        sourceService.addSource("verbose-src", sourceDir.toString(), false);
         destinationService.addDestination("verbose-dest", destDir.toString());
         destinationService.addMapping("verbose-dest", "verbose-src", null, false, false);
 
-        int exitCode = commandLine.execute("generate", "--destination-name", "verbose-dest", "--verbose");
+        // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
+        int exitCode = commandLine.execute("--destination-name", "verbose-dest", "--verbose");
 
         assertEquals(0, exitCode, "Exit code should be 0 on verbose run");
-        assertTrue(stdout.toString().contains("Created "), "Stdout should contain 'Created ' per-file line in verbose mode");
+        assertTrue(stdout.toString().contains("Created "), "Stdout must contain 'Created '. Was: " + stdout.toString());
     }
 
     // --- GEN-05/D-15: summary line always printed ---
 
-    @Disabled("Wave 2: implement after Plan 01")
     @Test
     void generateCommandSummaryLineAlwaysPrinted() throws Exception {
         // Set up a registered destination with at least one mapping
         Path sourceDir = Files.createDirectory(tempDir.resolve("src-summary"));
-        Files.writeString(sourceDir.resolve("summary.txt"), "summary content");
-        sourceService.addSource("summary-src", sourceDir.toString(), false);
         Path destDir = Files.createDirectory(tempDir.resolve("dest-summary"));
+        sourceService.addSource("summary-src", sourceDir.toString(), false);
         destinationService.addDestination("summary-dest", destDir.toString());
         destinationService.addMapping("summary-dest", "summary-src", null, false, false);
 
-        commandLine.execute("generate", "--destination-name", "summary-dest");
+        // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
+        commandLine.execute("--destination-name", "summary-dest");
 
         String out = stdout.toString();
-        assertTrue(out.contains("Generated: "), "Stdout should contain 'Generated: ' in summary");
-        assertTrue(out.contains("Skipped: "), "Stdout should contain 'Skipped: ' in summary");
-        assertTrue(out.contains("Failed: "), "Stdout should contain 'Failed: ' in summary");
+        assertTrue(out.contains("Generated: "), "Stdout should contain 'Generated: '. Was: " + out);
+        assertTrue(out.contains("Skipped: "), "Stdout should contain 'Skipped: '. Was: " + out);
+        assertTrue(out.contains("Failed: "), "Stdout should contain 'Failed: '. Was: " + out);
     }
 
     // --- GEN-05: unknown destination exits 1 ---
 
-    @Disabled("Wave 2: implement after Plan 01")
     @Test
     void generateCommandUnknownDestinationExitsOne() {
-        int exitCode = commandLine.execute("generate", "--destination-name", "unknown-dest");
+        // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
+        int exitCode = commandLine.execute("--destination-name", "unknown-dest");
 
         assertEquals(1, exitCode, "Exit code should be 1 for unknown destination");
-        assertTrue(stderr.toString().contains("unknown-dest"), "Stderr should contain the unknown destination name");
+        assertTrue(stderr.toString().contains("unknown-dest"), "Stderr should contain the unknown destination name. Was: " + stderr.toString());
     }
 }

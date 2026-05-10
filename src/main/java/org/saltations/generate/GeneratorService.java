@@ -191,6 +191,8 @@ public class GeneratorService {
                 // Write or dry-run
                 if (dryRun) {
                     generated++;  // count as would-generate
+                    // Always report "Would create" in dry-run mode (GEN-06)
+                    out.println("Would create " + destPath);
                     if (verbose) verboseLines.add("Would create " + destPath);
                 } else {
                     try {
