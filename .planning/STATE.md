@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
-status: executing
-stopped_at: Completed 11-generate-rewrite-00-PLAN.md
-last_updated: "2026-05-10T19:59:19.796Z"
+status: verifying
+stopped_at: Completed 11-02-PLAN.md — Phase 11 generate-rewrite complete
+last_updated: "2026-05-10T20:07:19.184Z"
 last_activity: 2026-05-10
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 12
-  completed_plans: 11
+  completed_plans: 12
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 Phase: 11 (generate-rewrite) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-10
 
 Progress: [░░░░░░░░░░] 0% (v3.0 — 0/5 phases complete)
@@ -60,6 +60,8 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 - [Phase 11-generate-rewrite]: Auto-create destination directory silently in GeneratorService.generate() — interactive prompt deferred to Plan 02 GenerateCommand integration
 - [Phase 11-generate-rewrite]: Template test parameters set on DestinationEntry before addMapping() — parameters live on destination, not mapping
 - [Phase 11-generate-rewrite]: Wave 0 uses @Disabled stubs so test scaffold compiles/passes while GeneratorService throws UnsupportedOperationException
+- [Phase 11]: 5-arg generate() overload keeps 3-arg for backward compat; dry-run always prints Would-create lines without requiring --verbose
+- [Phase 11]: Picocli leaf-command tests: CommandLine rooted at command class, execute() args are options not subcommand names
 
 ### Pending Todos
 
@@ -72,6 +74,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-10T19:59:19.794Z
-Stopped at: Completed 11-generate-rewrite-00-PLAN.md
+Last session: 2026-05-10T20:07:19.182Z
+Stopped at: Completed 11-02-PLAN.md — Phase 11 generate-rewrite complete
 Resume file: None
