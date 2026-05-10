@@ -3,6 +3,7 @@ package org.saltations;
 import io.micronaut.configuration.picocli.PicocliRunner;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigCommand;
+import org.saltations.destination.DestinationCommand;
 import org.saltations.generate.GenerateCommand;
 import org.saltations.source.SourceCommand;
 import org.saltations.sync.SyncCommand;
@@ -24,6 +25,7 @@ import java.util.concurrent.Callable;
     subcommands = {
         ConfigCommand.class,
         SourceCommand.class,
+        DestinationCommand.class,
         GenerateCommand.class,
         SyncCommand.class
     }
