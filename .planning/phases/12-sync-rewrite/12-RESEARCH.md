@@ -136,8 +136,8 @@ src/main/java/org/saltations/sync/SyncSubscriptionResult.java  # DELETE
 
 ```
 src/test/java/org/saltations/sync/
-├── SyncServiceTest.java       # Wave 0 stub / Wave 2 full
-└── SyncCommandTest.java       # Wave 0 stub / Wave 3 full
+├── DefaultSyncServiceTest.java  # Wave 0 stub / Wave 2 full
+└── SyncCommandTest.java         # Wave 0 stub / Wave 3 full
 ```
 
 ### Pattern 1: Timestamp-Based Change Detection
@@ -489,36 +489,37 @@ Step 2.6: SKIPPED — Phase 12 is a pure Java source code change with no externa
 |----------|-------|
 | Framework | JUnit 5 (Jupiter) 5.x |
 | Config file | `pom.xml` — surefire plugin configured |
-| Quick run command | `./mvnw test -pl . -Dtest="SyncServiceTest,SyncCommandTest" -q` |
+| Quick run command | `./mvnw test -pl . -Dtest="DefaultSyncServiceTest,SyncCommandTest" -q` |
 | Full suite command | `./mvnw test -q` |
 
 ### Phase Requirements → Test Map
 
 | Req ID | Behavior | Test Type | Automated Command | File Exists? |
 |--------|----------|-----------|-------------------|-------------|
-| SYN-01 | Copies changed source files (newer mtime, different content) to destination for `sync: true` mappings | unit | `./mvnw test -Dtest="SyncServiceTest#syncCopiesChangedFilesToDestination" -q` | Wave 0 |
-| SYN-01 | Skips files where content is identical despite mtime diff (D-03) | unit | `./mvnw test -Dtest="SyncServiceTest#syncSkipsContentIdenticalFiles" -q` | Wave 0 |
-| SYN-01 | Skips mappings with `sync: false` | unit | `./mvnw test -Dtest="SyncServiceTest#syncIgnoresNonSyncMappings" -q` | Wave 0 |
-| SYN-01 | Skips template sources silently (D-04) | unit | `./mvnw test -Dtest="SyncServiceTest#syncSkipsTemplateSources" -q` | Wave 0 |
-| SYN-02 | Detects conflict (dest newer, content differs) → conflicts count increments, exit 1 | unit | `./mvnw test -Dtest="SyncServiceTest#syncDetectsConflictWhenDestNewer"` | Wave 0 |
-| SYN-02 | No conflict when dest newer but content identical | unit | `./mvnw test -Dtest="SyncServiceTest#syncNoConflictWhenContentIdentical" -q` | Wave 0 |
-| SYN-03 | `--destination-name` required; missing → exit 2 | unit | `./mvnw test -Dtest="SyncCommandTest#syncCommandRequiresDestinationName" -q` | Wave 0 |
-| SYN-03 | `--destination-name` routes to correct destination | unit | `./mvnw test -Dtest="SyncCommandTest#syncCommandWithDestinationNameRoutes" -q` | Wave 0 |
-| SYN-04 | `--dry-run` reports what would be copied without writing | unit | `./mvnw test -Dtest="SyncCommandTest#syncCommandDryRunReportsWithoutWriting" -q` | Wave 0 |
-| SYN-05 | `--verbose` prints per-file Copied/Skipped/Conflict lines | unit | `./mvnw test -Dtest="SyncCommandTest#syncCommandVerbosePrintsPerFileLines" -q` | Wave 0 |
-| SYN-06 | `--json` outputs machine-readable SyncResult JSON | unit | `./mvnw test -Dtest="SyncCommandTest#syncCommandJsonOutputsMachineReadable" -q` | Wave 0 |
-| SYN-07 | Summary line always printed: `"Copied: N, Skipped: N, Failed: N, Conflicts: N"` | unit | `./mvnw test -Dtest="SyncCommandTest#syncCommandSummaryLineAlwaysPrinted" -q` | Wave 0 |
+| SYN-01 | Copies changed source files (newer mtime, different content) to destination for `sync: true` mappings | unit | `./mvnw test -Dtest="DefaultSyncServiceTest#syncCopiesChangedFilesToDestination" -q` | Wave 0 |
+| SYN-01 | Skips files where content is identical despite mtime diff (D-03) | unit | `./mvnw test -Dtest="DefaultSyncServiceTest#syncSkipsContentIdenticalFiles" -q` | Wave 0 |
+| SYN-01 | Skips mappings with `sync: false` | unit | `./mvnw test -Dtest="DefaultSyncServiceTest#syncIgnoresNonSyncMappings" -q` | Wave 0 |
+| SYN-01 | Skips template sources silently (D-04) | unit | `./mvnw test -Dtest="DefaultSyncServiceTest#syncSkipsTemplateSources" -q` | Wave 0 |
+| SYN-02 | Detects conflict (dest newer, content differs) → conflicts count increments | unit | `./mvnw test -Dtest="DefaultSyncServiceTest#syncDetectsConflictWhenDestNewer"` | Wave 0 |
+| SYN-02 | No conflict when dest newer but content identical | unit | `./mvnw test -Dtest="DefaultSyncServiceTest#syncNoConflictWhenContentIdentical" -q` | Wave 0 |
+| SYN-02 | Conflict causes exit code 1 at command level (D-12) | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandReturnsExitOneOnConflict" -q` | Wave 0 |
+| SYN-03 | `--destination-name` required; missing → exit 2 | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandRequiresDestinationName" -q` | Wave 0 |
+| SYN-03 | `--destination-name` routes to correct destination | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandWithDestinationNameRoutes" -q` | Wave 0 |
+| SYN-04 | `--dry-run` reports what would be copied without writing | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandDryRunReportsWithoutWriting" -q` | Wave 0 |
+| SYN-05 | `--verbose` prints per-file Copied/Skipped/Conflict lines | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandVerbosePrintsPerFileLines" -q` | Wave 0 |
+| SYN-06 | `--json` outputs machine-readable SyncResult JSON | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandJsonOutputsMachineReadable" -q` | Wave 0 |
+| SYN-07 | Summary line always printed: `"Copied: N, Skipped: N, Failed: N, Conflicts: N"` | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandSummaryLineAlwaysPrinted" -q` | Wave 0 |
 
 ### Sampling Rate
 
-- **Per task commit:** `./mvnw test -Dtest="SyncServiceTest,SyncCommandTest" -q`
+- **Per task commit:** `./mvnw test -Dtest="DefaultSyncServiceTest,SyncCommandTest" -q`
 - **Per wave merge:** `./mvnw test -q` (full 148+ test suite)
 - **Phase gate:** Full suite green before `/gsd:verify-work`
 
 ### Wave 0 Gaps
 
-- [ ] `src/test/java/org/saltations/sync/SyncServiceTest.java` — covers SYN-01, SYN-02
-- [ ] `src/test/java/org/saltations/sync/SyncCommandTest.java` — covers SYN-03, SYN-04, SYN-05, SYN-06, SYN-07
+- [ ] `src/test/java/org/saltations/sync/DefaultSyncServiceTest.java` — covers SYN-01, SYN-02
+- [ ] `src/test/java/org/saltations/sync/SyncCommandTest.java` — covers SYN-02 exit code, SYN-03, SYN-04, SYN-05, SYN-06, SYN-07
 
 *(No framework install needed — JUnit 5 already configured in pom.xml)*
 
@@ -533,7 +534,7 @@ The following directives from `CLAUDE.md` apply to Phase 12 planning and impleme
 | **Regeneration must never overwrite existing workspace files (skip-existing)** | Does NOT apply to sync. Sync uses `REPLACE_EXISTING` semantics by design. The constraint is for `generate` only. |
 | **Scope: Local filesystem only, no network, no Git** | Sync is local filesystem only — compliant |
 | **Use GSD workflow before file edits** | Planning artifacts must be complete before implementation begins |
-| **Naming patterns**: PascalCase classes, `Test` suffix for tests, `testXxx` method prefix | `SyncServiceTest.java`, `SyncCommandTest.java`; methods like `syncCopiesChangedFiles()` |
+| **Naming patterns**: PascalCase classes, `Test` suffix for tests, `testXxx` method prefix | `DefaultSyncServiceTest.java`, `SyncCommandTest.java`; methods like `syncCopiesChangedFiles()` |
 | **Constructor injection with `@Inject`** | `DefaultSyncService(@Inject ConfigService)` — established pattern |
 | **`@Singleton` on service and command classes** | `DefaultSyncService` and `SyncCommand` both `@Singleton` |
 | **`Callable<Integer>`** for commands, exit codes 0/1/2 | `SyncCommand implements Callable<Integer>`; D-12 exit codes |

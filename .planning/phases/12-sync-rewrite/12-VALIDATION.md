@@ -38,13 +38,14 @@ created: 2026-05-10
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 12-01-01 | 01 | 1 | SYN-01 | unit | `./mvnw test -Dtest="DefaultSyncServiceTest" -q` | ❌ W0 | ⬜ pending |
-| 12-01-02 | 01 | 1 | SYN-02 | unit | `./mvnw test -Dtest="DefaultSyncServiceTest" -q` | ❌ W0 | ⬜ pending |
-| 12-02-01 | 02 | 2 | SYN-03 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
-| 12-02-02 | 02 | 2 | SYN-04 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
-| 12-02-03 | 02 | 2 | SYN-05 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
-| 12-02-04 | 02 | 2 | SYN-06 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
-| 12-02-05 | 02 | 2 | SYN-07 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
+| 12-02-01 | 02 | 2 | SYN-01 | unit | `./mvnw test -Dtest="DefaultSyncServiceTest" -q` | ❌ W0 | ⬜ pending |
+| 12-02-02 | 02 | 2 | SYN-02 | unit | `./mvnw test -Dtest="DefaultSyncServiceTest" -q` | ❌ W0 | ⬜ pending |
+| 12-03-01 | 03 | 3 | SYN-02 | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandReturnsExitOneOnConflict" -q` | ❌ W0 | ⬜ pending |
+| 12-03-02 | 03 | 3 | SYN-03 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
+| 12-03-03 | 03 | 3 | SYN-04 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
+| 12-03-04 | 03 | 3 | SYN-05 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
+| 12-03-05 | 03 | 3 | SYN-06 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
+| 12-03-06 | 03 | 3 | SYN-07 | integration | `./mvnw test -Dtest="SyncCommandTest" -q` | ❌ W0 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -53,7 +54,7 @@ created: 2026-05-10
 ## Wave 0 Requirements
 
 - [ ] `src/test/java/org/saltations/sync/DefaultSyncServiceTest.java` — stubs for SYN-01, SYN-02
-- [ ] `src/test/java/org/saltations/sync/SyncCommandTest.java` — stubs for SYN-03 through SYN-07
+- [ ] `src/test/java/org/saltations/sync/SyncCommandTest.java` — stubs for SYN-02 exit code and SYN-03 through SYN-07
 
 *Existing test infrastructure (JUnit 5 + Micronaut Test + @TempDir) covers all framework needs.*
 
