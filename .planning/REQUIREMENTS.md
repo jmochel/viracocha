@@ -46,9 +46,9 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 - [x] **GEN-02**: `vira generate` skips destination files that already exist (skip-existing semantics preserved from v2)
 - [x] **GEN-03**: `vira generate` expands Freemarker templates in both path segments and file content for sources with `templates: true`
 - [x] **GEN-04**: `vira generate` uses binary byte copy (not string read) for sources with `templates: false`, preserving non-text files
-- [ ] **GEN-05**: `vira generate` accepts `--destination-name` to target a single destination
-- [ ] **GEN-06**: `vira generate` supports `--dry-run` (reports actions without writing files)
-- [ ] **GEN-07**: `vira generate` supports `--verbose` (prints per-file action lines)
+- [x] **GEN-05**: `vira generate` accepts `--destination-name` to target a single destination
+- [x] **GEN-06**: `vira generate` supports `--dry-run` (reports actions without writing files)
+- [x] **GEN-07**: `vira generate` supports `--verbose` (prints per-file action lines)
 
 ### Sync
 
@@ -114,9 +114,9 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 | GEN-02 | Phase 11 | Complete |
 | GEN-03 | Phase 11 | Complete |
 | GEN-04 | Phase 11 | Complete |
-| GEN-05 | Phase 11 | Pending |
-| GEN-06 | Phase 11 | Pending |
-| GEN-07 | Phase 11 | Pending |
+| GEN-05 | Phase 11 | Complete |
+| GEN-06 | Phase 11 | Complete |
+| GEN-07 | Phase 11 | Complete |
 | SYN-01 | Phase 12 | Pending |
 | SYN-02 | Phase 12 | Pending |
 | SYN-03 | Phase 12 | Pending |

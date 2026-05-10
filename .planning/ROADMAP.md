@@ -100,7 +100,7 @@ Plans:
   6. `vira generate --dry-run` reports all planned actions without writing any files
 **Plans**: 3 plans
 Plans:
-- [ ] 11-00-PLAN.md — Test scaffolding: GeneratorServiceTest and GenerateCommandTest stubs + binary fixture (GEN-01..GEN-07)
+- [x] 11-00-PLAN.md — Test scaffolding: GeneratorServiceTest and GenerateCommandTest stubs + binary fixture (GEN-01..GEN-07)
 - [x] 11-01-PLAN.md — GeneratorService.generate() v3 traversal implementation (GEN-01, GEN-02, GEN-03, GEN-04)
 - [ ] 11-02-PLAN.md — GenerateCommand interactive prompt, dry-run, verbose wiring (GEN-05, GEN-06, GEN-07)
 
@@ -130,5 +130,5 @@ Plans:
 | 8. Model & Config Foundation | v3.0 | 0/2 | Not started | - |
 | 9. Source Commands | v3.0 | 4/4 | Complete   | 2026-05-09 |
 | 10. Destination & Mapping Commands | v3.0 | 3/3 | Complete    | 2026-05-10 |
-| 11. Generate Rewrite | v3.0 | 1/3 | In Progress|  |
+| 11. Generate Rewrite | v3.0 | 2/3 | In Progress|  |
 | 12. Sync Rewrite | v3.0 | 0/TBD | Not started | - |

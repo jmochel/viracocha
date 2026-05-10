@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
 status: executing
-stopped_at: Completed 11-generate-rewrite/11-01-PLAN.md
-last_updated: "2026-05-10T19:58:37.590Z"
+stopped_at: Completed 11-generate-rewrite-00-PLAN.md
+last_updated: "2026-05-10T19:59:19.796Z"
 last_activity: 2026-05-10
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 12
-  completed_plans: 10
+  completed_plans: 11
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 11 (generate-rewrite) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 Status: Ready to execute
 Last activity: 2026-05-10
 
@@ -59,6 +59,7 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 - [Phase 10-destination-mapping-commands]: null glob stored as null and displayed as '(all files)' in list-mappings — no sentinel string in config YAML
 - [Phase 11-generate-rewrite]: Auto-create destination directory silently in GeneratorService.generate() — interactive prompt deferred to Plan 02 GenerateCommand integration
 - [Phase 11-generate-rewrite]: Template test parameters set on DestinationEntry before addMapping() — parameters live on destination, not mapping
+- [Phase 11-generate-rewrite]: Wave 0 uses @Disabled stubs so test scaffold compiles/passes while GeneratorService throws UnsupportedOperationException
 
 ### Pending Todos
 
@@ -71,6 +72,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-10T19:58:37.588Z
-Stopped at: Completed 11-generate-rewrite/11-01-PLAN.md
+Last session: 2026-05-10T19:59:19.794Z
+Stopped at: Completed 11-generate-rewrite-00-PLAN.md
 Resume file: None
