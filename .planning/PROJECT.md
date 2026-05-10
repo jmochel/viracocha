@@ -36,6 +36,8 @@ A developer registers sources and destinations once, then populates any workspac
 
 - ✓ SRC-01–SRC-07: `SourceService` with full CRUD + path validation (anti-traversal, existence, duplicate); `vira source add/list/show/remove` commands registered under `SourceCommand` group; Freemarker variable extraction via `@Singleton FreemarkerVariableExtractor`; `--json` output on show/list; aligned column list; exact error messages — Phase 9
 
+- ✓ DEST-01–DEST-06, MAP-01–MAP-05: `DestinationService` with full CRUD + mapping ops (no path-existence check on add; paths stored as-is); `vira destination add/list/show/remove/add-mapping/list-mappings/remove-mapping` registered under `DestinationCommand` group (alias `dest`); `GlobMatcher` in `infra/` wrapping JDK `PathMatcher`; `+` treated as literal in glob patterns; aligned column list; `--json` JSONL output; exact error messages; 60 new tests (136 total) — Phase 10
+
 ### Active (v3.0 — in progress)
 
 ## Current Milestone: v3.0 Unified Sources & Destinations
@@ -112,4 +114,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-09 — Phase 8 complete; v3 model foundation in place; v2 command packages removed*
+*Last updated: 2026-05-10 — Phase 10 complete; destination & mapping commands fully implemented; 136 tests green*
