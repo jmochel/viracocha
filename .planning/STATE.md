@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
-status: executing
-stopped_at: Completed 10-02-PLAN.md
-last_updated: "2026-05-10T14:24:31.405Z"
+status: verifying
+stopped_at: Completed 10-03-PLAN.md
+last_updated: "2026-05-10T14:30:05.501Z"
 last_activity: 2026-05-10
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 8
+  completed_plans: 9
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 Phase: 10 (destination-mapping-commands) — EXECUTING
 Plan: 3 of 3
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-10
 
 Progress: [░░░░░░░░░░] 0% (v3.0 — 0/5 phases complete)
@@ -55,6 +55,8 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 - [Phase 10-01]: Raw-string traversal check before Path.of() in DestinationService mirrors SourceService DEST-06/D-01 pattern
 - [Phase 10-destination-mapping-commands]: Stub pattern for Plan 03 mapping commands: @Command+@Singleton+Callable<Integer> returning 0 allows DestinationCommand group to compile with all 7 subcommands declared
 - [Phase 10-destination-mapping-commands]: DestinationAddCommand omits --templates and Files.exists check (D-04: destinations may not exist at registration time; differs from SourceAddCommand intentionally)
+- [Phase 10-destination-mapping-commands]: Two explicit @Parameters(index=0/1) for remove-mapping NAME INDEX — avoids picocli undefined binding order for multiple positional params
+- [Phase 10-destination-mapping-commands]: null glob stored as null and displayed as '(all files)' in list-mappings — no sentinel string in config YAML
 
 ### Pending Todos
 
@@ -67,6 +69,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-10T14:24:31.403Z
-Stopped at: Completed 10-02-PLAN.md
+Last session: 2026-05-10T14:30:05.498Z
+Stopped at: Completed 10-03-PLAN.md
 Resume file: None

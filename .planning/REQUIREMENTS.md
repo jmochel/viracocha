@@ -34,10 +34,10 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 
 ### Mapping
 
-- [ ] **MAP-01**: User can add a mapping to a destination specifying a source name, optional glob pattern, recurse flag, and sync flag (`vira destination add-mapping`)
-- [ ] **MAP-02**: User can list all mappings for a destination (`vira destination list-mappings NAME`)
-- [ ] **MAP-03**: User can remove a mapping from a destination by index (`vira destination remove-mapping NAME INDEX`)
-- [ ] **MAP-04**: Mapping add validates that the referenced source name exists in the config and rejects unknown source references
+- [x] **MAP-01**: User can add a mapping to a destination specifying a source name, optional glob pattern, recurse flag, and sync flag (`vira destination add-mapping`)
+- [x] **MAP-02**: User can list all mappings for a destination (`vira destination list-mappings NAME`)
+- [x] **MAP-03**: User can remove a mapping from a destination by index (`vira destination remove-mapping NAME INDEX`)
+- [x] **MAP-04**: Mapping add validates that the referenced source name exists in the config and rejects unknown source references
 - [x] **MAP-05**: `GlobMatcher` utility wraps JDK `FileSystem.getPathMatcher` with `glob:` / `regex:` prefix support; unit tests verify `+` is treated as a literal character (not a quantifier) in glob patterns
 
 ### Generate
@@ -105,10 +105,10 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 | DEST-04 | Phase 10 | Complete |
 | DEST-05 | Phase 10 | Complete |
 | DEST-06 | Phase 10 | Complete |
-| MAP-01 | Phase 10 | Pending |
-| MAP-02 | Phase 10 | Pending |
-| MAP-03 | Phase 10 | Pending |
-| MAP-04 | Phase 10 | Pending |
+| MAP-01 | Phase 10 | Complete |
+| MAP-02 | Phase 10 | Complete |
+| MAP-03 | Phase 10 | Complete |
+| MAP-04 | Phase 10 | Complete |
 | MAP-05 | Phase 10 | Complete |
 | GEN-01 | Phase 11 | Pending |
 | GEN-02 | Phase 11 | Pending |

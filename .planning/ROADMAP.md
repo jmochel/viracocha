@@ -33,7 +33,7 @@
 
 - [ ] **Phase 8: Model & Config Foundation** - Delete v2 packages, introduce v3 POJOs, add version guard
 - [x] **Phase 9: Source Commands** - `vira source` CRUD with Freemarker param extraction (completed 2026-05-09)
-- [ ] **Phase 10: Destination & Mapping Commands** - `vira destination` CRUD plus mapping subcommands and GlobMatcher
+- [x] **Phase 10: Destination & Mapping Commands** - `vira destination` CRUD plus mapping subcommands and GlobMatcher (completed 2026-05-10)
 - [ ] **Phase 11: Generate Rewrite** - Full GeneratorService rewrite for v3 schema
 - [ ] **Phase 12: Sync Rewrite** - DefaultSyncService rewrite for source-to-destination, mapping-driven sync
 
@@ -85,7 +85,7 @@ Plans:
 Plans:
 - [x] 10-01-PLAN.md — GlobMatcher infra utility and DestinationService with full CRUD and mapping operations (MAP-05, DEST-01, DEST-05, DEST-06)
 - [x] 10-02-PLAN.md — Destination CRUD commands (Add, List, Show, Remove) with DestinationCommand group (DEST-01, DEST-02, DEST-03, DEST-04, DEST-05, DEST-06)
-- [ ] 10-03-PLAN.md — Mapping commands (AddMapping, ListMappings, RemoveMapping), ViracochaCommand wiring (MAP-01, MAP-02, MAP-03, MAP-04, MAP-05)
+- [x] 10-03-PLAN.md — Mapping commands (AddMapping, ListMappings, RemoveMapping), ViracochaCommand wiring (MAP-01, MAP-02, MAP-03, MAP-04, MAP-05)
 
 ### Phase 11: Generate Rewrite
 **Goal**: `vira generate` traverses the v3 destinations/mappings/sources structure, applies glob and recurse filters, expands Freemarker templates in paths and content, and skips existing destination files
@@ -125,6 +125,6 @@ Plans:
 | 7. `vira sync` & docs | v2.0 | 3/3 | Complete | 2026-04-04 |
 | 8. Model & Config Foundation | v3.0 | 0/2 | Not started | - |
 | 9. Source Commands | v3.0 | 4/4 | Complete   | 2026-05-09 |
-| 10. Destination & Mapping Commands | v3.0 | 2/3 | In Progress|  |
+| 10. Destination & Mapping Commands | v3.0 | 3/3 | Complete   | 2026-05-10 |
 | 11. Generate Rewrite | v3.0 | 0/TBD | Not started | - |
 | 12. Sync Rewrite | v3.0 | 0/TBD | Not started | - |
