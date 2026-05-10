@@ -42,10 +42,10 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 
 ### Generate
 
-- [ ] **GEN-01**: `vira generate` traverses destinations → mappings → sources, applies glob/recurse filtering, and writes files to the destination path
-- [ ] **GEN-02**: `vira generate` skips destination files that already exist (skip-existing semantics preserved from v2)
-- [ ] **GEN-03**: `vira generate` expands Freemarker templates in both path segments and file content for sources with `templates: true`
-- [ ] **GEN-04**: `vira generate` uses binary byte copy (not string read) for sources with `templates: false`, preserving non-text files
+- [x] **GEN-01**: `vira generate` traverses destinations → mappings → sources, applies glob/recurse filtering, and writes files to the destination path
+- [x] **GEN-02**: `vira generate` skips destination files that already exist (skip-existing semantics preserved from v2)
+- [x] **GEN-03**: `vira generate` expands Freemarker templates in both path segments and file content for sources with `templates: true`
+- [x] **GEN-04**: `vira generate` uses binary byte copy (not string read) for sources with `templates: false`, preserving non-text files
 - [ ] **GEN-05**: `vira generate` accepts `--destination-name` to target a single destination
 - [ ] **GEN-06**: `vira generate` supports `--dry-run` (reports actions without writing files)
 - [ ] **GEN-07**: `vira generate` supports `--verbose` (prints per-file action lines)
@@ -110,10 +110,10 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 | MAP-03 | Phase 10 | Complete |
 | MAP-04 | Phase 10 | Complete |
 | MAP-05 | Phase 10 | Complete |
-| GEN-01 | Phase 11 | Pending |
-| GEN-02 | Phase 11 | Pending |
-| GEN-03 | Phase 11 | Pending |
-| GEN-04 | Phase 11 | Pending |
+| GEN-01 | Phase 11 | Complete |
+| GEN-02 | Phase 11 | Complete |
+| GEN-03 | Phase 11 | Complete |
+| GEN-04 | Phase 11 | Complete |
 | GEN-05 | Phase 11 | Pending |
 | GEN-06 | Phase 11 | Pending |
 | GEN-07 | Phase 11 | Pending |
