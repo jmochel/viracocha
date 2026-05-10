@@ -38,6 +38,8 @@ A developer registers sources and destinations once, then populates any workspac
 
 - ✓ DEST-01–DEST-06, MAP-01–MAP-05: `DestinationService` with full CRUD + mapping ops (no path-existence check on add; paths stored as-is); `vira destination add/list/show/remove/add-mapping/list-mappings/remove-mapping` registered under `DestinationCommand` group (alias `dest`); `GlobMatcher` in `infra/` wrapping JDK `PathMatcher`; `+` treated as literal in glob patterns; aligned column list; `--json` JSONL output; exact error messages; 60 new tests (136 total) — Phase 10
 
+- ✓ GEN-01–GEN-07: `GeneratorService.generate()` full v3 traversal (destinations→mappings→sources; glob+recurse filters; Freemarker expansion in paths and content; binary file copy without corruption; skip-existing); `vira generate --destination-name` routing; `--dry-run`, `--verbose`, interactive destination-creation prompt; `GenerateCommand` wired with testable output writer + stdin; 14 tests across `GeneratorServiceTest` and `GenerateCommandTest` — Phase 11
+
 ### Active (v3.0 — in progress)
 
 ## Current Milestone: v3.0 Unified Sources & Destinations
@@ -114,4 +116,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-10 — Phase 10 complete; destination & mapping commands fully implemented; 136 tests green*
+*Last updated: 2026-05-10 — Phase 11 complete; `vira generate` fully rewired for v3 schema; 148 tests green*
