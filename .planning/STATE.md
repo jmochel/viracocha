@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
 status: executing
-stopped_at: Phase 10 context gathered
-last_updated: "2026-05-09T21:41:32.485Z"
-last_activity: 2026-05-09
+stopped_at: Completed 10-01-PLAN.md
+last_updated: "2026-05-10T14:18:33.869Z"
+last_activity: 2026-05-10
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 6
-  completed_plans: 6
+  total_plans: 9
+  completed_plans: 7
   percent: 0
 ---
 
@@ -22,14 +22,14 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 **Core value:** A developer registers sources and destinations once, then populates any workspace with a single command — and regeneration is safe (skips existing files). Mappings with `sync: true` keep destination copies up to date on demand via `vira sync`.
 
-**Current focus:** Phase 09 — source-commands
+**Current focus:** Phase 10 — destination-mapping-commands
 
 ## Current Position
 
-Phase: 10
-Plan: Not started
+Phase: 10 (destination-mapping-commands) — EXECUTING
+Plan: 2 of 3
 Status: Ready to execute
-Last activity: 2026-05-09
+Last activity: 2026-05-10
 
 Progress: [░░░░░░░░░░] 0% (v3.0 — 0/5 phases complete)
 
@@ -50,6 +50,9 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 - [Phase 09-01]: SourceService stores absolute normalized path in SourceEntry.path for consistent lookup regardless of original input format
 - [Phase 09-source-commands]: Positional NAME parameter for show/remove commands, D-06 double guard for Parameters block, D-07 Jackson ObjectMapper for JSON output
 - [Phase 09-source-commands]: SourceCommand alias 'src' per D-10 locked decision; call() returns 0 with picocli auto-help
+- [Phase 10-01]: GlobMatcher prepends 'glob:' internally — callers pass clean patterns without prefix
+- [Phase 10-01]: Destination paths stored as-is with no normalization or existence check (D-04: destinations may not exist at registration time)
+- [Phase 10-01]: Raw-string traversal check before Path.of() in DestinationService mirrors SourceService DEST-06/D-01 pattern
 
 ### Pending Todos
 
@@ -62,6 +65,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-09T21:41:32.483Z
-Stopped at: Phase 10 context gathered
-Resume file: .planning/phases/10-destination-mapping-commands/10-CONTEXT.md
+Last session: 2026-05-10T14:18:33.867Z
+Stopped at: Completed 10-01-PLAN.md
+Resume file: None

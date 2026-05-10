@@ -25,12 +25,12 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 
 ### Destination
 
-- [ ] **DEST-01**: User can add a named destination workspace path with `--name` and `--path` (`vira destination add`)
+- [x] **DEST-01**: User can add a named destination workspace path with `--name` and `--path` (`vira destination add`)
 - [ ] **DEST-02**: User can list all registered destinations in plain or JSON output (`vira destination list [--json]`)
 - [ ] **DEST-03**: User can view a destination's full details — name, path, parameters, and all mappings (`vira destination show NAME`)
 - [ ] **DEST-04**: User can remove a destination by name (`vira destination remove NAME`)
-- [ ] **DEST-05**: Destination add rejects duplicate destination names with a clear error
-- [ ] **DEST-06**: Destination add rejects paths containing `..` directory traversal sequences
+- [x] **DEST-05**: Destination add rejects duplicate destination names with a clear error
+- [x] **DEST-06**: Destination add rejects paths containing `..` directory traversal sequences
 
 ### Mapping
 
@@ -38,7 +38,7 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 - [ ] **MAP-02**: User can list all mappings for a destination (`vira destination list-mappings NAME`)
 - [ ] **MAP-03**: User can remove a mapping from a destination by index (`vira destination remove-mapping NAME INDEX`)
 - [ ] **MAP-04**: Mapping add validates that the referenced source name exists in the config and rejects unknown source references
-- [ ] **MAP-05**: `GlobMatcher` utility wraps JDK `FileSystem.getPathMatcher` with `glob:` / `regex:` prefix support; unit tests verify `+` is treated as a literal character (not a quantifier) in glob patterns
+- [x] **MAP-05**: `GlobMatcher` utility wraps JDK `FileSystem.getPathMatcher` with `glob:` / `regex:` prefix support; unit tests verify `+` is treated as a literal character (not a quantifier) in glob patterns
 
 ### Generate
 
@@ -99,17 +99,17 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 | SRC-05 | Phase 9 | Complete |
 | SRC-06 | Phase 9 | Complete |
 | SRC-07 | Phase 9 | Complete |
-| DEST-01 | Phase 10 | Pending |
+| DEST-01 | Phase 10 | Complete |
 | DEST-02 | Phase 10 | Pending |
 | DEST-03 | Phase 10 | Pending |
 | DEST-04 | Phase 10 | Pending |
-| DEST-05 | Phase 10 | Pending |
-| DEST-06 | Phase 10 | Pending |
+| DEST-05 | Phase 10 | Complete |
+| DEST-06 | Phase 10 | Complete |
 | MAP-01 | Phase 10 | Pending |
 | MAP-02 | Phase 10 | Pending |
 | MAP-03 | Phase 10 | Pending |
 | MAP-04 | Phase 10 | Pending |
-| MAP-05 | Phase 10 | Pending |
+| MAP-05 | Phase 10 | Complete |
 | GEN-01 | Phase 11 | Pending |
 | GEN-02 | Phase 11 | Pending |
 | GEN-03 | Phase 11 | Pending |
