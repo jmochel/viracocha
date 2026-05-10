@@ -1,27 +1,25 @@
 package org.saltations.generate;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.saltations.config.ConfigService;
 import org.saltations.destination.DestinationService;
 import org.saltations.infra.FreemarkerVariableExtractor;
 import org.saltations.infra.XdgPaths;
+import org.saltations.model.ViracochaConfig;
 import org.saltations.source.SourceService;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * Test scaffold for GeneratorService — Wave 0 test infrastructure.
- * Tests are @Disabled until Wave 1 (Plan 01) implements GeneratorService.
- * Uses plain JUnit 5 with inline XdgPaths stub and @TempDir isolation.
- * No @MicronautTest — mirrors DestinationServiceTest pattern.
- * Covers GEN-01 through GEN-04.
+ * Integration tests for GeneratorService. Exercises GEN-01 through GEN-04.
+ * No @MicronautTest — plain JUnit 5 with inline XdgPaths stub and @TempDir isolation.
+ * Covers: flat copy, recursive walk, skip-existing, glob filter, hidden path skipping,
+ * template expansion (path + content), binary byte copy, destination-not-found.
  */
 class GeneratorServiceTest {
 
@@ -50,9 +48,8 @@ class GeneratorServiceTest {
         generatorService = new GeneratorService(configService, pathExpander);
     }
 
-    // --- GEN-01: flat copy ---
+    // --- GEN-01: flat copy writes files to destination ---
 
-    @Disabled("Wave 1: implement GeneratorService first")
     @Test
     void generateFlatCopyWritesFilesToDestination() throws Exception {
         // Set up source directory with two text files
@@ -73,11 +70,11 @@ class GeneratorServiceTest {
         assertTrue(Files.exists(destDir.resolve("file1.txt")), "file1.txt should exist in destination");
         assertTrue(Files.exists(destDir.resolve("file2.txt")), "file2.txt should exist in destination");
         assertEquals(2, result.generated(), "Should report 2 generated files");
+        assertEquals(0, result.skipped(), "Should report 0 skipped files");
     }
 
     // --- GEN-01: recursive walk ---
 
-    @Disabled("Wave 1: implement GeneratorService first")
     @Test
     void generateRecursiveCopyWalksSubdirectories() throws Exception {
         // Set up source with subdirectory
@@ -92,16 +89,16 @@ class GeneratorServiceTest {
         destinationService.addMapping("recurse-dest", "recurse-src", null, true, false);
 
         // Run generate
-        generatorService.generate("recurse-dest", false, false);
+        GenerationResult result = generatorService.generate("recurse-dest", false, false);
 
         // Assert subdirectory file exists in destination
+        assertEquals(1, result.generated());
         assertTrue(Files.exists(destDir.resolve("subdir").resolve("deep.txt")),
             "destDir/subdir/deep.txt should exist after recursive copy");
     }
 
     // --- GEN-02: skip-existing ---
 
-    @Disabled("Wave 1: implement GeneratorService first")
     @Test
     void generateSkipsExistingDestinationFiles() throws Exception {
         // Set up source and destination
@@ -126,11 +123,11 @@ class GeneratorServiceTest {
         String destContent = Files.readString(destDir.resolve("existing.txt"));
         assertEquals("original content", destContent, "Existing destination file must not be overwritten");
         assertEquals(1, secondResult.skipped(), "Second run should report 1 skipped file");
+        assertEquals(0, secondResult.generated(), "Second run should report 0 generated files");
     }
 
     // --- GEN-01: glob filter ---
 
-    @Disabled("Wave 1: implement GeneratorService first")
     @Test
     void generateWithGlobFilterSelectsMatchingFiles() throws Exception {
         // Set up source with mixed file types
@@ -144,16 +141,16 @@ class GeneratorServiceTest {
         // glob: only *.md files
         destinationService.addMapping("glob-dest", "glob-src", "*.md", false, false);
 
-        generatorService.generate("glob-dest", false, false);
+        GenerationResult result = generatorService.generate("glob-dest", false, false);
 
         // Only readme.md should be in destination
+        assertEquals(1, result.generated());
         assertTrue(Files.exists(destDir.resolve("readme.md")), "readme.md should be copied");
         assertFalse(Files.exists(destDir.resolve("config.yaml")), "config.yaml should be filtered out by glob");
     }
 
     // --- GEN-01/D-04: hidden path skipping ---
 
-    @Disabled("Wave 1: implement GeneratorService first")
     @Test
     void generateSkipsHiddenPathSegments() throws Exception {
         // Set up source with hidden directory and normal file
@@ -167,16 +164,16 @@ class GeneratorServiceTest {
         destinationService.addDestination("hidden-dest", destDir.toString());
         destinationService.addMapping("hidden-dest", "hidden-src", null, true, false);
 
-        generatorService.generate("hidden-dest", false, false);
+        GenerationResult result = generatorService.generate("hidden-dest", false, false);
 
         // real.txt should be copied, .git directory should be skipped
+        assertEquals(1, result.generated());
         assertTrue(Files.exists(destDir.resolve("real.txt")), "real.txt should be copied");
         assertFalse(Files.exists(destDir.resolve(".git")), ".git directory should be skipped (hidden)");
     }
 
     // --- GEN-03: template expansion in path and content ---
 
-    @Disabled("Wave 1: implement GeneratorService first")
     @Test
     void generateTemplateSourceExpandsPathSegmentsAndContent() throws Exception {
         // Set up source with Freemarker template in filename and content
@@ -187,14 +184,26 @@ class GeneratorServiceTest {
         sourceService.addSource("tmpl-src", sourceDir.toString(), true);
         Path destDir = Files.createDirectory(tempDir.resolve("dest-template"));
         destinationService.addDestination("tmpl-dest", destDir.toString());
-        // Add mapping with parameters: project=myproj, name=world
-        destinationService.addMapping("tmpl-dest", "tmpl-src", null, false, false);
-        // Set parameters on mapping (index 0): project -> myproj, name -> world
-        // (This requires the mapping to support parameter values — wire via config)
 
-        generatorService.generate("tmpl-dest", false, false);
+        // Set parameters on tmpl-dest: project -> myproj, name -> world
+        ViracochaConfig cfg = configService.load();
+        cfg.getDestinations().stream()
+            .filter(d -> d.getName().equals("tmpl-dest"))
+            .findFirst().get()
+            .getParameters().put("project", "myproj");
+        cfg.getDestinations().stream()
+            .filter(d -> d.getName().equals("tmpl-dest"))
+            .findFirst().get()
+            .getParameters().put("name", "world");
+        configService.save(cfg);
+
+        // Add mapping after setting parameters
+        destinationService.addMapping("tmpl-dest", "tmpl-src", null, false, false);
+
+        GenerationResult result = generatorService.generate("tmpl-dest", false, false);
 
         // destDir/myproj.txt should exist with expanded content
+        assertEquals(1, result.generated());
         Path expandedFile = destDir.resolve("myproj.txt");
         assertTrue(Files.exists(expandedFile), "Expanded file myproj.txt should exist");
         assertEquals("Hello world!", Files.readString(expandedFile), "Template content should be expanded");
@@ -202,35 +211,34 @@ class GeneratorServiceTest {
 
     // --- GEN-04: binary byte integrity ---
 
-    @Disabled("Wave 1: implement GeneratorService first")
     @Test
     void generateBinarySourceByteCopiesToDestination() throws Exception {
         // Write known non-UTF8 bytes to source
-        byte[] expectedBytes = {0x00, (byte) 0xFF, 0x1A, 0x2B, 0x3C};
+        byte[] binaryData = new byte[]{0x00, (byte) 0xFF, 0x1A, 0x2B, 0x3C, (byte) 0x89, 0x50, 0x4E, 0x47};
         Path sourceDir = Files.createDirectory(tempDir.resolve("source-binary"));
-        Files.write(sourceDir.resolve("sample.bin"), expectedBytes);
+        Files.write(sourceDir.resolve("sample.bin"), binaryData);
 
         sourceService.addSource("bin-src", sourceDir.toString(), false);
         Path destDir = Files.createDirectory(tempDir.resolve("dest-binary"));
         destinationService.addDestination("bin-dest", destDir.toString());
         destinationService.addMapping("bin-dest", "bin-src", null, false, false);
 
-        generatorService.generate("bin-dest", false, false);
+        GenerationResult result = generatorService.generate("bin-dest", false, false);
 
         // Read destination bytes and assert exact byte equality
-        byte[] actualBytes = Files.readAllBytes(destDir.resolve("sample.bin"));
-        assertArrayEquals(expectedBytes, actualBytes, "Binary file must be copied with exact byte integrity");
+        assertEquals(1, result.generated());
+        byte[] copiedData = Files.readAllBytes(destDir.resolve("sample.bin"));
+        assertArrayEquals(binaryData, copiedData, "Binary file must be copied byte-for-byte without corruption");
     }
 
     // --- Pitfall 6: destination not found ---
 
-    @Disabled("Wave 1: implement GeneratorService first")
     @Test
-    void generateDestinationNotFoundThrowsIllegalArgumentException() throws Exception {
+    void generateDestinationNotFoundThrowsIllegalArgumentException() {
         // Call generate with a destination name that does not exist in config
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
             () -> generatorService.generate("nonexistent-dest", false, false));
         assertTrue(ex.getMessage().contains("nonexistent-dest"),
-            "Exception message should contain the unknown destination name");
+            "Exception message should contain the unknown destination name. Got: " + ex.getMessage());
     }
 }
