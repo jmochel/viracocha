@@ -86,7 +86,7 @@ Each task was committed atomically:
 1. **Task 1: DestinationAddCommand, DestinationListCommand, and their tests** - `9f38139` (feat)
 2. **Task 2: DestinationShowCommand, DestinationRemoveCommand, DestinationCommand group, and their tests** - `1a1c2b0` (feat)
 
-**Plan metadata:** (to be added after state update commit)
+**Plan metadata:** `75f7e25` (docs: complete destination CRUD commands plan)
 
 _Note: TDD tasks have test (RED) verified by compile failure, then implementation (GREEN) verified by test pass._
 
