@@ -40,6 +40,8 @@ A developer registers sources and destinations once, then populates any workspac
 
 - ✓ GEN-01–GEN-07: `GeneratorService.generate()` full v3 traversal (destinations→mappings→sources; glob+recurse filters; Freemarker expansion in paths and content; binary file copy without corruption; skip-existing); `vira generate --destination-name` routing; `--dry-run`, `--verbose`, interactive destination-creation prompt; `GenerateCommand` wired with testable output writer + stdin; 14 tests across `GeneratorServiceTest` and `GenerateCommandTest` — Phase 11
 
+- ✓ SYN-01–SYN-07: `DefaultSyncService.sync()` full v3 traversal (source→destination only; timestamp conflict detection via `Files.getLastModifiedTime`; `Files.mismatch` for content equality; `REPLACE_EXISTING` copy semantics; glob+hidden-path filters; `isSync()` mapping guard); `SyncResult` record with 6 fields; `SyncCommand` rewritten with `--destination-name` (required), `--dry-run`, `--verbose`, `--json`; exit 1 on conflicts; summary line always printed; 13 new tests (161 total) — Phase 12
+
 ### Active (v3.0 — in progress)
 
 ## Current Milestone: v3.0 Unified Sources & Destinations
@@ -116,4 +118,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-05-10 — Phase 11 complete; `vira generate` fully rewired for v3 schema; 148 tests green*
+*Last updated: 2026-05-11 — Phase 12 complete; `vira sync` fully rewired for v3 schema; 161 tests green*
