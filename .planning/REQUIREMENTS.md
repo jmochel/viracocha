@@ -52,13 +52,13 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 
 ### Sync
 
-- [ ] **SYN-01**: `vira sync` copies changed source files to the destination for all mappings with `sync: true`
-- [ ] **SYN-02**: `vira sync` detects conflicts (destination file content differs from source) and aborts with exit 1
-- [ ] **SYN-03**: `vira sync` accepts `--destination-name` to target a single destination
-- [ ] **SYN-04**: `vira sync` supports `--dry-run`
-- [ ] **SYN-05**: `vira sync` supports `--verbose`
-- [ ] **SYN-06**: `vira sync` supports `--json` for machine-readable output
-- [ ] **SYN-07**: `vira sync` prints a summary line reporting copied/skipped/failed/conflict counts
+- [x] **SYN-01**: `vira sync` copies changed source files to the destination for all mappings with `sync: true`
+- [x] **SYN-02**: `vira sync` detects conflicts (destination file content differs from source) and aborts with exit 1
+- [x] **SYN-03**: `vira sync` accepts `--destination-name` to target a single destination
+- [x] **SYN-04**: `vira sync` supports `--dry-run`
+- [x] **SYN-05**: `vira sync` supports `--verbose`
+- [x] **SYN-06**: `vira sync` supports `--json` for machine-readable output
+- [x] **SYN-07**: `vira sync` prints a summary line reporting copied/skipped/failed/conflict counts
 
 ## Future Requirements (v4+)
 
@@ -117,13 +117,13 @@ Breaking redesign: replace the catalog/archetype/project/subscription model with
 | GEN-05 | Phase 11 | Complete |
 | GEN-06 | Phase 11 | Complete |
 | GEN-07 | Phase 11 | Complete |
-| SYN-01 | Phase 12 | Pending |
-| SYN-02 | Phase 12 | Pending |
-| SYN-03 | Phase 12 | Pending |
-| SYN-04 | Phase 12 | Pending |
-| SYN-05 | Phase 12 | Pending |
-| SYN-06 | Phase 12 | Pending |
-| SYN-07 | Phase 12 | Pending |
+| SYN-01 | Phase 12 | Complete |
+| SYN-02 | Phase 12 | Complete |
+| SYN-03 | Phase 12 | Complete |
+| SYN-04 | Phase 12 | Complete |
+| SYN-05 | Phase 12 | Complete |
+| SYN-06 | Phase 12 | Complete |
+| SYN-07 | Phase 12 | Complete |
 
 **Coverage:**
 - v3.0 requirements: 35 total
