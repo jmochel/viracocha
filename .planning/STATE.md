@@ -72,7 +72,7 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 
 ### Pending Todos
 
-None.
+- [ ] Fix LogstashEncoder missing for JSONL appender — `.planning/todos/pending/2026-05-11-fix-logstashencoder-missing-for-jsonl-appender.md`
 
 ### Blockers/Concerns
 
