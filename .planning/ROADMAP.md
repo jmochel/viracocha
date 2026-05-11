@@ -35,7 +35,7 @@
 - [x] **Phase 9: Source Commands** - `vira source` CRUD with Freemarker param extraction (completed 2026-05-09)
 - [x] **Phase 10: Destination & Mapping Commands** - `vira destination` CRUD plus mapping subcommands and GlobMatcher (completed 2026-05-10)
 - [x] **Phase 11: Generate Rewrite** - Full GeneratorService rewrite for v3 schema (completed 2026-05-10)
-- [ ] **Phase 12: Sync Rewrite** - DefaultSyncService rewrite for source-to-destination, mapping-driven sync
+- [x] **Phase 12: Sync Rewrite** - DefaultSyncService rewrite for source-to-destination, mapping-driven sync (completed 2026-05-11)
 
 ## Phase Details
 
@@ -119,7 +119,7 @@ Plans:
 - [x] 12-00-PLAN.md — Test scaffolding: DefaultSyncServiceTest and SyncCommandTest stubs (SYN-01..SYN-07)
 - [x] 12-01-PLAN.md — Model surgery: SyncResult record, SyncService interface v3, delete v2 artifacts (SYN-01..SYN-07)
 - [x] 12-02-PLAN.md — DefaultSyncService.sync() traversal with timestamp conflict detection (SYN-01, SYN-02)
-- [ ] 12-03-PLAN.md — SyncCommand integration: enable SyncCommandTest assertions (SYN-03, SYN-04, SYN-05, SYN-06, SYN-07)
+- [x] 12-03-PLAN.md — SyncCommand integration: enable SyncCommandTest assertions (SYN-03, SYN-04, SYN-05, SYN-06, SYN-07)
 
 ## Progress
 
@@ -136,4 +136,4 @@ Plans:
 | 9. Source Commands | v3.0 | 4/4 | Complete   | 2026-05-09 |
 | 10. Destination & Mapping Commands | v3.0 | 3/3 | Complete    | 2026-05-10 |
 | 11. Generate Rewrite | v3.0 | 3/3 | Complete    | 2026-05-10 |
-| 12. Sync Rewrite | v3.0 | 3/4 | In Progress|  |
+| 12. Sync Rewrite | v3.0 | 4/4 | Complete   | 2026-05-11 |

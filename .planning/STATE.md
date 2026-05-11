@@ -2,15 +2,15 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
-status: executing
-stopped_at: Completed 12-02-PLAN.md
-last_updated: "2026-05-11T13:56:17.063Z"
+status: verifying
+stopped_at: Completed 12-03-PLAN.md
+last_updated: "2026-05-11T14:00:26.598Z"
 last_activity: 2026-05-11
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 16
-  completed_plans: 15
+  completed_plans: 16
   percent: 0
 ---
 
@@ -28,7 +28,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 
 Phase: 12 (sync-rewrite) — EXECUTING
 Plan: 4 of 4
-Status: Ready to execute
+Status: Phase complete — ready for verification
 Last activity: 2026-05-11
 
 Progress: [░░░░░░░░░░] 0% (v3.0 — 0/5 phases complete)
@@ -68,6 +68,7 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 - [Phase 12-sync-rewrite]: SyncService redesigned to single v3 sync() method; v2 syncProject() methods removed entirely
 - [Phase 12]: Content-identity check (Files.mismatch == -1L) takes priority over mtime: always skip when content identical
 - [Phase 12]: REPLACE_EXISTING for sync copy — never COPY_ATTRIBUTES (dest.mtime must reflect sync time per D-02)
+- [Phase 12-sync-rewrite]: SyncCommandTest: CommandLine rooted at SyncCommand directly; conflict test uses FileTime.from(Instant.now().plusSeconds(60))
 
 ### Pending Todos
 
@@ -80,6 +81,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-11T13:56:17.061Z
-Stopped at: Completed 12-02-PLAN.md
+Last session: 2026-05-11T14:00:26.595Z
+Stopped at: Completed 12-03-PLAN.md
 Resume file: None
