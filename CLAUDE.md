@@ -3,9 +3,9 @@
 
 **Viracocha**
 
-A personal CLI workspace manager (`vira`) for AI-assisted development workflows. It manages how developer workspaces are populated — by registering reusable Freemarker-templated patterns and folder sources (catalogs), then generating workspace content from those registrations. Aimed at eliminating manual copy-paste when bootstrapping or updating AI assistant configuration across multiple projects.
+A personal CLI workspace manager (`vira`) for AI-assisted development workflows. It manages how developer workspaces are populated — by registering reusable Freemarker-templated archetypes and folder sources (catalogs), then generating workspace content from those registrations. Aimed at eliminating manual copy-paste when bootstrapping or updating AI assistant configuration across multiple projects.
 
-**Core Value:** A developer can register patterns and catalogs once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
+**Core Value:** A developer can register archetypes and catalogs once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
 
 ### Constraints
 
@@ -189,14 +189,11 @@ A personal CLI workspace manager (`vira`) for AI-assisted development workflows.
 <!-- GSD:architecture-end -->
 
 <!-- GSD:workflow-start source:GSD defaults -->
-## GSD Workflow Enforcement
+## GSD Workflow
 
-Before using Edit, Write, or other file-changing tools, start work through a GSD command so planning artifacts and execution context stay in sync.
+This project uses **GSD-2** (`gsd-pi@2.82.0`) for workflow management. GSD-2 is a standalone CLI agent — run `gsd` in a terminal from the project root to start a session.
 
-Use these entry points:
-- `/gsd:quick` for small fixes, doc updates, and ad-hoc tasks
-- `/gsd:debug` for investigation and bug fixing
-- `/gsd:execute-phase` for planned phase work
+Project state lives in `.gsd/` (git-ignored, managed by GSD-2). Use `gsd` for planning new milestones, slices, and tasks rather than direct file edits.
 
 Do not make direct repo edits outside a GSD workflow unless the user explicitly asks to bypass it.
 <!-- GSD:workflow-end -->
@@ -206,6 +203,5 @@ Do not make direct repo edits outside a GSD workflow unless the user explicitly 
 <!-- GSD:profile-start -->
 ## Developer Profile
 
-> Profile not yet configured. Run `/gsd:profile-user` to generate your developer profile.
-> This section is managed by `generate-claude-profile` -- do not edit manually.
+> Session-derived profile. Full write-up: `~/.claude/get-shit-done/USER-PROFILE.md`.
 <!-- GSD:profile-end -->

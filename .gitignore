@@ -72,7 +72,7 @@ replay_pid*
 .history/
 .vscode-test/
 
-#### GSD artifacts ####
+#### GSD-2 artifacts ####
 
 .gsd/
 gsd-out/
@@ -184,3 +184,20 @@ $RECYCLE.BIN/
 scratch.md
 scratch.txt
 
+# Claude
+
+.claude/
+!.claude/settings.json
+!.claude/settings.local.json
+!.claude/package.json
+
+# But exclude generated/temporary files within them
+.claude/**/*.tmp
+
+# keep graph outputs, skip heavy/local-only files
+
+# mtime-based, invalid after git clone - always gitignore this
+graphify-out/manifest.json
+
+# local token tracking, not useful to share
+graphify-out/cost.json
