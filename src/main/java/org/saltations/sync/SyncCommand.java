@@ -13,7 +13,8 @@ import java.io.IOException;
 import java.util.concurrent.Callable;
 
 /**
- * Command: vira sync — sync mapped files from sources to destinations.
+ * Command: vira sync — sync mapped files from sources to destinations (v3).
+ * Per-mapping filter removed (D-10). --destination-name required (D-11).
  */
 @Command(
     name = "sync",
@@ -26,18 +27,15 @@ public class SyncCommand implements Callable<Integer> {
     CommandSpec spec;
 
     @Option(names = {"--destination-name"}, description = "Destination name in configuration")
-    private String projectName;
+    private String destinationName;
 
-    @Option(names = {"--mapping-id"}, description = "Limit sync to this mapping id")
-    private String subscriptionId;
-
-    @Option(names = {"--dry-run"}, description = "Analyze only; do not copy files or create directories")
+    @Option(names = {"--dry-run"}, description = "Analyze only; do not copy files")
     private boolean dryRun;
 
     @Option(names = {"--verbose"}, description = "Print one line per file action")
     private boolean verbose;
 
-    @Option(names = {"--json"}, description = "Emit SyncEngineResult as JSON on stdout")
+    @Option(names = {"--json"}, description = "Emit SyncResult as JSON on stdout")
     private boolean json;
 
     private final SyncService syncService;
@@ -49,45 +47,30 @@ public class SyncCommand implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        if (projectName == null || projectName.isBlank()) {
+        if (destinationName == null || destinationName.isBlank()) {
             spec.commandLine().getErr().println("Missing required option: '--destination-name'");
             return 2;
         }
-        String subId = (subscriptionId == null || subscriptionId.isBlank()) ? null : subscriptionId;
         try {
-            SyncEngineResult result = syncService.syncProject(projectName, subId, dryRun, verbose);
+            SyncResult result = syncService.sync(destinationName, dryRun, verbose);
             if (json) {
                 ObjectMapper om = new ObjectMapper();
                 spec.commandLine().getOut().println(om.writeValueAsString(result));
-                return exitCode(result);
+                return result.conflicts() > 0 || result.failed() > 0 ? 1 : 0;
             }
             if (verbose) {
-                for (SyncSubscriptionResult sub : result.getSubscriptionResults()) {
-                    for (String line : sub.getVerboseLines()) {
-                        spec.commandLine().getOut().println(line);
-                    }
+                for (String line : result.verboseLines()) {
+                    spec.commandLine().getOut().println(line);
                 }
-            }
-            int copied = 0;
-            int skipped = 0;
-            int failed = 0;
-            int conflicts = 0;
-            for (SyncSubscriptionResult sub : result.getSubscriptionResults()) {
-                copied += sub.getFilesCopied();
-                skipped += sub.getFilesSkipped();
-                failed += sub.getFilesFailed();
-                conflicts += sub.getConflicts();
             }
             spec.commandLine().getOut().println(String.format(
                 "Copied: %d, Skipped: %d, Failed: %d, Conflicts: %d",
-                copied, skipped, failed, conflicts));
-            for (SyncSubscriptionResult sub : result.getSubscriptionResults()) {
-                for (SyncConflictRecord rec : sub.getConflictRecords()) {
-                    spec.commandLine().getErr().println(
-                        "CONFLICT %s %s".formatted(rec.getRelativePath(), rec.getKind()));
-                }
+                result.copied(), result.skipped(), result.failed(), result.conflicts()));
+            for (SyncConflictRecord rec : result.conflictRecords()) {
+                spec.commandLine().getErr().println(
+                    "CONFLICT %s %s".formatted(rec.getRelativePath(), rec.getKind()));
             }
-            return exitCode(result);
+            return result.conflicts() > 0 || result.failed() > 0 ? 1 : 0;
         } catch (ConfigNotInitializedException e) {
             spec.commandLine().getErr().println(e.getMessage());
             return 1;
@@ -98,14 +81,5 @@ public class SyncCommand implements Callable<Integer> {
             spec.commandLine().getErr().println("Error: " + e.getMessage());
             return 1;
         }
-    }
-
-    private static int exitCode(SyncEngineResult result) {
-        for (SyncSubscriptionResult sub : result.getSubscriptionResults()) {
-            if (sub.getConflicts() > 0 || sub.getFilesFailed() > 0) {
-                return 1;
-            }
-        }
-        return 0;
     }
 }

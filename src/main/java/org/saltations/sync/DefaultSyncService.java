@@ -7,7 +7,7 @@ import org.saltations.config.ConfigService;
 import java.io.IOException;
 
 /**
- * Stub implementation — will be rewritten in Phase 12 for v3 source/destination model.
+ * v3 sync engine — stub pending full implementation in Plan 02.
  */
 @Singleton
 public class DefaultSyncService implements SyncService {
@@ -20,9 +20,9 @@ public class DefaultSyncService implements SyncService {
     }
 
     @Override
-    public SyncEngineResult syncProject(String projectName, String subscriptionIdOrNull, boolean dryRun, boolean verbose)
+    public SyncResult sync(String destinationName, boolean dryRun, boolean verbose)
         throws IOException {
         throw new UnsupportedOperationException(
-            "DefaultSyncService not yet implemented for v3 — see Phase 12.");
+            "DefaultSyncService not yet implemented for v3 — see Phase 12 Plan 02.");
     }
 }
