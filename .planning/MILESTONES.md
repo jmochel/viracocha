@@ -1,5 +1,30 @@
 # Milestones
 
+## v3.0 Unified Sources & Destinations (Shipped: 2026-05-11)
+
+**Phases completed:** 5 phases, 16 plans, 32 tasks
+
+**Key accomplishments:**
+
+- Relocated HiddenPathFilter/FreemarkerVariableExtractor to infra/, introduced v3 SourceEntry/DestinationEntry/MappingEntry/ViracochaConfig POJOs, and stubbed GeneratorService/DefaultSyncService — 32 tests green
+- Added ConfigVersionException with version pre-read guard in ConfigService.load(), updated GenerateCommand/SyncCommand to v3 terminology — 37 tests green
+- SourceService with path validation and Freemarker extraction wired to ConfigService via injectable @Singleton FreemarkerVariableExtractor
+- SourceAddCommand and SourceListCommand as thin picocli wrappers over SourceService with 14 integration tests covering add/list/validation/JSONL output
+- SourceShowCommand with D-05/D-06/D-07 multi-line and JSON output, SourceRemoveCommand with D-16 not-found handling — 13 integration tests all passing
+- SourceCommand group wired into ViracochaCommand completing the full `vira source` / `vira src` CLI tree with all four leaf commands and smoke-tested via built JAR
+- GlobMatcher utility via JDK PathMatcher plus DestinationService with CRUD and mapping operations, 21 tests green
+- Four destination CRUD command classes (Add, List, Show, Remove) plus DestinationCommand group with 7 subcommands (3 stubs for Plan 03), all with integration tests passing
+- Three full mapping command implementations (add-mapping, list-mappings, remove-mapping) wired into DestinationCommand group, completing all MAP-0x requirements with 136 passing tests.
+- Wave 0 test scaffold for Phase 11: 14 named test methods across GeneratorServiceTest and GenerateCommandTest covering GEN-01 through GEN-07, plus a 9-byte binary fixture for byte-integrity testing
+- GeneratorService.generate() fully implemented with 6-step traversal algorithm covering flat/recursive copy, skip-existing, glob filtering, hidden path exclusion, Freemarker template expansion, and binary byte-copy — 8/8 tests green
+- Interactive destination-creation prompt, 5-arg GeneratorService overload, and 6/6 GenerateCommandTest passing for GEN-05 through GEN-07
+- Wave 0 test stub scaffolding for sync rewrite — 13 @Disabled test methods across DefaultSyncServiceTest and SyncCommandTest enabling Nyquist-compliant automated verification for all Phase 12 plans
+- v2-to-v3 sync model surgery: new SyncResult record, adapted SyncConflictRecord, redesigned SyncService interface, and compile-clean DefaultSyncService/SyncCommand against v3 types
+- Full v3 DefaultSyncService.sync() implementation with timestamp conflict detection and 6 enabled green tests for SYN-01 and SYN-02
+- SyncCommandTest fully enabled: 7 tests proving SYN-02 conflict exit-1, SYN-03 required destination, SYN-04 dry-run, SYN-05 verbose per-file, SYN-06 JSON output, SYN-07 summary always printed
+
+---
+
 ## v2.0 Subscriptions & sync (Shipped: 2026-05-06)
 
 **Phases completed:** 3 phases, 9 plans, 19 tasks

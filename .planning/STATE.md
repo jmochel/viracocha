@@ -2,36 +2,36 @@
 gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
-status: verifying
-stopped_at: Completed 12-03-PLAN.md
-last_updated: "2026-05-11T14:03:50.336Z"
+status: milestone_complete
+stopped_at: v3.0 milestone archived 2026-05-11
+last_updated: "2026-05-11"
 last_activity: 2026-05-11
 progress:
   total_phases: 5
   completed_phases: 5
   total_plans: 16
   completed_plans: 16
-  percent: 0
+  percent: 100
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md` (updated 2026-05-08)
+See: `.planning/PROJECT.md` (updated 2026-05-11)
 
 **Core value:** A developer registers sources and destinations once, then populates any workspace with a single command — and regeneration is safe (skips existing files). Mappings with `sync: true` keep destination copies up to date on demand via `vira sync`.
 
-**Current focus:** Phase 12 — sync-rewrite
+**Current focus:** v3.0 complete — planning next milestone
 
 ## Current Position
 
-Phase: 12
-Plan: Not started
-Status: Phase complete — ready for verification
+Phase: — (milestone complete)
+Plan: —
+Status: v3.0 archived 2026-05-11 — ready for next milestone
 Last activity: 2026-05-11
 
-Progress: [░░░░░░░░░░] 0% (v3.0 — 0/5 phases complete)
+Progress: [██████████] 100% (v3.0 — 5/5 phases complete)
 
 ## Accumulated Context
 
