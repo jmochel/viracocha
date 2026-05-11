@@ -1,102 +1,135 @@
 # Requirements: Viracocha
 
-**Defined:** 2026-04-04  
-**Milestone:** v2.0 Subscriptions & sync  
-**Core Value:** (from PROJECT.md) Register patterns and catalogs once; generate safely; **keep published artifacts in sync with the workspace** via subscriptions.
+**Defined:** 2026-05-08
+**Core Value:** A developer registers sources and destinations once, then populates any workspace with a single command — and regeneration is safe (skips existing files). Mappings with `sync: true` keep destination copies up to date on demand via `vira sync`.
 
----
+## v3.0 Requirements
 
-## v2.0 Requirements
+Breaking redesign: replace the catalog/archetype/project/subscription model with a unified sources/destinations schema. Local filesystem only; remote HTTP sources deferred to v4.
 
-Requirements for milestone v2.0. Each maps to roadmap phases (5–7).
+### Config
 
-### Config schema
+- [x] **CFG-01**: v3 config POJOs — `SourceEntry` (name, path, templates boolean, parameters), `DestinationEntry` (name, path, parameters, mappings), `MappingEntry` v3 (sourceRef, glob, recurse, sync, params) — with YAML round-trip and no data loss
+- [x] **CFG-02**: `ConfigService.load()` detects a v2 config (missing version field or version < 3) and fails with a clear error message instructing the user to recreate their config
+- [x] **CFG-03**: All v2 CLI command packages (catalog, archetype, project, subscription) are removed from the codebase; running old command names produces "unknown command" error
 
-- [ ] **CFG-01**: Central YAML includes a `subscriptions` collection (or nested under projects — see roadmap) with enough fields to persist catalog reference, paths, direction, and stable identity for CLI targeting
-- [ ] **CFG-02**: Config load/save round-trips subscription entries without data loss; invalid YAML fails with a clear error
+### Source
 
-### Subscriptions (CLI & model)
+- [x] **SRC-01**: User can add a named local directory source with `--name`, `--path`, and optional `--templates` flag (`vira source add`)
+- [x] **SRC-02**: User can list all registered sources in plain or JSON output (`vira source list [--json]`)
+- [x] **SRC-03**: User can view a source's full details — name, path, templates flag, and extracted parameter names (`vira source show NAME`)
+- [x] **SRC-04**: User can remove a source by name (`vira source remove NAME`)
+- [x] **SRC-05**: Source add rejects duplicate source names with a clear error
+- [x] **SRC-06**: Source add rejects paths containing `..` directory traversal sequences
+- [x] **SRC-07**: Source add with `--templates` extracts Freemarker variable names from all template files in the source directory and persists them in config
 
-- [ ] **SUB-01**: User can add a subscription on a **project** that references a registered **catalog** by name and ties a catalog-side source path to a workspace-relative path (subscription subtree)
-- [ ] **SUB-02**: Each subscription records **sync direction**: catalog→workspace only, workspace→catalog only, or **bidirectional**
-- [ ] **SUB-03**: User can **list** subscriptions (scope: project or global list — as implemented in roadmap) in plain text and JSON consistent with existing `vira` commands
-- [ ] **SUB-04**: User can **show** details for one subscription
-- [ ] **SUB-05**: User can **remove** a subscription
-- [ ] **SUB-06**: Registration validates that the project and catalog exist, paths exist where required, and paths reject unsafe traversal (e.g. `..` escapes)
-- [ ] **SUB-07**: Duplicate or overlapping subscriptions are rejected or warned per explicit rules documented in CLI help
+### Destination
 
-### Sync engine
+- [x] **DEST-01**: User can add a named destination workspace path with `--name` and `--path` (`vira destination add`)
+- [x] **DEST-02**: User can list all registered destinations in plain or JSON output (`vira destination list [--json]`)
+- [x] **DEST-03**: User can view a destination's full details — name, path, parameters, and all mappings (`vira destination show NAME`)
+- [x] **DEST-04**: User can remove a destination by name (`vira destination remove NAME`)
+- [x] **DEST-05**: Destination add rejects duplicate destination names with a clear error
+- [x] **DEST-06**: Destination add rejects paths containing `..` directory traversal sequences
 
-- [ ] **SYN-01**: A sync service can **copy files** from catalog tree into the workspace for subscriptions with catalog→workspace or bidirectional direction
-- [ ] **SYN-02**: The same service can **copy files** from workspace into the catalog tree when direction includes workspace→catalog
-- [ ] **SYN-03**: **Bidirectional** runs combine both directions using a **documented conflict policy** when both sides have changes affecting the same relative path
-- [ ] **SYN-04**: Default conflict behavior is **safe** (e.g. fail the sync with a clear report); optional flags may allow **explicit** overwrite / last-write-wins where implemented
-- [ ] **SYN-05**: Sync skips or includes **hidden** segments consistently with `generate` (document behavior)
+### Mapping
 
-### `vira sync` command
+- [x] **MAP-01**: User can add a mapping to a destination specifying a source name, optional glob pattern, recurse flag, and sync flag (`vira destination add-mapping`)
+- [x] **MAP-02**: User can list all mappings for a destination (`vira destination list-mappings NAME`)
+- [x] **MAP-03**: User can remove a mapping from a destination by index (`vira destination remove-mapping NAME INDEX`)
+- [x] **MAP-04**: Mapping add validates that the referenced source name exists in the config and rejects unknown source references
+- [x] **MAP-05**: `GlobMatcher` utility wraps JDK `FileSystem.getPathMatcher` with `glob:` / `regex:` prefix support; unit tests verify `+` is treated as a literal character (not a quantifier) in glob patterns
 
-- [ ] **SYN-06**: User can run `vira sync --project <name>` to execute sync for that project’s subscriptions (full or filtered per roadmap)
-- [ ] **SYN-07**: User can pass **`--dry-run`** to print planned actions without mutating files
-- [ ] **SYN-08**: User can pass **`--verbose`** for per-file outcomes (created / updated / skipped / conflict)
-- [ ] **SYN-09**: Sync prints a **summary** line on completion (counts: copied, skipped, failed, conflicts)
+### Generate
 
-### Cross-cutting
+- [x] **GEN-01**: `vira generate` traverses destinations → mappings → sources, applies glob/recurse filtering, and writes files to the destination path
+- [x] **GEN-02**: `vira generate` skips destination files that already exist (skip-existing semantics preserved from v2)
+- [x] **GEN-03**: `vira generate` expands Freemarker templates in both path segments and file content for sources with `templates: true`
+- [x] **GEN-04**: `vira generate` uses binary byte copy (not string read) for sources with `templates: false`, preserving non-text files
+- [x] **GEN-05**: `vira generate` accepts `--destination-name` to target a single destination
+- [x] **GEN-06**: `vira generate` supports `--dry-run` (reports actions without writing files)
+- [x] **GEN-07**: `vira generate` supports `--verbose` (prints per-file action lines)
 
-- [ ] **X-01**: Integration tests cover at least one catalog→workspace flow, one workspace→catalog flow, and one bidirectional conflict case
-- [ ] **X-02**: README documents subscriptions, directions, conflict policy, and examples
+### Sync
 
----
+- [x] **SYN-01**: `vira sync` copies changed source files to the destination for all mappings with `sync: true`
+- [x] **SYN-02**: `vira sync` detects conflicts (destination file content differs from source) and aborts with exit 1
+- [x] **SYN-03**: `vira sync` accepts `--destination-name` to target a single destination
+- [x] **SYN-04**: `vira sync` supports `--dry-run`
+- [x] **SYN-05**: `vira sync` supports `--verbose`
+- [x] **SYN-06**: `vira sync` supports `--json` for machine-readable output
+- [x] **SYN-07**: `vira sync` prints a summary line reporting copied/skipped/failed/conflict counts
 
-## Deferred (post–v2.0)
+## Future Requirements (v4+)
 
-| ID | Item |
-|----|------|
-| WATCH-01 | Watch mode / background sync daemon |
-| PUB-02a | `vira catalog list` shows subscriber count per catalog (optional enhancement) |
-| PAT-02a | `vira pattern unregister` warns when pattern still referenced |
+### Remote Sources
 
----
+- **REM-01**: User can add a remote http(s) URL as a source
+- **REM-02**: `vira generate` / `vira sync` fetches remote source content at runtime (fetch-and-copy, no local cache)
+- **REM-03**: Remote source mappings are limited to literal path globs (no wildcards); `recurse: true` rejected for remote sources
 
-## Out of scope (v2.0)
+### Config Migration
+
+- **MIG-01**: `vira config migrate` command converts a v2 config file to v3 format (with backup)
+
+## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Remote catalogs (HTTP/Git) | Network/auth complexity; local paths only |
-| Git integration | Explicit v1/v2 filesystem scope |
-| Interactive merge UI | Scriptable CLI first |
-
----
+| Config auto-migration from v2 | Clean break — v3 is a fresh start; fail-with-instructions is sufficient |
+| Bidirectional sync | Semantically undefined with "source is canonical" model; removed with subscriptions |
+| Watch mode / background sync | One-shot `vira sync` covers the use case; daemon adds OS complexity |
+| Remote write operations | Sources are always read-only; write operations stay on local filesystem |
+| Remote source authentication | Scope creep; use SHA-pinned public URLs instead |
+| Per-mapping parameter overrides | Added v2 complexity that rarely earned its keep; destination-level params are sufficient |
+| Multiple config profiles | Single XDG config path is sufficient |
+| GraalVM native image | Profile exists in pom.xml; not a v3 target |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CFG-01 | Phase 5 | Pending |
-| CFG-02 | Phase 5 | Pending |
-| SUB-01 | Phase 5 | Pending |
-| SUB-02 | Phase 5 | Pending |
-| SUB-03 | Phase 5 | Pending |
-| SUB-04 | Phase 5 | Pending |
-| SUB-05 | Phase 5 | Pending |
-| SUB-06 | Phase 5 | Pending |
-| SUB-07 | Phase 5 | Pending |
-| SYN-01 | Phase 6 | Pending |
-| SYN-02 | Phase 6 | Pending |
-| SYN-03 | Phase 6 | Pending |
-| SYN-04 | Phase 6 | Pending |
-| SYN-05 | Phase 6 | Pending |
-| SYN-06 | Phase 7 | Pending |
-| SYN-07 | Phase 7 | Pending |
-| SYN-08 | Phase 7 | Pending |
-| SYN-09 | Phase 7 | Pending |
-| X-01 | Phase 7 | Pending |
-| X-02 | Phase 7 | Pending |
+| CFG-01 | Phase 8 | Complete |
+| CFG-02 | Phase 8 | Complete |
+| CFG-03 | Phase 8 | Complete |
+| SRC-01 | Phase 9 | Complete |
+| SRC-02 | Phase 9 | Complete |
+| SRC-03 | Phase 9 | Complete |
+| SRC-04 | Phase 9 | Complete |
+| SRC-05 | Phase 9 | Complete |
+| SRC-06 | Phase 9 | Complete |
+| SRC-07 | Phase 9 | Complete |
+| DEST-01 | Phase 10 | Complete |
+| DEST-02 | Phase 10 | Complete |
+| DEST-03 | Phase 10 | Complete |
+| DEST-04 | Phase 10 | Complete |
+| DEST-05 | Phase 10 | Complete |
+| DEST-06 | Phase 10 | Complete |
+| MAP-01 | Phase 10 | Complete |
+| MAP-02 | Phase 10 | Complete |
+| MAP-03 | Phase 10 | Complete |
+| MAP-04 | Phase 10 | Complete |
+| MAP-05 | Phase 10 | Complete |
+| GEN-01 | Phase 11 | Complete |
+| GEN-02 | Phase 11 | Complete |
+| GEN-03 | Phase 11 | Complete |
+| GEN-04 | Phase 11 | Complete |
+| GEN-05 | Phase 11 | Complete |
+| GEN-06 | Phase 11 | Complete |
+| GEN-07 | Phase 11 | Complete |
+| SYN-01 | Phase 12 | Complete |
+| SYN-02 | Phase 12 | Complete |
+| SYN-03 | Phase 12 | Complete |
+| SYN-04 | Phase 12 | Complete |
+| SYN-05 | Phase 12 | Complete |
+| SYN-06 | Phase 12 | Complete |
+| SYN-07 | Phase 12 | Complete |
 
 **Coverage:**
-
-- v2.0 requirements: 18 total  
-- Mapped to phases: 18  
-- Unmapped: 0 ✓  
+- v3.0 requirements: 35 total
+- Mapped to phases: 35
+- Unmapped: 0 ✓
 
 ---
-*Requirements defined: 2026-04-04 — milestone v2.0*
+*Requirements defined: 2026-05-08*
+*Last updated: 2026-05-08 — traceability filled after roadmap creation*

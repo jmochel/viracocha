@@ -1,243 +1,222 @@
 package org.saltations.generate;
 
-import freemarker.template.Configuration;
-import freemarker.template.Template;
-import freemarker.template.TemplateException;
-import freemarker.template.TemplateExceptionHandler;
-import freemarker.template.Version;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigService;
+import org.saltations.infra.GlobMatcher;
+import org.saltations.infra.HiddenPathFilter;
+import org.saltations.model.DestinationEntry;
 import org.saltations.model.MappingEntry;
-import org.saltations.model.PatternEntry;
-import org.saltations.model.ProjectEntry;
+import org.saltations.model.SourceEntry;
 import org.saltations.model.ViracochaConfig;
-import org.saltations.pattern.PatternPathUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Walks pattern trees, merges parameters, expands path segments and template bodies, and writes
- * into the project workspace (or simulates with {@code dryRun}).
+ * Core v3 traversal engine. Wires together ConfigService, GlobMatcher, HiddenPathFilter,
+ * and PathExpander to implement the generate algorithm (GEN-01 through GEN-04).
  */
 @Singleton
 public class GeneratorService {
 
-    private static final Version FM_VERSION = Configuration.VERSION_2_3_34;
-
     private final ConfigService configService;
     private final PathExpander pathExpander;
-    private final Configuration fmContentConfig;
 
     @Inject
     public GeneratorService(ConfigService configService, PathExpander pathExpander) {
         this.configService = configService;
         this.pathExpander = pathExpander;
-        this.fmContentConfig = new Configuration(FM_VERSION);
-        this.fmContentConfig.setDefaultEncoding("UTF-8");
-        this.fmContentConfig.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
     }
 
     /**
-     * @param verbose when true, populate {@link GenerationResult#verboseLines()} with workspace-relative paths
+     * Convenience overload — delegates to the 5-arg method with System.out and System.in.
+     *
+     * @param destinationName name of the registered destination to generate
+     * @param dryRun          when true, compute what would be generated but do not write files
+     * @param verbose         when true, populate verboseLines in the result with per-file details
+     * @return GenerationResult with counts of generated, skipped, and failed files
+     * @throws IllegalArgumentException if destinationName is not found in config
+     * @throws IOException              if config cannot be read or files cannot be written
      */
-    public GenerationResult generate(String projectName, boolean dryRun, boolean verbose) throws IOException {
+    public GenerationResult generate(String destinationName, boolean dryRun, boolean verbose) throws IOException {
+        return generate(destinationName, dryRun, verbose,
+            new PrintWriter(System.out, true), System.in);
+    }
+
+    /**
+     * Generates destination workspace from registered sources via mappings.
+     *
+     * <ul>
+     *   <li>GEN-01: Files from all mapped sources are written to the destination path.</li>
+     *   <li>GEN-02: Re-running skips already-present files and counts them as skipped.</li>
+     *   <li>GEN-03: Template sources expand Freemarker variables in path segments and file content.</li>
+     *   <li>GEN-04: Binary (non-template) sources are byte-copied using Files.copy() without string read.</li>
+     *   <li>D-05: Prompts user when destination directory does not exist (interactive mode only).</li>
+     *   <li>D-06: User confirms with y/Y — directory is created.</li>
+     *   <li>D-07: Any other response — returns empty result, exits 0, no directory created.</li>
+     *   <li>D-08: --dry-run skips prompt, prints "Would create: &lt;path&gt;".</li>
+     * </ul>
+     *
+     * @param destinationName name of the registered destination to generate
+     * @param dryRun          when true, compute what would be generated but do not write files
+     * @param verbose         when true, populate verboseLines in the result with per-file details
+     * @param out             PrintWriter for output (prompt text, verbose lines, summary)
+     * @param in              InputStream for reading user input (destination-creation prompt)
+     * @return GenerationResult with counts of generated, skipped, and failed files
+     * @throws IllegalArgumentException if destinationName is not found in config
+     * @throws IOException              if config cannot be read or files cannot be written
+     */
+    public GenerationResult generate(String destinationName, boolean dryRun, boolean verbose,
+                                     PrintWriter out, InputStream in) throws IOException {
+        // STEP 1 — Load config
         ViracochaConfig config = configService.load();
-        ProjectEntry project = config.getProjects().stream()
-            .filter(p -> p.getName().equals(projectName))
+
+        // STEP 2 — Find destination (Pitfall 6 guard)
+        DestinationEntry dest = config.getDestinations().stream()
+            .filter(d -> d.getName().equals(destinationName))
             .findFirst()
-            .orElse(null);
-        if (project == null) {
-            throw new IllegalArgumentException("Project '" + projectName + "' not found.");
+            .orElseThrow(() -> new IllegalArgumentException(
+                "Destination '" + destinationName + "' not found."));
+
+        // STEP 3 — Tilde expansion (D-10)
+        String rawPath = dest.getPath();
+        String resolvedPath = rawPath.startsWith("~")
+            ? System.getProperty("user.home") + rawPath.substring(1)
+            : rawPath;
+        Path destRoot = Path.of(resolvedPath);
+
+        // STEP 4 — Missing destination directory check (D-05 through D-09)
+        if (!Files.exists(destRoot)) {
+            if (dryRun) {
+                // D-08: In dry-run, report without prompting
+                out.println("Would create: " + destRoot);
+            } else {
+                // D-05: Prompt user
+                out.print("Destination " + destRoot + " does not exist. Create it? [y/N] ");
+                out.flush();  // CRITICAL: prevent buffering hang (Pitfall 5)
+                String answer = new BufferedReader(new InputStreamReader(in)).readLine();
+                if (answer == null || !answer.equalsIgnoreCase("y")) {
+                    // D-07: Any response other than y/Y → exit 0, no directory created
+                    return GenerationResult.empty();
+                }
+                // D-06: User confirmed — create directory
+                Files.createDirectories(destRoot);
+            }
         }
 
-        Path workspace = Path.of(project.getPath()).normalize().toAbsolutePath();
+        // STEP 5 — Accumulators
         int generated = 0;
         int skipped = 0;
         int failed = 0;
-        List<String> verboseLines = verbose ? new ArrayList<>() : null;
+        List<String> verboseLines = new ArrayList<>();
 
-        for (MappingEntry mapping : project.getMappings()) {
-            PatternEntry pattern = config.getPatterns().stream()
-                .filter(pe -> pe.getName().equals(mapping.getPatternName()))
+        // STEP 6 — For each mapping, traverse source
+        for (MappingEntry mapping : dest.getMappings()) {
+            // Resolve source
+            SourceEntry source = config.getSources().stream()
+                .filter(s -> s.getName().equals(mapping.getSourceRef()))
                 .findFirst()
-                .orElse(null);
-            if (pattern == null) {
-                throw new IllegalArgumentException("Pattern '" + mapping.getPatternName() + "' not found in config.");
-            }
+                .orElseThrow(() -> new IllegalArgumentException(
+                    "Source '" + mapping.getSourceRef() + "' not found."));
 
-            Map<String, String> model = mergeParameters(project, mapping);
-            Path patternRoot = Path.of(pattern.getPath()).normalize().toAbsolutePath();
-
-            Path destRoot;
-            try {
-                destRoot = resolveMappingWorkspacePath(workspace, mapping.getWorkspacePath());
-            } catch (IllegalArgumentException e) {
-                failed++;
-                if (verbose) {
-                    verboseLines.add("Failed " + mapping.getWorkspacePath() + " (" + e.getMessage() + ")");
-                }
-                continue;
-            }
+            Path sourceRoot = Path.of(source.getPath());
+            // Pitfall 1 note: filter(Files::isRegularFile) removes root dir and subdirs from stream
+            int maxDepth = mapping.isRecurse() ? Integer.MAX_VALUE : 1;
 
             List<Path> files;
-            try (Stream<Path> walk = Files.walk(patternRoot)) {
-                files = walk
+            try (Stream<Path> stream = Files.walk(sourceRoot, maxDepth)) {
+                files = stream
                     .filter(Files::isRegularFile)
-                    .filter(p -> !PatternPathUtils.hasHiddenPathSegment(patternRoot, p))
-                    .sorted(Comparator.comparing(p -> patternRoot.relativize(p).toString()))
+                    .filter(p -> !HiddenPathFilter.hasHiddenPathSegment(sourceRoot, p))
+                    .filter(p -> {
+                        String glob = mapping.getGlob();
+                        if (glob == null) return true;
+                        // Pitfall 2: always relativize before passing to GlobMatcher
+                        Path rel = sourceRoot.relativize(p);
+                        return GlobMatcher.matches(glob, rel);
+                    })
+                    .sorted()
                     .collect(Collectors.toList());
             }
 
-            for (Path sourceFile : files) {
-                Path relFromPattern = patternRoot.relativize(sourceFile);
+            for (Path sourcePath : files) {
+                // Compute dest path with optional template segment expansion (D-12)
+                Path relPath = sourceRoot.relativize(sourcePath);
+                Path destPath = destRoot;
+                Map<String, String> params = dest.getParameters();
+                boolean fileFailedDuringPathExpansion = false;
 
-                Path expandedRel;
-                try {
-                    expandedRel = expandRelativePath(relFromPattern, model);
-                } catch (IllegalArgumentException e) {
-                    failed++;
-                    if (verbose) {
-                        String hint = Path.of(mapping.getWorkspacePath()).resolve(relFromPattern).toString().replace('\\', '/');
-                        verboseLines.add("Failed " + hint + " (path expansion: " + e.getMessage() + ")");
-                    }
-                    continue;
-                }
-
-                Path target = destRoot.resolve(expandedRel).normalize().toAbsolutePath();
-
-                if (!target.startsWith(workspace)) {
-                    failed++;
-                    if (verbose) {
-                        verboseLines.add("Failed " + workspace.relativize(target).toString().replace('\\', '/')
-                            + " (escapes workspace)");
-                    }
-                    continue;
-                }
-
-                String relToWs = workspace.relativize(target).toString().replace('\\', '/');
-
-                if (Files.exists(target)) {
-                    if (Files.isRegularFile(target)) {
-                        skipped++;
-                        if (verbose) {
-                            verboseLines.add("Skipped " + relToWs);
+                for (int i = 0; i < relPath.getNameCount(); i++) {
+                    String seg = relPath.getName(i).toString();
+                    String expanded;
+                    if (source.isTemplates()) {
+                        // Pitfall 3: catch IllegalArgumentException from expandSegment, increment failed, skip file
+                        try {
+                            expanded = pathExpander.expandSegment(seg, params);
+                        } catch (IllegalArgumentException e) {
+                            failed++;
+                            if (verbose) verboseLines.add("Failed " + sourcePath);
+                            fileFailedDuringPathExpansion = true;
+                            break;
                         }
-                        continue;
+                    } else {
+                        expanded = seg;
                     }
-                    if (Files.isDirectory(target)) {
-                        failed++;
-                        if (verbose) {
-                            verboseLines.add("Failed " + relToWs + " (exists as directory)");
-                        }
-                        continue;
-                    }
+                    destPath = destPath.resolve(expanded);
                 }
 
-                Path parent = target.getParent();
-                if (parent != null && Files.exists(parent) && !Files.isDirectory(parent)) {
-                    failed++;
-                    if (verbose) {
-                        verboseLines.add("Failed " + relToWs + " (parent path blocked by file)");
-                    }
+                if (fileFailedDuringPathExpansion) {
+                    continue; // skip this file
+                }
+
+                // Skip existing (GEN-02)
+                if (Files.exists(destPath)) {
+                    skipped++;
+                    if (verbose) verboseLines.add("Skipped " + destPath);
                     continue;
                 }
 
-                String content;
-                try {
-                    content = Files.readString(sourceFile, StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    failed++;
-                    if (verbose) {
-                        verboseLines.add("Failed " + relToWs + " (read: " + e.getMessage() + ")");
-                    }
-                    continue;
-                }
-
-                String rendered;
-                try {
-                    rendered = renderTemplate(sourceFile.toString(), content, model);
-                } catch (IOException | TemplateException e) {
-                    failed++;
-                    if (verbose) {
-                        verboseLines.add("Failed " + relToWs + " (template: " + e.getMessage() + ")");
-                    }
-                    continue;
-                }
-
-                if (!dryRun) {
+                // Write or dry-run
+                if (dryRun) {
+                    generated++;  // count as would-generate
+                    // Always report "Would create" in dry-run mode (GEN-06)
+                    out.println("Would create " + destPath);
+                    if (verbose) verboseLines.add("Would create " + destPath);
+                } else {
                     try {
-                        if (parent != null) {
-                            Files.createDirectories(parent);
+                        // D-09: auto-create subdirs silently
+                        Files.createDirectories(destPath.getParent());
+                        if (source.isTemplates()) {
+                            // GEN-03, D-12: Template — expand file content
+                            String rawContent = Files.readString(sourcePath, StandardCharsets.UTF_8);
+                            String expandedContent = pathExpander.expandSegment(rawContent, params);
+                            Files.writeString(destPath, expandedContent, StandardCharsets.UTF_8);
+                        } else {
+                            // GEN-04, D-11: Binary byte-copy — no REPLACE_EXISTING; exists check already done
+                            Files.copy(sourcePath, destPath);
                         }
-                        Files.writeString(target, rendered, StandardCharsets.UTF_8);
-                    } catch (IOException e) {
+                        generated++;
+                        if (verbose) verboseLines.add("Created " + destPath);
+                    } catch (IllegalArgumentException | IOException e) {
                         failed++;
-                        if (verbose) {
-                            verboseLines.add("Failed " + relToWs + " (write: " + e.getMessage() + ")");
-                        }
-                        continue;
+                        if (verbose) verboseLines.add("Failed " + destPath);
                     }
-                }
-
-                generated++;
-                if (verbose) {
-                    verboseLines.add("Created " + relToWs);
                 }
             }
         }
 
-        return new GenerationResult(generated, skipped, failed, verbose ? List.copyOf(verboseLines) : List.of());
-    }
-
-    private Map<String, String> mergeParameters(ProjectEntry project, MappingEntry mapping) {
-        Map<String, String> merged = new LinkedHashMap<>();
-        if (project.getParameters() != null) {
-            merged.putAll(project.getParameters());
-        }
-        if (mapping.getParameters() != null) {
-            mapping.getParameters().forEach(merged::put);
-        }
-        return merged;
-    }
-
-    private Path resolveMappingWorkspacePath(Path projectWorkspace, String workspacePath) {
-        if (workspacePath == null || workspacePath.isBlank()) {
-            throw new IllegalArgumentException("Mapping workspace path must not be empty.");
-        }
-        Path destRoot = projectWorkspace.resolve(workspacePath).normalize().toAbsolutePath();
-        if (!destRoot.startsWith(projectWorkspace)) {
-            throw new IllegalArgumentException("Mapping workspace path escapes project workspace.");
-        }
-        return destRoot;
-    }
-
-    private Path expandRelativePath(Path relativePath, Map<String, String> model) {
-        Path acc = Path.of(pathExpander.expandSegment(relativePath.getName(0).toString(), model));
-        for (int i = 1; i < relativePath.getNameCount(); i++) {
-            String seg = relativePath.getName(i).toString();
-            acc = acc.resolve(pathExpander.expandSegment(seg, model));
-        }
-        return acc;
-    }
-
-    private String renderTemplate(String sourceName, String content, Map<String, String> model)
-        throws IOException, TemplateException {
-        Template template = new Template(sourceName, new StringReader(content), fmContentConfig);
-        StringWriter out = new StringWriter();
-        template.process(model, out);
-        return out.toString();
+        return new GenerationResult(generated, skipped, failed, verboseLines);
     }
 }

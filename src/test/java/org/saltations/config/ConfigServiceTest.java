@@ -50,7 +50,7 @@ class ConfigServiceTest {
         Path created = configService.init();
         assertTrue(Files.exists(created), "init() must create config file");
         String contents = Files.readString(created);
-        assertTrue(contents.contains("version: 1"), "Config file must contain 'version: 1'");
+        assertTrue(contents.contains("version: 3"), "Config file must contain 'version: 3'");
     }
 
     @Test
@@ -75,7 +75,7 @@ class ConfigServiceTest {
     void loadAfterInitReturnsDefaultConfig() throws IOException {
         configService.init();
         ViracochaConfig config = configService.load();
-        assertEquals(1, config.getVersion(), "Loaded config must have version=1");
+        assertEquals(3, config.getVersion(), "Loaded config must have version=3");
     }
 
     @Test
@@ -86,5 +86,51 @@ class ConfigServiceTest {
         configService.save(config);
         ViracochaConfig reloaded = configService.load();
         assertEquals(42, reloaded.getVersion(), "save()+load() must preserve version field");
+    }
+
+    @Test
+    void loadThrowsConfigVersionExceptionForV1Config() throws IOException {
+        // Write a v1 config file manually (simulates a developer's existing v2 config)
+        Path configDir = configService.xdgPaths().configDir();
+        Files.createDirectories(configDir);
+        Path configFile = configService.xdgPaths().configFile();
+        Files.writeString(configFile,
+            "version: 1\ncatalogs: []\narchetypes: []\nprojects: []\n");
+        ConfigVersionException ex = assertThrows(ConfigVersionException.class,
+            () -> configService.load(),
+            "load() must throw ConfigVersionException when version is 1");
+        assertTrue(ex.getMessage().contains("v3 format required"),
+            "Exception message must contain 'v3 format required'");
+        assertTrue(ex.getMessage().contains("v1"),
+            "Exception message must report the found version (v1)");
+    }
+
+    @Test
+    void loadThrowsConfigVersionExceptionForMissingVersionField() throws IOException {
+        Path configDir = configService.xdgPaths().configDir();
+        Files.createDirectories(configDir);
+        Path configFile = configService.xdgPaths().configFile();
+        Files.writeString(configFile, "catalogs: []\n"); // no version field
+        ConfigVersionException ex = assertThrows(ConfigVersionException.class,
+            () -> configService.load(),
+            "load() must throw ConfigVersionException when version field is absent");
+        assertTrue(ex.getMessage().contains("v0"),
+            "Exception message must report version 0 for missing field");
+    }
+
+    @Test
+    void loadSucceedsForV3Config() throws IOException {
+        configService.init();
+        // init() writes version:3; this must load without exception
+        ViracochaConfig config = assertDoesNotThrow(() -> configService.load());
+        assertEquals(3, config.getVersion());
+    }
+
+    @Test
+    void initWritesVersion3() throws IOException {
+        Path path = configService.init();
+        String contents = Files.readString(path);
+        assertTrue(contents.contains("version: 3"),
+            "init() must write a config file containing 'version: 3'");
     }
 }

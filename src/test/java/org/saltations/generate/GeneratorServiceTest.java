@@ -4,177 +4,241 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.saltations.config.ConfigService;
+import org.saltations.destination.DestinationService;
+import org.saltations.infra.FreemarkerVariableExtractor;
 import org.saltations.infra.XdgPaths;
-import org.saltations.model.MappingEntry;
-import org.saltations.model.PatternEntry;
-import org.saltations.model.ProjectEntry;
 import org.saltations.model.ViracochaConfig;
+import org.saltations.source.SourceService;
 
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Integration tests for GeneratorService. Exercises GEN-01 through GEN-04.
+ * No @MicronautTest — plain JUnit 5 with inline XdgPaths stub and @TempDir isolation.
+ * Covers: flat copy, recursive walk, skip-existing, glob filter, hidden path skipping,
+ * template expansion (path + content), binary byte copy, destination-not-found.
+ */
 class GeneratorServiceTest {
 
     @TempDir
     Path tempDir;
 
     private ConfigService configService;
+    private SourceService sourceService;
+    private DestinationService destinationService;
+    private PathExpander pathExpander;
     private GeneratorService generatorService;
-
-    private XdgPaths xdgPaths() {
-        return new XdgPaths() {
-            @Override
-            public Path configFile() {
-                return tempDir.resolve("viracocha/config.yaml");
-            }
-
-            @Override
-            public Path configDir() {
-                return tempDir.resolve("viracocha");
-            }
-
-            @Override
-            public Path dataDir() {
-                return tempDir.resolve("share/viracocha");
-            }
-        };
-    }
 
     @BeforeEach
     void setUp() throws Exception {
-        configService = new ConfigService(xdgPaths());
+        XdgPaths xdgPaths = new XdgPaths() {
+            @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
+            @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
+            @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
+        };
+        configService = new ConfigService(xdgPaths);
         configService.init();
-        generatorService = new GeneratorService(configService, new PathExpander());
+        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        sourceService = new SourceService(configService, extractor);
+        destinationService = new DestinationService(configService);
+        pathExpander = new PathExpander();
+        generatorService = new GeneratorService(configService, pathExpander);
     }
+
+    // --- GEN-01: flat copy writes files to destination ---
 
     @Test
-    void generatesExpandedFileFromPattern() throws Exception {
-        Path workspace = Files.createDirectory(tempDir.resolve("ws"));
-        Path patternDir = Files.createDirectory(tempDir.resolve("pat"));
-        Files.createDirectories(patternDir.resolve("sub"));
-        Files.writeString(patternDir.resolve("sub/${name}.txt"), "Hello ${name}!", StandardCharsets.UTF_8);
+    void generateFlatCopyWritesFilesToDestination() throws Exception {
+        // Set up source directory with two text files
+        Path sourceDir = Files.createDirectory(tempDir.resolve("source-flat"));
+        Files.writeString(sourceDir.resolve("file1.txt"), "content1");
+        Files.writeString(sourceDir.resolve("file2.txt"), "content2");
 
-        ViracochaConfig cfg = new ViracochaConfig();
-        cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
-        LinkedHashMap<String, String> mParams = new LinkedHashMap<>();
-        mParams.put("name", "World");
-        cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", mParams)), new LinkedHashMap<>(), new java.util.ArrayList<>()));
-        configService.save(cfg);
+        // Register source (templates: false) and destination
+        sourceService.addSource("flat-src", sourceDir.toString(), false);
+        Path destDir = Files.createDirectory(tempDir.resolve("dest-flat"));
+        destinationService.addDestination("flat-dest", destDir.toString());
+        destinationService.addMapping("flat-dest", "flat-src", null, false, false);
 
-        GenerationResult r = generatorService.generate("p1", false, false);
-        assertEquals(1, r.generated());
-        assertEquals(0, r.skipped());
-        assertEquals(0, r.failed());
+        // Run generate
+        GenerationResult result = generatorService.generate("flat-dest", false, false);
 
-        Path written = workspace.resolve("sub/World.txt");
-        assertTrue(Files.isRegularFile(written));
-        assertEquals("Hello World!", Files.readString(written, StandardCharsets.UTF_8));
+        // Assert both files exist in destination
+        assertTrue(Files.exists(destDir.resolve("file1.txt")), "file1.txt should exist in destination");
+        assertTrue(Files.exists(destDir.resolve("file2.txt")), "file2.txt should exist in destination");
+        assertEquals(2, result.generated(), "Should report 2 generated files");
+        assertEquals(0, result.skipped(), "Should report 0 skipped files");
     }
+
+    // --- GEN-01: recursive walk ---
 
     @Test
-    void secondRunSkipsExistingFile() throws Exception {
-        Path workspace = Files.createDirectory(tempDir.resolve("ws"));
-        Path patternDir = Files.createDirectory(tempDir.resolve("pat"));
-        Files.writeString(patternDir.resolve("a.txt"), "x", StandardCharsets.UTF_8);
+    void generateRecursiveCopyWalksSubdirectories() throws Exception {
+        // Set up source with subdirectory
+        Path sourceDir = Files.createDirectory(tempDir.resolve("source-recurse"));
+        Path subDir = Files.createDirectory(sourceDir.resolve("subdir"));
+        Files.writeString(subDir.resolve("deep.txt"), "deep content");
 
-        ViracochaConfig cfg = new ViracochaConfig();
-        cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
-        cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
-        configService.save(cfg);
+        // Register source + destination + mapping (recurse: true)
+        sourceService.addSource("recurse-src", sourceDir.toString(), false);
+        Path destDir = Files.createDirectory(tempDir.resolve("dest-recurse"));
+        destinationService.addDestination("recurse-dest", destDir.toString());
+        destinationService.addMapping("recurse-dest", "recurse-src", null, true, false);
 
-        assertEquals(0, generatorService.generate("p1", false, false).skipped());
-        GenerationResult second = generatorService.generate("p1", false, false);
-        assertTrue(second.skipped() >= 1);
-        assertEquals(0, second.generated());
+        // Run generate
+        GenerationResult result = generatorService.generate("recurse-dest", false, false);
+
+        // Assert subdirectory file exists in destination
+        assertEquals(1, result.generated());
+        assertTrue(Files.exists(destDir.resolve("subdir").resolve("deep.txt")),
+            "destDir/subdir/deep.txt should exist after recursive copy");
     }
+
+    // --- GEN-02: skip-existing ---
 
     @Test
-    void dryRunLeavesWorkspaceUnchanged() throws Exception {
-        Path workspace = Files.createDirectory(tempDir.resolve("ws"));
-        Path patternDir = Files.createDirectory(tempDir.resolve("pat"));
-        Files.writeString(patternDir.resolve("only.txt"), "body", StandardCharsets.UTF_8);
+    void generateSkipsExistingDestinationFiles() throws Exception {
+        // Set up source and destination
+        Path sourceDir = Files.createDirectory(tempDir.resolve("source-skip"));
+        Files.writeString(sourceDir.resolve("existing.txt"), "original content");
 
-        ViracochaConfig cfg = new ViracochaConfig();
-        cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
-        cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
-        configService.save(cfg);
+        sourceService.addSource("skip-src", sourceDir.toString(), false);
+        Path destDir = Files.createDirectory(tempDir.resolve("dest-skip"));
+        destinationService.addDestination("skip-dest", destDir.toString());
+        destinationService.addMapping("skip-dest", "skip-src", null, false, false);
 
-        long before = fileCount(workspace);
-        GenerationResult r = generatorService.generate("p1", true, false);
-        assertEquals(1, r.generated());
-        long after = fileCount(workspace);
-        assertEquals(before, after);
+        // Generate once — writes file
+        generatorService.generate("skip-dest", false, false);
+
+        // Overwrite source with different content
+        Files.writeString(sourceDir.resolve("existing.txt"), "modified content");
+
+        // Generate again
+        GenerationResult secondResult = generatorService.generate("skip-dest", false, false);
+
+        // Destination file should still have original content (skip-existing)
+        String destContent = Files.readString(destDir.resolve("existing.txt"));
+        assertEquals("original content", destContent, "Existing destination file must not be overwritten");
+        assertEquals(1, secondResult.skipped(), "Second run should report 1 skipped file");
+        assertEquals(0, secondResult.generated(), "Second run should report 0 generated files");
     }
+
+    // --- GEN-01: glob filter ---
 
     @Test
-    void dryRunStillReportsWouldCreateInVerbose() throws Exception {
-        Path workspace = Files.createDirectory(tempDir.resolve("ws"));
-        Path patternDir = Files.createDirectory(tempDir.resolve("pat"));
-        Files.writeString(patternDir.resolve("only.txt"), "b", StandardCharsets.UTF_8);
+    void generateWithGlobFilterSelectsMatchingFiles() throws Exception {
+        // Set up source with mixed file types
+        Path sourceDir = Files.createDirectory(tempDir.resolve("source-glob"));
+        Files.writeString(sourceDir.resolve("readme.md"), "# readme");
+        Files.writeString(sourceDir.resolve("config.yaml"), "key: value");
 
-        ViracochaConfig cfg = new ViracochaConfig();
-        cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
-        cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
-        configService.save(cfg);
+        sourceService.addSource("glob-src", sourceDir.toString(), false);
+        Path destDir = Files.createDirectory(tempDir.resolve("dest-glob"));
+        destinationService.addDestination("glob-dest", destDir.toString());
+        // glob: only *.md files
+        destinationService.addMapping("glob-dest", "glob-src", "*.md", false, false);
 
-        GenerationResult r = generatorService.generate("p1", true, true);
-        assertEquals(1, r.generated());
-        assertTrue(r.verboseLines().stream().anyMatch(l -> l.startsWith("Created ")));
+        GenerationResult result = generatorService.generate("glob-dest", false, false);
+
+        // Only readme.md should be in destination
+        assertEquals(1, result.generated());
+        assertTrue(Files.exists(destDir.resolve("readme.md")), "readme.md should be copied");
+        assertFalse(Files.exists(destDir.resolve("config.yaml")), "config.yaml should be filtered out by glob");
     }
+
+    // --- GEN-01/D-04: hidden path skipping ---
 
     @Test
-    void fileBlocksDirectoryCountsFailed() throws Exception {
-        Path workspace = Files.createDirectory(tempDir.resolve("ws"));
-        Files.writeString(workspace.resolve("out"), "", StandardCharsets.UTF_8);
+    void generateSkipsHiddenPathSegments() throws Exception {
+        // Set up source with hidden directory and normal file
+        Path sourceDir = Files.createDirectory(tempDir.resolve("source-hidden"));
+        Path gitDir = Files.createDirectory(sourceDir.resolve(".git"));
+        Files.writeString(gitDir.resolve("config"), "git config content");
+        Files.writeString(sourceDir.resolve("real.txt"), "real content");
 
-        Path patternDir = Files.createDirectory(tempDir.resolve("pat"));
-        Files.writeString(patternDir.resolve("x.txt"), "z", StandardCharsets.UTF_8);
+        sourceService.addSource("hidden-src", sourceDir.toString(), false);
+        Path destDir = Files.createDirectory(tempDir.resolve("dest-hidden"));
+        destinationService.addDestination("hidden-dest", destDir.toString());
+        destinationService.addMapping("hidden-dest", "hidden-src", null, true, false);
 
-        ViracochaConfig cfg = new ViracochaConfig();
-        cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
-        cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", "out", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
-        configService.save(cfg);
+        GenerationResult result = generatorService.generate("hidden-dest", false, false);
 
-        GenerationResult r = generatorService.generate("p1", false, false);
-        assertTrue(r.failed() >= 1);
-        assertEquals(0, r.generated());
+        // real.txt should be copied, .git directory should be skipped
+        assertEquals(1, result.generated());
+        assertTrue(Files.exists(destDir.resolve("real.txt")), "real.txt should be copied");
+        assertFalse(Files.exists(destDir.resolve(".git")), ".git directory should be skipped (hidden)");
     }
+
+    // --- GEN-03: template expansion in path and content ---
 
     @Test
-    void targetExistsAsDirectoryCountsFailed() throws Exception {
-        Path workspace = Files.createDirectory(tempDir.resolve("ws"));
-        Path patternDir = Files.createDirectory(tempDir.resolve("pat"));
-        Files.writeString(patternDir.resolve("foo.txt"), "a", StandardCharsets.UTF_8);
+    void generateTemplateSourceExpandsPathSegmentsAndContent() throws Exception {
+        // Set up source with Freemarker template in filename and content
+        Path sourceDir = Files.createDirectory(tempDir.resolve("source-template"));
+        Files.writeString(sourceDir.resolve("${project}.txt"), "Hello ${name}!");
 
-        ViracochaConfig cfg = new ViracochaConfig();
-        cfg.getPatterns().add(new PatternEntry("pat1", patternDir.toString(), List.of()));
-        cfg.getProjects().add(new ProjectEntry("p1", workspace.toString(),
-            List.of(new MappingEntry("pat1", ".", new LinkedHashMap<>())), new LinkedHashMap<>(), new java.util.ArrayList<>()));
+        // Register as template source (templates: true)
+        sourceService.addSource("tmpl-src", sourceDir.toString(), true);
+        Path destDir = Files.createDirectory(tempDir.resolve("dest-template"));
+        destinationService.addDestination("tmpl-dest", destDir.toString());
+
+        // Set parameters on tmpl-dest: project -> myproj, name -> world
+        ViracochaConfig cfg = configService.load();
+        cfg.getDestinations().stream()
+            .filter(d -> d.getName().equals("tmpl-dest"))
+            .findFirst().get()
+            .getParameters().put("project", "myproj");
+        cfg.getDestinations().stream()
+            .filter(d -> d.getName().equals("tmpl-dest"))
+            .findFirst().get()
+            .getParameters().put("name", "world");
         configService.save(cfg);
 
-        Files.createDirectory(workspace.resolve("foo.txt"));
+        // Add mapping after setting parameters
+        destinationService.addMapping("tmpl-dest", "tmpl-src", null, false, false);
 
-        GenerationResult r = generatorService.generate("p1", false, false);
-        assertTrue(r.failed() >= 1);
+        GenerationResult result = generatorService.generate("tmpl-dest", false, false);
+
+        // destDir/myproj.txt should exist with expanded content
+        assertEquals(1, result.generated());
+        Path expandedFile = destDir.resolve("myproj.txt");
+        assertTrue(Files.exists(expandedFile), "Expanded file myproj.txt should exist");
+        assertEquals("Hello world!", Files.readString(expandedFile), "Template content should be expanded");
     }
 
-    private static long fileCount(Path root) throws Exception {
-        if (!Files.exists(root)) {
-            return 0;
-        }
-        try (Stream<Path> s = Files.walk(root)) {
-            return s.filter(Files::isRegularFile).count();
-        }
+    // --- GEN-04: binary byte integrity ---
+
+    @Test
+    void generateBinarySourceByteCopiesToDestination() throws Exception {
+        // Write known non-UTF8 bytes to source
+        byte[] binaryData = new byte[]{0x00, (byte) 0xFF, 0x1A, 0x2B, 0x3C, (byte) 0x89, 0x50, 0x4E, 0x47};
+        Path sourceDir = Files.createDirectory(tempDir.resolve("source-binary"));
+        Files.write(sourceDir.resolve("sample.bin"), binaryData);
+
+        sourceService.addSource("bin-src", sourceDir.toString(), false);
+        Path destDir = Files.createDirectory(tempDir.resolve("dest-binary"));
+        destinationService.addDestination("bin-dest", destDir.toString());
+        destinationService.addMapping("bin-dest", "bin-src", null, false, false);
+
+        GenerationResult result = generatorService.generate("bin-dest", false, false);
+
+        // Read destination bytes and assert exact byte equality
+        assertEquals(1, result.generated());
+        byte[] copiedData = Files.readAllBytes(destDir.resolve("sample.bin"));
+        assertArrayEquals(binaryData, copiedData, "Binary file must be copied byte-for-byte without corruption");
+    }
+
+    // --- Pitfall 6: destination not found ---
+
+    @Test
+    void generateDestinationNotFoundThrowsIllegalArgumentException() {
+        // Call generate with a destination name that does not exist in config
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
+            () -> generatorService.generate("nonexistent-dest", false, false));
+        assertTrue(ex.getMessage().contains("nonexistent-dest"),
+            "Exception message should contain the unknown destination name. Got: " + ex.getMessage());
     }
 }

@@ -1,74 +1,83 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: — Subscriptions & sync
-status: complete
-stopped_at: Milestone v2.0 complete — Phase 7 shipped
-last_updated: "2026-04-04T22:35:00.000Z"
-last_activity: 2026-04-04
+milestone: v3.0
+milestone_name: Unified Sources & Destinations
+status: executing
+stopped_at: Completed 12-sync-rewrite/12-01-PLAN.md
+last_updated: "2026-05-11T13:48:51.803Z"
+last_activity: 2026-05-11
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 5
+  completed_phases: 4
+  total_plans: 16
+  completed_plans: 14
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: `.planning/PROJECT.md`
+See: `.planning/PROJECT.md` (updated 2026-05-08)
 
-**Core value:** A developer can register patterns and catalogs once, then generate a correctly-structured workspace with a single command — and regenerating is safe (skips existing files).
+**Core value:** A developer registers sources and destinations once, then populates any workspace with a single command — and regeneration is safe (skips existing files). Mappings with `sync: true` keep destination copies up to date on demand via `vira sync`.
 
-**Current focus:** Milestone v2.0 complete (Phases 5–7)
+**Current focus:** Phase 12 — sync-rewrite
 
 ## Current Position
 
-Phase: 07 — complete
-Plan: 07-01, 07-02, 07-03 (all SUMMARY.md)
-Status: Phase 7 complete — v2.0 milestone shipped
-Last activity: 2026-04-04
+Phase: 12 (sync-rewrite) — EXECUTING
+Plan: 3 of 4
+Status: Ready to execute
+Last activity: 2026-05-11
 
-## Performance Metrics
-
-**Velocity:**
-
-- Total plans completed: 9
-- Average duration: -
-- Total execution time: -
-
-**By Phase:**
-
-| Phase | Plans | Total | Avg/Plan |
-|-------|-------|-------|----------|
-| 5 | 3 | - | - |
-| 6 | 3 | - | - |
-| 7 | 3 | - | - |
-
-**Recent Trend:**
-
-- Last 5 plans: 07-03, 07-02, 07-01, 06-03, 06-02
-- Trend: -
-
-*Updated after each plan completion*
+Progress: [░░░░░░░░░░] 0% (v3.0 — 0/5 phases complete)
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table. Prior milestone decisions remain valid unless superseded in v2.0 planning.
+Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
+
+- [v3.0 design]: Collapse catalogs+archetypes into sources with `templates: true/false` flag
+- [v3.0 design]: Collapse projects into destinations; eliminate subscriptions in favor of per-mapping `sync: true`
+- [v3.0 design]: v2 config files trigger fail-with-instructions (no auto-migration)
+- [Phase 8]: Delete v2 packages in dependency order — move shared infra first, then delete packages one at a time compiling after each
+- [Phase 08]: Deleted v2 command packages (archetype/catalog/project/subscription) in Plan 01 to achieve compile-clean state after v2 model class deletion
+- [Phase 08]: GeneratorService and DefaultSyncService stubbed with UnsupportedOperationException referencing rewrite phases (11 and 12)
+- [Phase 08]: Updated GenerateCommand and SyncCommand to v3 terminology so assertFalse checks on v2 command names pass
+- [Phase 09-01]: Raw-string traversal check (rawPath.contains('..')) before Path.of() to prevent normalization bypass when validating source paths
+- [Phase 09-01]: SourceService stores absolute normalized path in SourceEntry.path for consistent lookup regardless of original input format
+- [Phase 09-source-commands]: Positional NAME parameter for show/remove commands, D-06 double guard for Parameters block, D-07 Jackson ObjectMapper for JSON output
+- [Phase 09-source-commands]: SourceCommand alias 'src' per D-10 locked decision; call() returns 0 with picocli auto-help
+- [Phase 10-01]: GlobMatcher prepends 'glob:' internally — callers pass clean patterns without prefix
+- [Phase 10-01]: Destination paths stored as-is with no normalization or existence check (D-04: destinations may not exist at registration time)
+- [Phase 10-01]: Raw-string traversal check before Path.of() in DestinationService mirrors SourceService DEST-06/D-01 pattern
+- [Phase 10-destination-mapping-commands]: Stub pattern for Plan 03 mapping commands: @Command+@Singleton+Callable<Integer> returning 0 allows DestinationCommand group to compile with all 7 subcommands declared
+- [Phase 10-destination-mapping-commands]: DestinationAddCommand omits --templates and Files.exists check (D-04: destinations may not exist at registration time; differs from SourceAddCommand intentionally)
+- [Phase 10-destination-mapping-commands]: Two explicit @Parameters(index=0/1) for remove-mapping NAME INDEX — avoids picocli undefined binding order for multiple positional params
+- [Phase 10-destination-mapping-commands]: null glob stored as null and displayed as '(all files)' in list-mappings — no sentinel string in config YAML
+- [Phase 11-generate-rewrite]: Auto-create destination directory silently in GeneratorService.generate() — interactive prompt deferred to Plan 02 GenerateCommand integration
+- [Phase 11-generate-rewrite]: Template test parameters set on DestinationEntry before addMapping() — parameters live on destination, not mapping
+- [Phase 11-generate-rewrite]: Wave 0 uses @Disabled stubs so test scaffold compiles/passes while GeneratorService throws UnsupportedOperationException
+- [Phase 11]: 5-arg generate() overload keeps 3-arg for backward compat; dry-run always prints Would-create lines without requiring --verbose
+- [Phase 11]: Picocli leaf-command tests: CommandLine rooted at command class, execute() args are options not subcommand names
+- [Phase 12-sync-rewrite]: Wave 0 stubs: Javadoc must not contain literal '@Disabled' to satisfy grep -c @Disabled acceptance criteria
+- [Phase 12-sync-rewrite]: SyncResult is a Java record (not Lombok @Data) following the GenerationResult template pattern
+- [Phase 12-sync-rewrite]: SyncConflictRecord kept as Lombok @Data class to avoid Jackson deserialization issues with records
+- [Phase 12-sync-rewrite]: SyncService redesigned to single v3 sync() method; v2 syncProject() methods removed entirely
 
 ### Pending Todos
 
-None yet.
+None.
 
 ### Blockers/Concerns
 
-None.
+- Phase 8: v2 package deletion requires careful ordering; `ArchetypePathUtils` must move to `infra/` before pattern/catalog/project/subscription packages are removed
+- Phase 11: Binary file copy (GEN-04) needs a dedicated integration test with a non-text file to verify no corruption
 
 ## Session Continuity
 
-Last session: 2026-04-04T22:09:14.485Z
-Stopped at: v2.0 milestone complete
-Resume file: —
+Last session: 2026-05-11T13:48:51.800Z
+Stopped at: Completed 12-sync-rewrite/12-01-PLAN.md
+Resume file: None

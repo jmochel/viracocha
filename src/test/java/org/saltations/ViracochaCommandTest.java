@@ -31,10 +31,16 @@ public class ViracochaCommandTest {
                 "--help output must list 'config' subcommand");
             assertTrue(help.contains("generate"),
                 "--help output must list 'generate' subcommand");
-            assertTrue(help.contains("subscription"),
-                "--help output must list 'subscription' subcommand");
             assertTrue(help.contains("sync"),
                 "--help output must list 'sync' subcommand");
+            assertFalse(help.contains("subscription"),
+                "--help must NOT list removed 'subscription' subcommand");
+            assertFalse(help.contains("archetype"),
+                "--help must NOT list removed 'archetype' subcommand");
+            assertFalse(help.contains("catalog"),
+                "--help must NOT list removed 'catalog' subcommand");
+            assertFalse(help.contains("project"),
+                "--help must NOT list removed 'project' subcommand");
         }
     }
 }

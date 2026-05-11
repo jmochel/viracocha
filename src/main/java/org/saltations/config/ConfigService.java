@@ -1,5 +1,6 @@
 package org.saltations.config;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import jakarta.inject.Inject;
@@ -49,12 +50,20 @@ public class ConfigService {
      * Loads config.yaml from the XDG config path.
      *
      * @throws ConfigNotInitializedException if config file does not exist
+     * @throws ConfigVersionException if the config file version is less than 3
      * @throws IOException if file cannot be read or parsed
      */
     public ViracochaConfig load() throws IOException {
         Path configFile = xdgPaths.configFile();
         if (!Files.exists(configFile)) {
             throw new ConfigNotInitializedException();
+        }
+        // Version pre-read: detect v2 config before full deserialization (per D-09)
+        JsonNode root = yaml.readTree(configFile.toFile());
+        JsonNode versionNode = root.get("version");
+        int version = (versionNode == null || versionNode.isNull()) ? 0 : versionNode.asInt(0);
+        if (version < 3) {
+            throw new ConfigVersionException(version);
         }
         return yaml.readValue(configFile.toFile(), ViracochaConfig.class);
     }
