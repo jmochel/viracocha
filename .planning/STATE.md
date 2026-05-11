@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.0
 milestone_name: Unified Sources & Destinations
 status: executing
-stopped_at: Completed 12-00-PLAN.md
-last_updated: "2026-05-11T13:44:35.481Z"
+stopped_at: Completed 12-sync-rewrite/12-01-PLAN.md
+last_updated: "2026-05-11T13:48:51.803Z"
 last_activity: 2026-05-11
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 16
-  completed_plans: 13
+  completed_plans: 14
   percent: 0
 ---
 
@@ -27,7 +27,7 @@ See: `.planning/PROJECT.md` (updated 2026-05-08)
 ## Current Position
 
 Phase: 12 (sync-rewrite) — EXECUTING
-Plan: 2 of 4
+Plan: 3 of 4
 Status: Ready to execute
 Last activity: 2026-05-11
 
@@ -63,6 +63,9 @@ Decisions logged in PROJECT.md Key Decisions table. Recent v3.0 decisions:
 - [Phase 11]: 5-arg generate() overload keeps 3-arg for backward compat; dry-run always prints Would-create lines without requiring --verbose
 - [Phase 11]: Picocli leaf-command tests: CommandLine rooted at command class, execute() args are options not subcommand names
 - [Phase 12-sync-rewrite]: Wave 0 stubs: Javadoc must not contain literal '@Disabled' to satisfy grep -c @Disabled acceptance criteria
+- [Phase 12-sync-rewrite]: SyncResult is a Java record (not Lombok @Data) following the GenerationResult template pattern
+- [Phase 12-sync-rewrite]: SyncConflictRecord kept as Lombok @Data class to avoid Jackson deserialization issues with records
+- [Phase 12-sync-rewrite]: SyncService redesigned to single v3 sync() method; v2 syncProject() methods removed entirely
 
 ### Pending Todos
 
@@ -75,6 +78,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-05-11T13:44:35.479Z
-Stopped at: Completed 12-00-PLAN.md
+Last session: 2026-05-11T13:48:51.800Z
+Stopped at: Completed 12-sync-rewrite/12-01-PLAN.md
 Resume file: None
