@@ -2,7 +2,9 @@
   "resources": {
     "includes": [
       { "pattern": "\\Qlogback.xml\\E" },
-      { "pattern": "\\Qapplication.yml\\E" }
+      { "pattern": "\\Qapplication.yml\\E" },
+      { "pattern": "\\QMETA-INF/micronaut/\\E" },
+      { "pattern": "\\QMETA-INF/services/\\E.*" }
     ]
   }
 }

@@ -226,3 +226,6 @@ vendor/
 coverage/
 .cache/
 tmp/
+
+# Graal native-image agent output (regenerate with native-image-agent when needed)
+native-agent-out/

@@ -1,0 +1,98 @@
+# .graphifyignore example
+AGENTS.md          # graphify install files — don't extract your own instructions as knowledge
+CLAUDE.md
+.cursor/
+.claude/
+
+# .graphifyignore
+
+# ── GSD Runtime & State (ephemeral, per-session) ──
+.gsd/
+.planning/
+
+# ── Generated Files (regenerable) ──
+node_modules/
+dist/
+build/
+.next/
+*.tsbuildinfo
+
+# ── Dependencies & Lock Files ──
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# ── Build Artifacts ──
+*.o
+*.so
+*.dylib
+*.dll
+*.exe
+out/
+target/
+
+# ── IDE & Editor Config ──
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+### Java ###
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+replay_pid*
+
+### Maven ###
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+
+# ── Environment Files ──
+.env
+.env.local
+.env.*.local
+
+# ── Test Coverage ──
+coverage/
+.nyc_output/
+
+# ── Large Binary/Media ──
+*.pdf
+*.mp4
+*.mov
+*.mp3
+*.wav
+*.png
+*.jpg
+*.webp
+

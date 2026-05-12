@@ -1,0 +1,22 @@
+vars: {
+  d2-config: {
+    layout-engine: elk
+  }
+}
+
+home-folder: {
+  label: "Home Folder"
+
+  central-config: {
+    shape: document
+    label: "central-config.yaml"
+  }
+
+  catalog: {
+    shape: package
+    label: "catalog - a path to shared templates and sources"
+  }
+  
+  central-config -> catalog: contains
+  
+}
