@@ -29,11 +29,11 @@ public class SourceAddCommand implements Callable<Integer> {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"--name"}, required = true,
+    @Option(names = {"-n", "--name"}, required = true,
             description = "Unique name for this source.")
     private String name;
 
-    @Option(names = {"--path"}, required = true,
+    @Option(names = {"-p", "--path"}, required = true,
             description = "Absolute or relative path to the source directory.")
     private String path;
 

@@ -1,7 +1,33 @@
 {
   "permissions": {
     "allow": [
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Skill(gsd:progress)",
+      "Bash(./mvnw compile *)",
+      "Bash(./mvnw test *)",
+      "Bash(grep -rn \"CatalogEntry\\\\|ArchetypeEntry\\\\|ProjectEntry\\\\|SubscriptionEntry\" src/main/java/)",
+      "Bash(grep -rn \"ArchetypePathUtils\" src/main/java/)",
+      "Bash(git log *)",
+      "Bash(python3 -c ' *)",
+      "Bash(mvn test *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Skill(gsd:execute-phase)",
+      "Bash(npm list *)",
+      "Bash(python3 -m json.tool)",
+      "Bash(grep -v \"^\\\\s*$\")",
+      "Bash(gsd --version)",
+      "Bash(gsd version *)",
+      "Bash(gsd init *)",
+      "Bash(npm view *)",
+      "Bash(npm search *)",
+      "Read(//home/jmochel/.gsd/**)",
+      "Read(//home/jmochel/.gsd/agent/**)",
+      "Bash(gh repo *)",
+      "Bash(git -C /home/jmochel/pers/viracocha ls-files .cursor/)",
+      "Bash(git -C /home/jmochel/pers/viracocha ls-files .claude/)",
+      "Bash(git -C /home/jmochel/pers/viracocha status --short)",
+      "Bash(git -C /home/jmochel/pers/viracocha ls-files .cursor/get-shit-done/)",
+      "Bash(git -C /home/jmochel/pers/viracocha ls-files .cursor/gsd-file-manifest.json)"
     ]
   }
 }

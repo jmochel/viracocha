@@ -1,146 +1,139 @@
 # Viracocha (`vira`)
 
-CLI workspace manager for AI-assisted development: register **catalogs** (folder sources) and **patterns** (Freemarker templates), tie them together in **projects**, then **generate** files into a project workspace. Regeneration skips files that already exist.
+CLI workspace manager for AI-assisted development: register **sources** (local directories, optionally Freemarker template trees), register **destinations** (workspace roots), attach **mappings** from sources into a destination, then **generate** files or **sync** non-template files. **Generate** never overwrites existing files. **Sync** is local filesystem only (no network, no Git).
 
-Requires **JDK 21**. Build with `./mvnw package` and run `java -jar target/viracocha-0.1.jar`, or use `scripts/vira` from the repo root.
+Requires **JDK 21**. Build with `./mvnw package`, then `java -jar target/viracocha-0.1.jar`, or run `./scripts/vira` from the repository root (the script builds the fat JAR if missing).
 
 ---
 
 ## Conceptual model
 
+| Concept | Role |
+| --- | --- |
+| **Central config** | Single YAML file (`config.yaml`) listing `sources` and `destinations`. Created by `vira config init`. Must declare **`version: 3`**. |
+| **Source** | Named path to a directory. If marked as templates, path segments and file contents are expanded with Freemarker using the destination’s **parameters** map. |
+| **Destination** | Named workspace root path, optional default **parameters** (`key: value`), and a list of **mappings**. |
+| **Mapping** | Binds a **source** into that destination: optional glob filter, recurse flag, and **`sync: true`** to include the mapping in `vira sync`. |
+| **Generate** | For each mapping, walks the source tree, applies template or binary copy rules, writes under the destination root. Existing destination files are skipped. |
+| **Sync** | For each mapping with `sync: true`, copies changed **non-template** source files into the destination using timestamp and content checks; reports conflicts when the destination file is newer than the source and content differs. |
 
-| Concept            | Role                                                                                                                                                                                                                                       |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Central Config** | Single YAML file listing catalogs, patterns, and projects. Created by `vira config init`.                                                                                                                                                |
-| **Catalog**      | Named reference to a folder containing AI configuration artifacts that can be synced to a **workspace folder**. Paths to the **Catalog** must exist on disk when registered.                                                                                                      |
-| **Pattern**        | Named reference to a folder or file of **Freemarker** templates. The names of Pattern folders and files can contain `${variable}` and the file contents  can use `${variable}` placeholders.                                                                                         |
-| **Project**        | A configuration stored in the **Central Config** that has the path to the **workspace folder** and a list of **mappings** that map folders/files from **Catalogs** and **Patterns**.                                                                                                                 |
-| **Mapping**        | “Install this **registered pattern** under this **workspace** path (relative to the project workspace root), with optional **parameters** (`key=value`) for Freemarker.” Project-level default parameters can exist; mapping params override. |
-| `**generate`**     | Walks each mapping, merges parameters, expands templates, writes into the project workspace. **Existing files are not overwritten** (skip-existing).                                                                                       |
-
-Structured logging (JSONL) goes to `~/.local/share/viracocha/vira.jsonl`; normal command output stays on stdout/stderr.
-
----
-
-## Subscriptions and sync
-
-1. **Register a catalog** (`vira catalog register`) and **create a project** (`vira project create`).
-2. **Add a subscription** linking the catalog tree to a folder under the workspace, with a **direction**:
-   - `catalog-to-workspace` — copy catalog → workspace
-   - `workspace-to-catalog` — copy workspace → catalog
-   - `bidirectional` — reconcile both sides (analyze then apply); conflicts abort the apply phase
-
-   Example: `vira subscription add --project <name> --catalog <name> --source <rel> --workspace <rel> --direction catalog-to-workspace`
-
-3. **Run sync:** `vira sync --project-name <name>` with optional:
-   - `--subscription <uuid>` — limit to one subscription
-   - `--dry-run` — report what would happen without copying or creating directories
-   - `--verbose` — one line per file action on stdout before the summary
-   - `--json` — machine-readable `SyncEngineResult` on stdout (no human summary line)
-
-**Conflict behavior:** sync is **one-shot** (no file watcher). On **bidirectional** sync, if both sides differ for the same path, the engine reports **structured conflicts** and **does not auto-merge** — exit code **1** when any subscription has conflicts or file failures.
-
-**Scope:** **local filesystem only** — same as the rest of vira (no network, no Git operations).
+Structured logging (JSONL) is written to `~/.local/share/viracocha/vira.jsonl`. Normal command output uses stdout/stderr.
 
 ---
 
-## Configuration file
+## Configuration
 
+| Item | Location |
+| --- | --- |
+| Config file | `$XDG_CONFIG_HOME/viracocha/config.yaml` when `XDG_CONFIG_HOME` is set; otherwise `~/.config/viracocha/config.yaml`. |
+| JSONL log | `~/.local/share/viracocha/vira.jsonl` |
 
-| Item        | Location                                                                                                                 |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------ |
-| Config file | `$XDG_CONFIG_HOME/viracocha/config.yaml` — if `XDG_CONFIG_HOME` is unset, defaults to `~/.config/viracocha/config.yaml`. |
-| JSONL log   | `~/.local/share/viracocha/vira.jsonl`                                                                                    |
-
-
-Almost every command requires an initialized config (`vira config init` first). Otherwise you’ll see: `Config not initialized. Run 'vira config init' first.`
+If the config file is missing, commands that need it print: `Config not initialized. Run 'vira config init' first.` If the file exists but **`version` is less than 3**, load fails with an error that tells you to remove the old file and run `vira config init` again.
 
 ---
 
-## Usage overview
+## Typical workflow
 
-### 1. Initialize config
+### 1. Initialize and inspect config
 
 ```bash
 vira config init
 vira config show
 ```
 
-### 2. Register catalogs and patterns
+### 2. Register sources
 
-Catalogs and patterns are **absolute paths** on your machine.
-
-```bash
-vira catalog register --name my-catalog --path /absolute/path/to/catalog/folder
-vira catalog list
-vira catalog show --name my-catalog
-
-vira pattern register --name my-pattern --path /absolute/path/to/template-tree
-vira pattern list
-vira pattern show --name my-pattern
-```
-
-Use `--json` on `list` / `show` where supported for machine-readable output.
-
-### 3. Define a project and mappings
+Paths may be absolute or relative; the string must not contain `..`. The path must exist and be a directory.
 
 ```bash
-vira project create --name my-app --path /absolute/path/to/workspace
-vira project add-mapping \
-  --project my-app \
-  --pattern my-pattern \
-  --workspace relative/target/dir \
-  --param foo=bar \
-  --param other=value
-vira project show --name my-app
-vira project list
+vira source add -n my-templates -p /absolute/or/relative/path/to/tree --templates
+vira source add -n my-static -p /path/to/static-files
+vira source list
+vira source show my-templates
 ```
 
-### 4. Generate into the workspace
+Short aliases: `-n` for `--name`, `-p` for `--path`. `--templates` marks the source as Freemarker-driven and can record extracted variable names in config. Use `vira source remove NAME` to unregister.
+
+### 3. Register destinations and mappings
+
+Destination paths may be absent on disk at registration time (but must not contain `..` in the stored string). Tilde (`~`) in stored paths is expanded when generating or syncing.
 
 ```bash
-vira generate --project-name my-app
-vira generate --project-name my-app --dry-run    # plan only, no writes
-vira generate --project-name my-app --verbose    # one line per file action
+vira destination add -n my-app -p /path/to/workspace
+vira destination add-mapping my-app --source my-templates --recurse
+vira destination add-mapping my-app --source my-static --glob "**/*.md" --sync
+vira destination show my-app
+vira destination list
 ```
 
-Summary line always reports counts: `Generated: …, Skipped: …, Failed: …`.
+`add-mapping` takes the **destination name** as the first parameter, then `--source` (required). Options: `--glob`, `--recurse`, `--sync` (persisted on the mapping; only mappings with `sync: true` participate in `vira sync`).
+
+List mappings: `vira destination list-mappings DEST`. Remove one by **0-based index**: `vira destination remove-mapping DEST 0`.
+
+To set Freemarker **default parameter values** for a destination, edit `config.yaml` under that destination’s `parameters:` key. There is no CLI flag for parameters today.
+
+### 4. Generate
+
+```bash
+vira generate --destination-name my-app
+vira generate --destination-name my-app --dry-run
+vira generate --destination-name my-app --verbose
+```
+
+If the destination directory does not exist, you are prompted to create it (`y`/`N`), except in `--dry-run`, which only reports `Would create: <path>`. Summary line: `Generated: …, Skipped: …, Failed: …`.
+
+### 5. Sync
+
+```bash
+vira sync --destination-name my-app
+vira sync --destination-name my-app --dry-run
+vira sync --destination-name my-app --verbose
+vira sync --destination-name my-app --json
+```
+
+Only mappings with **`sync: true`** are processed. **Template sources are skipped** during sync. Human-readable summary: `Copied: …, Skipped: …, Failed: …, Conflicts: …`. With **`--json`**, a single **SyncResult** JSON object is printed on stdout; exit code **1** if there are conflicts or failures. Conflicts occur when a destination file is **newer** than the corresponding source file and **content differs**.
 
 ---
 
-## Command tree (quick reference)
+## Command reference
 
+Group aliases: `vira config` → `vira cfg`, `vira source` → `vira src`, `vira destination` → `vira dest`, `vira generate` → `vira gen`.
 
-| Command                                                                | Purpose                                                                                                              |
-| ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `vira config init`                                                     | Create config dir and `config.yaml` if missing.                                                                      |
-| `vira config show`                                                     | Print config path and file contents.                                                                                 |
-| `vira catalog` … `register`, `list`, `show`, `unregister`            | CRUD for named catalog paths (`--name`, `--path` where needed).                                                    |
-| `vira pattern` … `register`, `list`, `show`, `unregister`              | CRUD for named pattern trees; `show` lists extracted Freemarker parameters.                                          |
-| `vira project` … `create`, `list`, `show`, `add-mapping`, `unregister` | Projects (`--name`, `--path`), mappings (`--project`, `--pattern`, `--workspace`, repeatable `--param key=value`). |
-| `vira generate`                                                        | `--project-name` (required), optional `--dry-run`, `--verbose`.                                                      |
-| `vira subscription` … `add`, `list`, `show`, `remove`                  | Link a catalog subtree to a workspace subtree with a sync direction.                                                |
-| `vira sync`                                                            | `--project-name` (required); optional `--subscription`, `--dry-run`, `--verbose`, `--json`.                         |
+| Command | Purpose |
+| --- | --- |
+| `vira config init` | Create config directory and `config.yaml` if missing. |
+| `vira config show` | Print config file path and raw YAML. |
+| `vira source add` | `-n`/`--name`, `-p`/`--path` (required); optional `--templates`. |
+| `vira source list` | Optional `--json` (JSONL, one object per line). |
+| `vira source show NAME` | Optional `--json` (single object). |
+| `vira source remove NAME` | Remove a source. |
+| `vira destination add` | `-n`/`--name`, `-p`/`--path` (required). |
+| `vira destination list` | Optional `--json` (JSONL). |
+| `vira destination show NAME` | Optional `--json` (single object). |
+| `vira destination remove NAME` | Remove a destination and its mappings. |
+| `vira destination add-mapping DEST` | `--source` (required); `--glob`, `--recurse`, `--sync`. |
+| `vira destination list-mappings DEST` | Optional `--json` (JSONL). |
+| `vira destination remove-mapping DEST INDEX` | `INDEX` is 0-based. |
+| `vira generate` | Required `--destination-name`; `--dry-run`, `--verbose`. |
+| `vira sync` | Required `--destination-name`; `--dry-run`, `--verbose`, `--json`. |
 
-
-For every subcommand, `vira <group> <command> --help` lists exact options.
+Use `vira <group> <subcommand> --help` for full option lists.
 
 ---
 
 ## GraalVM native image
 
-Prerequisites: [GraalVM for JDK 21](https://www.graalvm.org/) (or another distribution) with `native-image` available (e.g. `gu install native-image` on older bundles).
+Use a JDK 21 distribution that includes **`native-image`** (install tooling for your vendor if needed).
 
 ```bash
 ./mvnw -DskipTests -Pgraalvm-native package
 ./target/vira --help
 ```
 
-The usual JVM workflow remains: `./mvnw -DskipTests package` and `java -jar target/viracocha-0.1.jar`, or `scripts/vira`.
-
 ---
 
 ## Development
 
-- **Stack:** Java 21, Micronaut 4, Picocli, Freemarker, Jackson YAML, Logback.
-- **Docs:** [Micronaut 4 guide](https://docs.micronaut.io/4.10.10/guide/index.html), [Maven plugin](https://micronaut-projects.github.io/micronaut-maven-plugin/latest/).
+Stack: Java 21, Micronaut 4, Picocli, Freemarker, Jackson YAML, Logback.
+
+References: [Micronaut 4 guide](https://docs.micronaut.io/4.10.10/guide/index.html), [Micronaut Maven plugin](https://micronaut-projects.github.io/micronaut-maven-plugin/latest/).

@@ -29,11 +29,11 @@ public class DestinationAddCommand implements Callable<Integer> {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"--name"}, required = true,
+    @Option(names = {"-n", "--name"}, required = true,
             description = "Unique name for this destination.")
     private String name;
 
-    @Option(names = {"--path"}, required = true,
+    @Option(names = {"-p", "--path"}, required = true,
             description = "Absolute or relative path to the destination directory.")
     private String path;
 

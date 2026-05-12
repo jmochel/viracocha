@@ -83,6 +83,15 @@ class SourceAddCommandTest {
     }
 
     @Test
+    void addWithShortAliasesExitsZero() throws IOException {
+        Path sourceDir = Files.createDirectory(tempDir.resolve("alias-source"));
+        int exit = commandLine.execute("-n", "alias-source", "-p", sourceDir.toString());
+        assertEquals(0, exit, "Short aliases -n/-p must exit 0");
+        assertTrue(stdout.toString().contains("Source 'alias-source' added."),
+            "stdout must contain confirmation message when using short aliases");
+    }
+
+    @Test
     void addPathWithDotDotExitsOneWithTraversalError() {
         int exit = commandLine.execute("--name", "x", "--path", "/tmp/../etc");
         assertEquals(1, exit, "Path with '..' must exit 1");

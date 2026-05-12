@@ -64,6 +64,14 @@ class DestinationAddCommandTest {
     }
 
     @Test
+    void addWithShortAliasesExitsZero() {
+        int exit = commandLine.execute("-n", "alias-dest", "-p", "/tmp/workspace");
+        assertEquals(0, exit, "Short aliases -n/-p must exit 0");
+        assertTrue(stdout.toString().contains("Destination 'alias-dest' added."),
+            "stdout must contain confirmation message when using short aliases");
+    }
+
+    @Test
     void addPathWithDotDotExitsOneWithTraversalError() {
         int exit = commandLine.execute("--name", "x", "--path", "/tmp/../etc");
         assertEquals(1, exit, "Path with '..' must exit 1");
