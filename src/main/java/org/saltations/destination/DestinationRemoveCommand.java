@@ -19,6 +19,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "remove",
+    aliases = {"rm"},
     description = "Remove a named destination from the configuration.",
     mixinStandardHelpOptions = true
 )
@@ -41,19 +42,17 @@ public class DestinationRemoveCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         try {
-            boolean removed = destinationService.removeDestination(name);
+            var removed = destinationService.removeDestination(name);
             if (!removed) {
                 spec.commandLine().getErr().println("Destination '" + name + "' not found.");
                 return 1;
             }
             spec.commandLine().getOut().println("Destination '" + name + "' removed.");
             return 0;
-        } catch (ConfigNotInitializedException e) {
+        } catch (ConfigNotInitializedException | IOException e) {
             spec.commandLine().getErr().println(e.getMessage());
             return 1;
-        } catch (IOException e) {
-            spec.commandLine().getErr().println("Error: " + e.getMessage());
-            return 1;
         }
+   
     }
 }

@@ -1,6 +1,5 @@
 package org.saltations;
 
-import io.micronaut.configuration.picocli.PicocliRunner;
 import io.micronaut.context.ApplicationContext;
 import io.micronaut.context.env.Environment;
 import jakarta.inject.Singleton;
@@ -38,9 +37,9 @@ import java.util.concurrent.Callable;
 public class ViracochaCommand implements Callable<Integer> {
 
     public static void main(String[] args) throws Exception {
-        try (ApplicationContext ctx = ApplicationContext.builder(
+        try (var ctx = ApplicationContext.builder(
                 ViracochaCommand.class, Environment.CLI).start()) {
-            CommandLine cmd = new CommandLine(
+            var cmd = new CommandLine(
                     ctx.getBean(ViracochaCommand.class),
                     new CommandLine.IFactory() {
                         @Override
@@ -50,15 +49,39 @@ public class ViracochaCommand implements Callable<Integer> {
                     });
             cmd.setCommandName("vira");
             cmd.setSeparator(" ");
+
             cmd.getSubcommands().values().forEach(sub -> propagateSeparator(sub, " "));
+            propagateUsageSettings(cmd);
+
             System.exit(cmd.execute(args));
         }
     }
-
+ 
     private static void propagateSeparator(CommandLine cmd, String separator) {
         cmd.setSeparator(separator);
         cmd.getSubcommands().values().forEach(sub -> propagateSeparator(sub, separator));
     }
+
+
+    private static void propagateUsageSettings(CommandLine cmd) {
+
+        var spec = cmd.getCommandSpec();
+
+        spec.usageMessage().headerHeading("@|bold,underline Usage|@:%n%n");
+        spec.usageMessage().descriptionHeading("%n@|bold,underline Description|@:%n");
+        spec.usageMessage().sortOptions(false);
+
+        boolean hasOptions = !spec.options().isEmpty();
+
+        if (hasOptions) {
+            spec.usageMessage().optionListHeading("%n@|bold,underline Options|@:%n");
+        } else {
+            spec.usageMessage().optionListHeading(""); // suppress header entirely
+        }
+
+        cmd.getSubcommands().values().forEach(sub -> propagateUsageSettings(sub));
+    }
+
 
     @Override
     public Integer call() {

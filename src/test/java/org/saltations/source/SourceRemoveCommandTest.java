@@ -31,16 +31,16 @@ class SourceRemoveCommandTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString()) {
             @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
             @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
             @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
         };
-        ConfigService configService = new ConfigService(xdgPaths);
+        var configService = new ConfigService(xdgPaths);
         configService.init();
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        var extractor = new FreemarkerVariableExtractor();
         sourceService = new SourceService(configService, extractor);
-        SourceRemoveCommand command = new SourceRemoveCommand(sourceService);
+        var command = new SourceRemoveCommand(sourceService);
         commandLine = new CommandLine(command);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
@@ -52,7 +52,7 @@ class SourceRemoveCommandTest {
     void removeExistingSourceExitsZeroWithConfirmation() throws Exception {
         Path dir = Files.createDirectory(tempDir.resolve("to-remove"));
         sourceService.addSource("to-remove", dir.toString(), false);
-        int exit = commandLine.execute("to-remove");
+        var exit = commandLine.execute("to-remove");
         assertEquals(0, exit, "remove existing source must exit 0");
         assertTrue(stdout.toString().contains("to-remove"),
             "Confirmation message must mention the source name");
@@ -71,7 +71,7 @@ class SourceRemoveCommandTest {
 
     @Test
     void removeMissingSourceExitsOneWithNotFoundError() {
-        int exit = commandLine.execute("no-such-source");
+        var exit = commandLine.execute("no-such-source");
         assertEquals(1, exit, "remove missing source must exit 1");
         assertTrue(stderr.toString().contains("Source 'no-such-source' not found."),
             "stderr must contain exact D-16 error: \"Source 'no-such-source' not found.\"");
@@ -79,20 +79,20 @@ class SourceRemoveCommandTest {
 
     @Test
     void removeExitsOneWhenConfigNotInitialized() {
-        XdgPaths uninitPaths = new XdgPaths() {
+        var uninitPaths = new XdgPaths("") {
             @Override public Path configFile() { return tempDir.resolve("uninit2").resolve("config.yaml"); }
             @Override public Path configDir()  { return tempDir.resolve("uninit2"); }
             @Override public Path dataDir()    { return tempDir.resolve("share2").resolve("viracocha"); }
         };
-        ConfigService uninitConfig = new ConfigService(uninitPaths);
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
-        SourceService uninitService = new SourceService(uninitConfig, extractor);
-        SourceRemoveCommand cmd = new SourceRemoveCommand(uninitService);
-        CommandLine cl = new CommandLine(cmd);
-        ByteArrayOutputStream err2 = new ByteArrayOutputStream();
+        var uninitConfig = new ConfigService(uninitPaths);
+        var extractor = new FreemarkerVariableExtractor();
+        var uninitService = new SourceService(uninitConfig, extractor);
+        var cmd = new SourceRemoveCommand(uninitService);
+        var cl = new CommandLine(cmd);
+        var err2 = new ByteArrayOutputStream();
         cl.setOut(new PrintWriter(new ByteArrayOutputStream(), true));
         cl.setErr(new PrintWriter(err2, true));
-        int exit = cl.execute("anything");
+        var exit = cl.execute("anything");
         assertEquals(1, exit, "remove must exit 1 when config not initialized");
         assertTrue(err2.toString().contains("Config not initialized"),
             "stderr must contain 'Config not initialized'");
@@ -100,7 +100,7 @@ class SourceRemoveCommandTest {
 
     @Test
     void missingNameArgumentExitsNonZero() {
-        int exit = commandLine.execute();  // no positional arg provided
+        var exit = commandLine.execute();  // no positional arg provided
         assertNotEquals(0, exit, "Missing NAME argument must exit non-zero");
     }
 }

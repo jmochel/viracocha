@@ -18,15 +18,15 @@ public class ViracochaCommandTest {
 
     @Test
     public void helpExitsZeroAndListsConfigSubcommand() throws Exception {
-        ByteArrayOutputStream stdout = new ByteArrayOutputStream();
+        var stdout = new ByteArrayOutputStream();
         try (ApplicationContext ctx = ApplicationContext.run(Environment.CLI, Environment.TEST)) {
-            CommandLine commandLine = new CommandLine(
+            var commandLine = new CommandLine(
                 ctx.getBean(ViracochaCommand.class),
                 new io.micronaut.configuration.picocli.MicronautFactory(ctx));
             commandLine.setOut(new PrintWriter(stdout, true));
-            int exitCode = commandLine.execute("--help");
+            var exitCode = commandLine.execute("--help");
             assertEquals(0, exitCode, "--help must exit 0");
-            String help = stdout.toString();
+            var help = stdout.toString();
             assertTrue(help.contains("config"),
                 "--help output must list 'config' subcommand");
             assertTrue(help.contains("generate"),

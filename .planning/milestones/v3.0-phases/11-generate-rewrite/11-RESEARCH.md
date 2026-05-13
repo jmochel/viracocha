@@ -32,7 +32,7 @@ Test strategy mirrors Phase 10/Phase 9: plain JUnit 5 with inline `XdgPaths` stu
 - **D-11:** For sources with `templates: false` — byte-copy all files using `Files.copy()`. No string processing.
 - **D-12:** For sources with `templates: true` — use `PathExpander.expandSegment()` on each path segment, and Freemarker template processing on file content. Both use the destination's `parameters` map.
 - **D-13:** Per-mapping parameter overrides (`MappingEntry.params`) are NOT used for template expansion in this phase. Destination-level parameters only.
-- **D-14:** `--destination-name` is effectively required (exit 2 with `"Missing required option: '--destination-name'"` if omitted). Preserve current `GenerateCommand` behavior unchanged.
+- **D-14:** `--dest` is effectively required (exit 2 with `"Missing required option: '--dest'"` if omitted). Preserve current `GenerateCommand` behavior unchanged.
 - **D-15:** Summary line always written to stdout: `"Generated: N files, Skipped: M files, Failed: K files"` — existing format, unchanged.
 - **D-16:** `--verbose`: one line per file action: `"Created <dest-path>"`, `"Skipped <dest-path>"`, `"Failed <dest-path>"`. Written to stdout before the summary line.
 - **D-17:** `--dry-run`: emit planned `"Would create <dest-path>"` lines (and `"Would create: <dest-path>"` for destination directory if applicable), but write no files. Summary line still printed at end.
@@ -46,7 +46,7 @@ Test strategy mirrors Phase 10/Phase 9: plain JUnit 5 with inline `XdgPaths` stu
 
 ### Deferred Ideas (OUT OF SCOPE)
 
-- `--destination-name` as optional (generate all destinations) — not selected; current behavior preserved.
+- `--dest` as optional (generate all destinations) — not selected; current behavior preserved.
 - Per-mapping parameter overrides — `MappingEntry.params` field exists but is explicitly out of scope per REQUIREMENTS.md.
 </user_constraints>
 
@@ -59,7 +59,7 @@ Test strategy mirrors Phase 10/Phase 9: plain JUnit 5 with inline `XdgPaths` stu
 | GEN-02 | `vira generate` skips destination files that already exist | `Files.exists(destFile)` check before any write; increment `skipped` counter |
 | GEN-03 | `vira generate` expands Freemarker templates in both path segments and file content for sources with `templates: true` | `PathExpander.expandSegment()` per path segment; Freemarker `StringTemplateLoader` for content; destination `parameters` map as data model |
 | GEN-04 | `vira generate` uses binary byte copy (not string read) for sources with `templates: false`, preserving non-text files | `Files.copy(sourcePath, destPath, StandardCopyOption.REPLACE_EXISTING)` — but only reaches copy because `Files.exists()` check prevents overwrite; or `Files.copy(sourcePath, destPath)` with no REPLACE option (fails if exists) |
-| GEN-05 | `vira generate` accepts `--destination-name` to target a single destination | Already wired in `GenerateCommand`; `GeneratorService.generate(destinationName, ...)` receives the name |
+| GEN-05 | `vira generate` accepts `--dest` to target a single destination | Already wired in `GenerateCommand`; `GeneratorService.generate(destinationName, ...)` receives the name |
 | GEN-06 | `vira generate` supports `--dry-run` (reports actions without writing files) | `dryRun` parameter; skip filesystem writes, emit `"Would create ..."` lines, still count and return `GenerationResult` |
 | GEN-07 | `vira generate` supports `--verbose` (prints per-file action lines) | `verbose` parameter; `GeneratorService` populates `verboseLines` list in `GenerationResult`; `GenerateCommand` already prints them |
 </phase_requirements>
@@ -188,7 +188,7 @@ if (!Files.exists(destRoot)) {
 @TempDir Path tempDir;
 
 @BeforeEach void setUp() throws Exception {
-    XdgPaths xdgPaths = new XdgPaths() {
+    XdgPaths xdgPaths = new XdgPaths("") {
         @Override public Path configFile() { return tempDir.resolve("viracocha/config.yaml"); }
         @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
         @Override public Path dataDir()    { return tempDir.resolve("share/viracocha"); }
@@ -358,7 +358,7 @@ Verified baseline:
 | GEN-02 | Existing destination files are skipped | integration | `./mvnw test -Dtest="GeneratorServiceTest#*skipExisting*"` | Wave 0 |
 | GEN-03 | Template sources expand path segments and content | integration | `./mvnw test -Dtest="GeneratorServiceTest#*template*"` | Wave 0 |
 | GEN-04 | Binary files byte-copied intact | integration | `./mvnw test -Dtest="GeneratorServiceTest#*binary*"` | Wave 0 |
-| GEN-05 | `--destination-name` routes to correct destination | integration | `./mvnw test -Dtest="GenerateCommandTest#*destinationName*"` | Wave 0 |
+| GEN-05 | `--dest` routes to correct destination | integration | `./mvnw test -Dtest="GenerateCommandTest#*destinationName*"` | Wave 0 |
 | GEN-06 | `--dry-run` reports actions without writing | integration | `./mvnw test -Dtest="GenerateCommandTest#*dryRun*"` | Wave 0 |
 | GEN-07 | `--verbose` prints per-file lines | integration | `./mvnw test -Dtest="GenerateCommandTest#*verbose*"` | Wave 0 |
 

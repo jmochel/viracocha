@@ -13,7 +13,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "destination",
-    aliases = {"dest"},
+    aliases = {"dst"},
     description = "Manage registered destination workspaces.",
     mixinStandardHelpOptions = true,
     subcommands = {

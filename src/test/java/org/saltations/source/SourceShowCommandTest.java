@@ -32,16 +32,12 @@ class SourceShowCommandTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
-            @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
-            @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
-        };
-        ConfigService configService = new ConfigService(xdgPaths);
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
+        var configService = new ConfigService(xdgPaths);
         configService.init();
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        var extractor = new FreemarkerVariableExtractor();
         sourceService = new SourceService(configService, extractor);
-        SourceShowCommand command = new SourceShowCommand(sourceService);
+        var command = new SourceShowCommand(sourceService);
         commandLine = new CommandLine(command);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
@@ -53,7 +49,7 @@ class SourceShowCommandTest {
     void showExistingSourceExitsZeroAndPrintsName() throws Exception {
         Path dir = Files.createDirectory(tempDir.resolve("show-src"));
         sourceService.addSource("show-src", dir.toString(), false);
-        int exit = commandLine.execute("show-src");
+        var exit = commandLine.execute("show-src");
         assertEquals(0, exit, "show existing source must exit 0");
         assertTrue(stdout.toString().contains("Name:      show-src"),
             "Output must contain 'Name:      show-src'");
@@ -64,7 +60,7 @@ class SourceShowCommandTest {
         Path dir = Files.createDirectory(tempDir.resolve("path-src"));
         sourceService.addSource("path-src", dir.toString(), false);
         commandLine.execute("path-src");
-        String output = stdout.toString();
+        var output = stdout.toString();
         assertTrue(output.contains("Path:      "),
             "Output must contain 'Path:      ' line");
         assertTrue(output.contains(dir.toAbsolutePath().toString()),
@@ -97,7 +93,7 @@ class SourceShowCommandTest {
             StandardCharsets.UTF_8);
         sourceService.addSource("tmpl-vars", templateDir.toString(), true);
         commandLine.execute("tmpl-vars");
-        String output = stdout.toString();
+        var output = stdout.toString();
         assertTrue(output.contains("Templates: true"),
             "Output must contain 'Templates: true'");
         assertTrue(output.contains("Parameters:"),
@@ -119,21 +115,8 @@ class SourceShowCommandTest {
     }
 
     @Test
-    void showJsonOutputsValidSingleJsonObject() throws Exception {
-        Path dir = Files.createDirectory(tempDir.resolve("json-show"));
-        sourceService.addSource("json-show", dir.toString(), false);
-        int exit = commandLine.execute("--json", "json-show");
-        assertEquals(0, exit, "show --json must exit 0");
-        String output = stdout.toString().trim();
-        assertTrue(output.startsWith("{"), "JSON output must start with '{'");
-        assertTrue(output.endsWith("}"), "JSON output must end with '}'");
-        assertTrue(output.contains("\"name\""), "JSON must contain 'name' key");
-        assertTrue(output.contains("\"json-show\""), "JSON must contain source name value");
-    }
-
-    @Test
     void showMissingSourceExitsOneWithNotFoundError() {
-        int exit = commandLine.execute("no-such-source");
+        var exit = commandLine.execute("no-such-source");
         assertEquals(1, exit, "show missing source must exit 1");
         assertTrue(stderr.toString().contains("Source 'no-such-source' not found."),
             "stderr must contain exact D-16 error: \"Source 'no-such-source' not found.\"");

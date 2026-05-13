@@ -8,7 +8,6 @@ import picocli.CommandLine.Spec;
 
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.concurrent.Callable;
 
 /**
@@ -38,8 +37,8 @@ public class InitCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         try {
-            Path configFile = configService.xdgPaths().configFile();
-            boolean alreadyExisted = Files.exists(configFile);
+            var configFile = configService.xdgPaths().configFile();
+            var alreadyExisted = Files.exists(configFile);
             configService.init();
             if (alreadyExisted) {
                 spec.commandLine().getOut().println("Config already initialized at " + configFile.toAbsolutePath());

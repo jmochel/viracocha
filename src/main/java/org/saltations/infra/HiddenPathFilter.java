@@ -14,8 +14,8 @@ public final class HiddenPathFilter {
      * True if any path segment under {@code root} (including {@code path}'s filename) starts with ".".
      */
     public static boolean hasHiddenPathSegment(Path root, Path path) {
-        Path rel = root.relativize(path);
-        for (int i = 0; i < rel.getNameCount(); i++) {
+        var rel = root.relativize(path);
+        for (var i = 0; i < rel.getNameCount(); i++) {
             if (rel.getName(i).toString().startsWith(".")) {
                 return true;
             }

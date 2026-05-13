@@ -27,7 +27,7 @@ All truths are derived from the GEN-01 through GEN-07 must_haves across Plans 00
 | 5  | Re-running generate skips already-present files and counts them (GEN-02)                      | VERIFIED   | `generateSkipsExistingDestinationFiles` passes; original content preserved on second run |
 | 6  | Template sources expand Freemarker in both path segments and file content (GEN-03)             | VERIFIED   | `generateTemplateSourceExpandsPathSegmentsAndContent` passes; `${project}.txt` → `myproj.txt` with `Hello world!` |
 | 7  | Binary sources are byte-copied via Files.copy() with no string read — no corruption (GEN-04)  | VERIFIED   | `generateBinarySourceByteCopiesToDestination` passes; `assertArrayEquals` on known bytes {0x00, 0xFF, ...} |
-| 8  | `--destination-name` routes generate to a specific destination; omitting exits 2 (GEN-05)     | VERIFIED   | `generateCommandWithDestinationNameRoutes` and `generateCommandRequiresDestinationName` both pass |
+| 8  | `--dest` routes generate to a specific destination; omitting exits 2 (GEN-05)     | VERIFIED   | `generateCommandWithDestinationNameRoutes` and `generateCommandRequiresDestinationName` both pass |
 | 9  | `--dry-run` reports "Would create" lines per file without writing any files (GEN-06)           | VERIFIED   | `generateCommandDryRunReportsActionsWithoutWriting` passes; dry.txt absent on disk |
 | 10 | `--verbose` prints "Created <path>" per file before summary line (GEN-07)                     | VERIFIED   | `generateCommandVerbosePrintsPerFileLines` passes; stdout contains "Created " |
 | 11 | Summary line "Generated: N files, Skipped: M files, Failed: K files" always printed (D-15)   | VERIFIED   | `generateCommandSummaryLineAlwaysPrinted` passes |
@@ -87,7 +87,7 @@ All 7 GEN requirements were assigned to Phase 11 in REQUIREMENTS.md and claimed 
 | GEN-02      | 11-00, 11-01 | Skips destination files that already exist                                           | SATISFIED | `generateSkipsExistingDestinationFiles` passes  |
 | GEN-03      | 11-00, 11-01 | Expands Freemarker in path segments and file content for `templates: true`           | SATISFIED | `generateTemplateSourceExpandsPathSegmentsAndContent` passes; `myproj.txt` with expanded content |
 | GEN-04      | 11-00, 11-01 | Binary byte copy (not string read) for `templates: false`                            | SATISFIED | `generateBinarySourceByteCopiesToDestination` passes; `assertArrayEquals` on exact bytes |
-| GEN-05      | 11-00, 11-02 | Accepts `--destination-name` to target single destination                            | SATISFIED | `generateCommandWithDestinationNameRoutes`, `generateCommandRequiresDestinationName` pass |
+| GEN-05      | 11-00, 11-02 | Accepts `--dest` to target single destination                            | SATISFIED | `generateCommandWithDestinationNameRoutes`, `generateCommandRequiresDestinationName` pass |
 | GEN-06      | 11-00, 11-02 | `--dry-run` reports actions without writing files                                    | SATISFIED | `generateCommandDryRunReportsActionsWithoutWriting` passes; file absent, "Would create" in stdout |
 | GEN-07      | 11-00, 11-02 | `--verbose` prints per-file action lines                                             | SATISFIED | `generateCommandVerbosePrintsPerFileLines` passes; "Created " in stdout |
 
@@ -109,7 +109,7 @@ None. All GEN-01 through GEN-07 behaviors are fully exercised by automated tests
 
 The following is informational, not blocking:
 
-1. **Interactive prompt under real user input** — tests bypass the prompt by pre-creating destination directories. Manual testing could exercise: `vira generate --destination-name new-ws` where `new-ws` does not exist, then type `y` or press Enter.
+1. **Interactive prompt under real user input** — tests bypass the prompt by pre-creating destination directories. Manual testing could exercise: `vira generate --dest new-ws` where `new-ws` does not exist, then type `y` or press Enter.
    - Expected: `y` → creates directory and generates; Enter/other → exits 0 with no directory created.
    - This is a D-05/D-06/D-07 detail; not a GEN requirement. Automated evidence in code inspection confirms correct logic at lines 107-115 of GeneratorService.java.
 

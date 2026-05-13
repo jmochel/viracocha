@@ -6,7 +6,6 @@ import org.saltations.config.ConfigNotInitializedException;
 import org.saltations.config.ConfigService;
 import org.saltations.model.DestinationEntry;
 import org.saltations.model.MappingEntry;
-import org.saltations.model.ViracochaConfig;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,15 +44,15 @@ public class DestinationService {
         if (rawPath.contains("..")) {
             throw new IllegalArgumentException("Path must not contain '..': " + rawPath);
         }
-        ViracochaConfig config = configService.load();
+        var config = configService.load();
         // DEST-05: duplicate name check
-        boolean duplicate = config.getDestinations().stream()
+        var duplicate = config.getDestinations().stream()
             .anyMatch(d -> d.getName().equals(name));
         if (duplicate) {
             throw new IllegalArgumentException("Destination '" + name + "' already exists.");
         }
         // D-07: store path as-is (no normalization, no existence check per D-04)
-        DestinationEntry entry = new DestinationEntry(name, rawPath,
+        var entry = new DestinationEntry(name, rawPath,
             new LinkedHashMap<>(), new ArrayList<>());
         config.getDestinations().add(entry);
         configService.save(config);
@@ -90,8 +89,8 @@ public class DestinationService {
      * @throws IOException if config cannot be read or written
      */
     public boolean removeDestination(String name) throws IOException {
-        ViracochaConfig config = configService.load();
-        boolean removed = config.getDestinations().removeIf(d -> d.getName().equals(name));
+        var config = configService.load();
+        var removed = config.getDestinations().removeIf(d -> d.getName().equals(name));
         if (removed) {
             configService.save(config);
         }
@@ -109,15 +108,15 @@ public class DestinationService {
      */
     public void addMapping(String destName, String sourceRef, String glob,
                            boolean recurse, boolean sync) throws IOException {
-        ViracochaConfig config = configService.load();
+        var config = configService.load();
         // MAP-04 / D-18: validate sourceRef exists in config.sources
-        boolean sourceExists = config.getSources().stream()
+        var sourceExists = config.getSources().stream()
             .anyMatch(s -> s.getName().equals(sourceRef));
         if (!sourceExists) {
             throw new IllegalArgumentException("Source '" + sourceRef + "' not found.");
         }
         // D-17: validate destination exists
-        DestinationEntry dest = config.getDestinations().stream()
+        var dest = config.getDestinations().stream()
             .filter(d -> d.getName().equals(destName))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(
@@ -151,14 +150,14 @@ public class DestinationService {
      * @throws IOException if config cannot be read or written
      */
     public boolean removeMapping(String destName, int index) throws IOException {
-        ViracochaConfig config = configService.load();
+        var config = configService.load();
         Optional<DestinationEntry> opt = config.getDestinations().stream()
             .filter(d -> d.getName().equals(destName))
             .findFirst();
         if (opt.isEmpty()) {
             return false; // caller prints D-27 error: "Destination '<name>' not found."
         }
-        DestinationEntry dest = opt.get();
+        var dest = opt.get();
         if (index < 0 || index >= dest.getMappings().size()) {
             throw new IndexOutOfBoundsException(
                 "Mapping index " + index + " out of range (destination has "

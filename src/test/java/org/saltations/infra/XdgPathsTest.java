@@ -2,7 +2,8 @@ package org.saltations.infra;
 
 import org.junit.jupiter.api.Test;
 import java.nio.file.Path;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Unit tests for XdgPaths. Uses plain JUnit (no Micronaut context needed).
@@ -11,11 +12,11 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 class XdgPathsTest {
 
-    private final XdgPaths xdgPaths = new XdgPaths();
+    private final XdgPaths xdgPaths = new XdgPaths("");
 
     @Test
     void configFileEndsWithExpectedSegments() {
-        Path configFile = xdgPaths.configFile();
+        var configFile = xdgPaths.configFile();
         assertTrue(configFile.toString().endsWith("viracocha/config.yaml"),
             "configFile() must end with viracocha/config.yaml, got: " + configFile);
     }
@@ -28,7 +29,7 @@ class XdgPathsTest {
 
     @Test
     void logFileEndsWithExpectedSegments() {
-        Path logFile = xdgPaths.logFile();
+        var logFile = xdgPaths.logFile();
         assertTrue(logFile.toString().endsWith("viracocha/vira.jsonl"),
             "logFile() must end with viracocha/vira.jsonl, got: " + logFile);
     }

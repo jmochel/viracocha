@@ -1,6 +1,5 @@
 package org.saltations.config;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import jakarta.inject.Inject;
@@ -34,9 +33,10 @@ public class ConfigService {
      * @return path to the config file
      * @throws IOException if directory creation or file write fails
      */
+
     public Path init() throws IOException {
-        Path configDir = xdgPaths.configDir();
-        Path configFile = xdgPaths.configFile();
+        var configDir = xdgPaths.configDir();
+        var configFile = xdgPaths.configFile();
         Files.createDirectories(configDir);
         // Also ensure the log data directory exists for logback
         Files.createDirectories(xdgPaths.dataDir());
@@ -54,13 +54,13 @@ public class ConfigService {
      * @throws IOException if file cannot be read or parsed
      */
     public ViracochaConfig load() throws IOException {
-        Path configFile = xdgPaths.configFile();
+        var configFile = xdgPaths.configFile();
         if (!Files.exists(configFile)) {
             throw new ConfigNotInitializedException();
         }
         // Version pre-read: detect v2 config before full deserialization (per D-09)
-        JsonNode root = yaml.readTree(configFile.toFile());
-        JsonNode versionNode = root.get("version");
+        var root = yaml.readTree(configFile.toFile());
+        var versionNode = root.get("version");
         int version = (versionNode == null || versionNode.isNull()) ? 0 : versionNode.asInt(0);
         if (version < 3) {
             throw new ConfigVersionException(version);

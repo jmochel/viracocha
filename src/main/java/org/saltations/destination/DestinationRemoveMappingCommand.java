@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
  * D-24: index out of range throws IndexOutOfBoundsException -> exit 1
  */
 @Command(
-    name = "remove-mapping",
+    name = "map-rm",
     description = "Remove a mapping from a destination by index.",
     mixinStandardHelpOptions = true
 )
@@ -55,16 +55,10 @@ public class DestinationRemoveMappingCommand implements Callable<Integer> {
             spec.commandLine().getOut().println(
                 "Mapping " + index + " removed from destination '" + destName + "'.");
             return 0;
-        } catch (ConfigNotInitializedException e) {
+        } catch (Exception e) {
             spec.commandLine().getErr().println(e.getMessage());
-            return 1;
-        } catch (IndexOutOfBoundsException e) {
-            // D-24: "Mapping index N out of range (destination has M mappings)."
-            spec.commandLine().getErr().println(e.getMessage());
-            return 1;
-        } catch (IOException e) {
-            spec.commandLine().getErr().println("Error: " + e.getMessage());
             return 1;
         }
+   
     }
 }

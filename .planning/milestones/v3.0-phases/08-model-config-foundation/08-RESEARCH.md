@@ -338,7 +338,7 @@ v3 round-trip tests follow the same pattern with v3 fields.
 
 ```java
 // Source: src/test/java/org/saltations/config/ConfigServiceTest.java (verified)
-XdgPaths xdgPaths = new XdgPaths() {
+XdgPaths xdgPaths = new XdgPaths("") {
     @Override
     public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
     @Override

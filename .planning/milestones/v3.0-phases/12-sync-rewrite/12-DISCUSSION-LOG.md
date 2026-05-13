@@ -61,7 +61,7 @@ Secondary `Files.mismatch()` check added to avoid unnecessary writes when conten
 
 **User's choice:** Remove entirely
 
-### --destination-name optionality
+### --dest optionality
 
 | Option | Description | Selected |
 |--------|-------------|----------|
@@ -83,5 +83,5 @@ Secondary `Files.mismatch()` check added to avoid unnecessary writes when conten
 ## Deferred Ideas
 
 - Per-mapping filter (--mapping-id): no SYN requirement, removed for v3 clean break
-- --destination-name optional (sync all): user chose required; revisit if all-destination sync needed
+- --dest optional (sync all): user chose required; revisit if all-destination sync needed
 - Template source sync: deferred; template expansion is generate-only for Phase 12

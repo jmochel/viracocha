@@ -44,14 +44,10 @@ class SyncCommandTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
-            @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
-            @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
-        };
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
         configService = new ConfigService(xdgPaths);
         configService.init();
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        var extractor = new FreemarkerVariableExtractor();
         sourceService = new SourceService(configService, extractor);
         destinationService = new DestinationService(configService);
         syncService = new DefaultSyncService(configService);
@@ -67,9 +63,9 @@ class SyncCommandTest {
 
     @Test
     void syncCommandRequiresDestinationName() {
-        int exitCode = commandLine.execute();
-        assertEquals(2, exitCode, "Exit code must be 2 when --destination-name is missing");
-        assertTrue(stderr.toString().contains("Missing required option: '--destination-name'"),
+        var exitCode = commandLine.execute();
+        assertEquals(2, exitCode, "Exit code must be 2 when --dest is missing");
+        assertTrue(stderr.toString().contains("Missing required option: '--dest'"),
             "Stderr must contain missing option message. Was: " + stderr.toString());
     }
 
@@ -84,7 +80,7 @@ class SyncCommandTest {
         destinationService.addDestination("route-dest", destDir.toString());
         destinationService.addMapping("route-dest", "route-src", null, false, true); // sync=true
 
-        int exitCode = commandLine.execute("--destination-name", "route-dest");
+        var exitCode = commandLine.execute("--dest", "route-dest");
 
         assertEquals(0, exitCode, "Exit code must be 0 on success");
         assertTrue(stdout.toString().contains("Copied: "),
@@ -104,7 +100,7 @@ class SyncCommandTest {
         destinationService.addDestination("dry-dest", destDir.toString());
         destinationService.addMapping("dry-dest", "dry-src", null, false, true);
 
-        int exitCode = commandLine.execute("--destination-name", "dry-dest", "--dry-run");
+        var exitCode = commandLine.execute("--dest", "dry-dest", "--dry-run");
 
         assertEquals(0, exitCode);
         assertFalse(Files.exists(destDir.resolve("dry.txt")),
@@ -124,38 +120,14 @@ class SyncCommandTest {
         destinationService.addDestination("verbose-dest", destDir.toString());
         destinationService.addMapping("verbose-dest", "verbose-src", null, false, true);
 
-        int exitCode = commandLine.execute("--destination-name", "verbose-dest", "--verbose");
+        var exitCode = commandLine.execute("--dest", "verbose-dest", "--verbose");
 
         assertEquals(0, exitCode);
-        String out = stdout.toString();
+        var out = stdout.toString();
         assertTrue(out.contains("Copied "),
             "Stdout must contain per-file 'Copied ' line. Was: " + out);
         assertTrue(out.contains("Copied: "),
             "Stdout must contain summary 'Copied: ' line. Was: " + out);
-    }
-
-    // --- SYN-06: sync command json outputs machine-readable (D-15) ---
-
-    @Test
-    void syncCommandJsonOutputsMachineReadable() throws Exception {
-        Path sourceDir = Files.createDirectory(tempDir.resolve("src-json"));
-        Files.writeString(sourceDir.resolve("json.txt"), "json content");
-        Path destDir = Files.createDirectory(tempDir.resolve("dest-json"));
-        sourceService.addSource("json-src", sourceDir.toString(), false);
-        destinationService.addDestination("json-dest", destDir.toString());
-        destinationService.addMapping("json-dest", "json-src", null, false, true);
-
-        int exitCode = commandLine.execute("--destination-name", "json-dest", "--json");
-
-        assertEquals(0, exitCode);
-        String out = stdout.toString().trim();
-        assertTrue(out.startsWith("{"), "JSON output must start with '{'. Was: " + out);
-        assertTrue(out.contains("\"copied\""),
-            "JSON output must contain 'copied' key. Was: " + out);
-        assertTrue(out.contains("\"skipped\""),
-            "JSON output must contain 'skipped' key. Was: " + out);
-        assertTrue(out.contains("\"conflicts\""),
-            "JSON output must contain 'conflicts' key. Was: " + out);
     }
 
     // --- SYN-07: sync command summary line always printed (D-13) ---
@@ -168,10 +140,10 @@ class SyncCommandTest {
         destinationService.addDestination("summary-dest", destDir.toString());
         destinationService.addMapping("summary-dest", "summary-src", null, false, true);
 
-        int exitCode = commandLine.execute("--destination-name", "summary-dest");
+        var exitCode = commandLine.execute("--dest", "summary-dest");
 
         assertEquals(0, exitCode, "Exit code must be 0 when summary is printed");
-        String out = stdout.toString();
+        var out = stdout.toString();
         assertTrue(out.contains("Copied: "),    "Must contain 'Copied: '. Was: " + out);
         assertTrue(out.contains("Skipped: "),   "Must contain 'Skipped: '. Was: " + out);
         assertTrue(out.contains("Failed: "),    "Must contain 'Failed: '. Was: " + out);
@@ -194,7 +166,7 @@ class SyncCommandTest {
         destinationService.addDestination("conflict-dest", destDir.toString());
         destinationService.addMapping("conflict-dest", "conflict-src", null, false, true);
 
-        int exitCode = commandLine.execute("--destination-name", "conflict-dest");
+        var exitCode = commandLine.execute("--dest", "conflict-dest");
 
         assertEquals(1, exitCode,
             "Exit code must be 1 when conflict is detected. Stdout was: " + stdout.toString());

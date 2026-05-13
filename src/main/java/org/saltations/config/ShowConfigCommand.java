@@ -43,9 +43,9 @@ public class ShowConfigCommand implements Callable<Integer> {
         try {
             // load() throws ConfigNotInitializedException if config missing
             configService.load();
-            java.nio.file.Path configFile = configService.xdgPaths().configFile();
+            var configFile = configService.xdgPaths().configFile();
             String rawYaml = Files.readString(configFile);
-            java.nio.file.Path fullPath = configFile.toAbsolutePath().normalize();
+            var fullPath = configFile.toAbsolutePath().normalize();
             try {
                 fullPath = configFile.toRealPath();
             } catch (IOException ignored) {

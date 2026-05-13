@@ -26,28 +26,13 @@ class ConfigServiceTest {
     @BeforeEach
     void setUp() {
         // Inline stub: override configFile() to point into @TempDir
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override
-            public Path configFile() {
-                return tempDir.resolve("viracocha").resolve("config.yaml");
-            }
-
-            @Override
-            public Path configDir() {
-                return tempDir.resolve("viracocha");
-            }
-
-            @Override
-            public Path dataDir() {
-                return tempDir.resolve("share").resolve("viracocha");
-            }
-        };
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
         configService = new ConfigService(xdgPaths);
     }
 
     @Test
     void initCreatesConfigFile() throws IOException {
-        Path created = configService.init();
+        var created = configService.init();
         assertTrue(Files.exists(created), "init() must create config file");
         String contents = Files.readString(created);
         assertTrue(contents.contains("version: 3"), "Config file must contain 'version: 3'");
@@ -74,26 +59,26 @@ class ConfigServiceTest {
     @Test
     void loadAfterInitReturnsDefaultConfig() throws IOException {
         configService.init();
-        ViracochaConfig config = configService.load();
+        var config = configService.load();
         assertEquals(3, config.getVersion(), "Loaded config must have version=3");
     }
 
     @Test
     void saveAndLoadRoundTripPreservesVersion() throws IOException {
         configService.init();
-        ViracochaConfig config = configService.load();
+        var config = configService.load();
         config.setVersion(42);
         configService.save(config);
-        ViracochaConfig reloaded = configService.load();
+        var reloaded = configService.load();
         assertEquals(42, reloaded.getVersion(), "save()+load() must preserve version field");
     }
 
     @Test
     void loadThrowsConfigVersionExceptionForV1Config() throws IOException {
         // Write a v1 config file manually (simulates a developer's existing v2 config)
-        Path configDir = configService.xdgPaths().configDir();
+        var configDir = configService.xdgPaths().configDir();
         Files.createDirectories(configDir);
-        Path configFile = configService.xdgPaths().configFile();
+        var configFile = configService.xdgPaths().configFile();
         Files.writeString(configFile,
             "version: 1\ncatalogs: []\narchetypes: []\nprojects: []\n");
         ConfigVersionException ex = assertThrows(ConfigVersionException.class,
@@ -107,9 +92,9 @@ class ConfigServiceTest {
 
     @Test
     void loadThrowsConfigVersionExceptionForMissingVersionField() throws IOException {
-        Path configDir = configService.xdgPaths().configDir();
+        var configDir = configService.xdgPaths().configDir();
         Files.createDirectories(configDir);
-        Path configFile = configService.xdgPaths().configFile();
+        var configFile = configService.xdgPaths().configFile();
         Files.writeString(configFile, "catalogs: []\n"); // no version field
         ConfigVersionException ex = assertThrows(ConfigVersionException.class,
             () -> configService.load(),
@@ -128,7 +113,7 @@ class ConfigServiceTest {
 
     @Test
     void initWritesVersion3() throws IOException {
-        Path path = configService.init();
+        var path = configService.init();
         String contents = Files.readString(path);
         assertTrue(contents.contains("version: 3"),
             "init() must write a config file containing 'version: 3'");

@@ -43,14 +43,10 @@ class GenerateCommandTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
-            @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
-            @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
-        };
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
         configService = new ConfigService(xdgPaths);
         configService.init();
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        var extractor = new FreemarkerVariableExtractor();
         sourceService = new SourceService(configService, extractor);
         destinationService = new DestinationService(configService);
         pathExpander = new PathExpander();
@@ -63,16 +59,16 @@ class GenerateCommandTest {
         commandLine.setErr(new PrintWriter(stderr, true));
     }
 
-    // --- GEN-05/D-14: missing --destination-name ---
+    // --- GEN-05/D-14: missing --dest ---
     // This test is NOT @Disabled — the null check is already wired in GenerateCommand.call()
 
     @Test
     void generateCommandRequiresDestinationName() {
-        // Execute without --destination-name; since we build CommandLine directly from GenerateCommand,
+        // Execute without --dest; since we build CommandLine directly from GenerateCommand,
         // we call execute() with no subcommand routing (the command IS the root here)
-        int exitCode = commandLine.execute();
-        assertEquals(2, exitCode, "Exit code should be 2 when --destination-name is missing");
-        assertTrue(stderr.toString().contains("Missing required option: '--destination-name'"),
+        var exitCode = commandLine.execute();
+        assertEquals(2, exitCode, "Exit code should be 2 when --dest is missing");
+        assertTrue(stderr.toString().contains("Missing required option: '--dest'"),
             "Stderr should contain the missing option message. Was: " + stderr.toString());
     }
 
@@ -89,7 +85,7 @@ class GenerateCommandTest {
         destinationService.addMapping("route-dest", "route-src", null, false, false);
 
         // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
-        int exitCode = commandLine.execute("--destination-name", "route-dest");
+        var exitCode = commandLine.execute("--dest", "route-dest");
 
         assertEquals(0, exitCode, "Exit code should be 0 on success");
         assertTrue(stdout.toString().contains("Generated:"), "Stdout should contain 'Generated:' summary line. Was: " + stdout.toString());
@@ -109,7 +105,7 @@ class GenerateCommandTest {
         destinationService.addMapping("dry-dest", "dry-src", null, false, false);
 
         // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
-        int exitCode = commandLine.execute("--destination-name", "dry-dest", "--dry-run");
+        var exitCode = commandLine.execute("--dest", "dry-dest", "--dry-run");
 
         assertEquals(0, exitCode, "Exit code should be 0 on dry-run");
         assertTrue(stdout.toString().contains("Would create"), "Stdout should report 'Would create' in dry-run mode. Was: " + stdout.toString());
@@ -129,7 +125,7 @@ class GenerateCommandTest {
         destinationService.addMapping("verbose-dest", "verbose-src", null, false, false);
 
         // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
-        int exitCode = commandLine.execute("--destination-name", "verbose-dest", "--verbose");
+        var exitCode = commandLine.execute("--dest", "verbose-dest", "--verbose");
 
         assertEquals(0, exitCode, "Exit code should be 0 on verbose run");
         assertTrue(stdout.toString().contains("Created "), "Stdout must contain 'Created '. Was: " + stdout.toString());
@@ -147,9 +143,9 @@ class GenerateCommandTest {
         destinationService.addMapping("summary-dest", "summary-src", null, false, false);
 
         // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
-        commandLine.execute("--destination-name", "summary-dest");
+        commandLine.execute("--dest", "summary-dest");
 
-        String out = stdout.toString();
+        var out = stdout.toString();
         assertTrue(out.contains("Generated: "), "Stdout should contain 'Generated: '. Was: " + out);
         assertTrue(out.contains("Skipped: "), "Stdout should contain 'Skipped: '. Was: " + out);
         assertTrue(out.contains("Failed: "), "Stdout should contain 'Failed: '. Was: " + out);
@@ -160,7 +156,7 @@ class GenerateCommandTest {
     @Test
     void generateCommandUnknownDestinationExitsOne() {
         // CommandLine is rooted at GenerateCommand — do NOT pass "generate" as first arg
-        int exitCode = commandLine.execute("--destination-name", "unknown-dest");
+        var exitCode = commandLine.execute("--dest", "unknown-dest");
 
         assertEquals(1, exitCode, "Exit code should be 1 for unknown destination");
         assertTrue(stderr.toString().contains("unknown-dest"), "Stderr should contain the unknown destination name. Was: " + stderr.toString());

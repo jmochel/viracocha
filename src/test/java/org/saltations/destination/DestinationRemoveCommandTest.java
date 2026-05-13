@@ -11,7 +11,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration tests for DestinationRemoveCommand.
@@ -29,15 +30,15 @@ class DestinationRemoveCommandTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
+        var xdgPaths = new XdgPaths("") {
             @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
             @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
             @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
         };
-        ConfigService configService = new ConfigService(xdgPaths);
+        var configService = new ConfigService(xdgPaths);
         configService.init();
         destinationService = new DestinationService(configService);
-        DestinationRemoveCommand command = new DestinationRemoveCommand(destinationService);
+        var command = new DestinationRemoveCommand(destinationService);
         commandLine = new CommandLine(command);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
@@ -48,7 +49,7 @@ class DestinationRemoveCommandTest {
     @Test
     void removeExistingDestinationExitsZeroWithConfirmation() throws Exception {
         destinationService.addDestination("my-ws", "/some/path");
-        int exit = commandLine.execute("my-ws");
+        var exit = commandLine.execute("my-ws");
         assertEquals(0, exit, "remove existing destination must exit 0");
         assertTrue(stdout.toString().contains("Destination 'my-ws' removed."),
             "stdout must contain removal confirmation message");
@@ -56,7 +57,7 @@ class DestinationRemoveCommandTest {
 
     @Test
     void removeUnknownDestinationExitsOneWithNotFoundError() {
-        int exit = commandLine.execute("ghost");
+        var exit = commandLine.execute("ghost");
         assertEquals(1, exit, "remove unknown destination must exit 1");
         assertTrue(stderr.toString().contains("Destination 'ghost' not found."),
             "stderr must contain exact error: \"Destination 'ghost' not found.\"");

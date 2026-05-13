@@ -54,7 +54,7 @@ created: 2026-05-10
 ## Wave 0 Requirements
 
 - [ ] `src/test/java/org/saltations/generate/GeneratorServiceTest.java` — full stubs covering GEN-01 through GEN-04 (flat walk, recurse walk, skip-existing, template expansion, binary copy)
-- [ ] `src/test/java/org/saltations/generate/GenerateCommandTest.java` — full stubs covering GEN-05 through GEN-07 (`--destination-name`, `--dry-run`, `--verbose`)
+- [ ] `src/test/java/org/saltations/generate/GenerateCommandTest.java` — full stubs covering GEN-05 through GEN-07 (`--dest`, `--dry-run`, `--verbose`)
 - [ ] `src/test/resources/fixtures/sample.bin` — binary fixture file for GEN-04 byte-integrity test
 
 *All three are currently placeholder stubs or absent — Wave 0 must create them before implementation waves.*
@@ -65,7 +65,7 @@ created: 2026-05-10
 
 | Behavior | Requirement | Why Manual | Test Instructions |
 |----------|-------------|------------|-------------------|
-| Destination creation prompt (interactive stdin) | D-05, D-06, D-07 | Interactive stdin read from terminal cannot be automated without System.in injection | Run `vira generate --destination-name my-ws` against a non-existent destination path; verify prompt appears, type `y`, confirm directory created; repeat with `N`, confirm exit 0 and no directory |
+| Destination creation prompt (interactive stdin) | D-05, D-06, D-07 | Interactive stdin read from terminal cannot be automated without System.in injection | Run `vira generate --dest my-ws` against a non-existent destination path; verify prompt appears, type `y`, confirm directory created; repeat with `N`, confirm exit 0 and no directory |
 
 ---
 

@@ -452,7 +452,7 @@ public Integer call() {
 
 @BeforeEach
 void setUp() {
-    XdgPaths xdgPaths = new XdgPaths() {
+    XdgPaths xdgPaths = new XdgPaths("") {
         @Override public Path configFile() { return tempDir.resolve("viracocha/config.yaml"); }
         @Override public Path configDir() { return tempDir.resolve("viracocha"); }
         @Override public Path dataDir() { return tempDir.resolve("share/viracocha"); }

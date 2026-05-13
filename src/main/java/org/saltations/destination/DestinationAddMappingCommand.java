@@ -19,7 +19,7 @@ import java.util.concurrent.Callable;
  * D-18: source not found prints "Source '<sourceRef>' not found." exit 1
  */
 @Command(
-    name = "add-mapping",
+    name = "map-add",
     description = "Add a source mapping to a destination.",
     mixinStandardHelpOptions = true
 )
@@ -32,19 +32,19 @@ public class DestinationAddMappingCommand implements Callable<Integer> {
     @Parameters(index = "0", description = "Name of the destination.")
     private String destName;
 
-    @Option(names = {"--source"}, required = true,
+    @Option(names = {"--source","-src"}, required = true,
             description = "Name of the source to map from.")
     private String sourceRef;
 
-    @Option(names = {"--glob"},
+    @Option(names = {"--glob","-g"},
             description = "Glob pattern filter (null = copy all files).")
     private String glob;
 
-    @Option(names = {"--recurse"},
+    @Option(names = {"--recurse","-r"},
             description = "Walk source directory recursively.")
     private boolean recurse;
 
-    @Option(names = {"--sync"},
+    @Option(names = {"--syncable","-syn"},
             description = "Keep destination in sync on 'vira sync'.")
     private boolean sync;
 
@@ -61,14 +61,8 @@ public class DestinationAddMappingCommand implements Callable<Integer> {
             destinationService.addMapping(destName, sourceRef, glob, recurse, sync);
             spec.commandLine().getOut().println("Mapping added to destination '" + destName + "'.");
             return 0;
-        } catch (ConfigNotInitializedException e) {
+        } catch (ConfigNotInitializedException | IllegalArgumentException | IOException e) {
             spec.commandLine().getErr().println(e.getMessage());
-            return 1;
-        } catch (IllegalArgumentException e) {
-            spec.commandLine().getErr().println(e.getMessage());
-            return 1;
-        } catch (IOException e) {
-            spec.commandLine().getErr().println("Error: " + e.getMessage());
             return 1;
         }
     }

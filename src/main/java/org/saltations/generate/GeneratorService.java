@@ -5,10 +5,7 @@ import jakarta.inject.Singleton;
 import org.saltations.config.ConfigService;
 import org.saltations.infra.GlobMatcher;
 import org.saltations.infra.HiddenPathFilter;
-import org.saltations.model.DestinationEntry;
 import org.saltations.model.MappingEntry;
-import org.saltations.model.SourceEntry;
-import org.saltations.model.ViracochaConfig;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -22,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Core v3 traversal engine. Wires together ConfigService, GlobMatcher, HiddenPathFilter,
@@ -81,17 +77,17 @@ public class GeneratorService {
     public GenerationResult generate(String destinationName, boolean dryRun, boolean verbose,
                                      PrintWriter out, InputStream in) throws IOException {
         // STEP 1 — Load config
-        ViracochaConfig config = configService.load();
+        var config = configService.load();
 
         // STEP 2 — Find destination (Pitfall 6 guard)
-        DestinationEntry dest = config.getDestinations().stream()
+        var dest = config.getDestinations().stream()
             .filter(d -> d.getName().equals(destinationName))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(
                 "Destination '" + destinationName + "' not found."));
 
         // STEP 3 — Tilde expansion (D-10)
-        String rawPath = dest.getPath();
+        var rawPath = dest.getPath();
         String resolvedPath = rawPath.startsWith("~")
             ? System.getProperty("user.home") + rawPath.substring(1)
             : rawPath;
@@ -106,7 +102,7 @@ public class GeneratorService {
                 // D-05: Prompt user
                 out.print("Destination " + destRoot + " does not exist. Create it? [y/N] ");
                 out.flush();  // CRITICAL: prevent buffering hang (Pitfall 5)
-                String answer = new BufferedReader(new InputStreamReader(in)).readLine();
+                var answer = new BufferedReader(new InputStreamReader(in)).readLine();
                 if (answer == null || !answer.equalsIgnoreCase("y")) {
                     // D-07: Any response other than y/Y → exit 0, no directory created
                     return GenerationResult.empty();
@@ -117,15 +113,15 @@ public class GeneratorService {
         }
 
         // STEP 5 — Accumulators
-        int generated = 0;
-        int skipped = 0;
-        int failed = 0;
-        List<String> verboseLines = new ArrayList<>();
+        var generated = 0;
+        var skipped = 0;
+        var failed = 0;
+        var verboseLines = new ArrayList<String>();
 
         // STEP 6 — For each mapping, traverse source
         for (MappingEntry mapping : dest.getMappings()) {
             // Resolve source
-            SourceEntry source = config.getSources().stream()
+            var source = config.getSources().stream()
                 .filter(s -> s.getName().equals(mapping.getSourceRef()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -136,15 +132,15 @@ public class GeneratorService {
             int maxDepth = mapping.isRecurse() ? Integer.MAX_VALUE : 1;
 
             List<Path> files;
-            try (Stream<Path> stream = Files.walk(sourceRoot, maxDepth)) {
+            try (var stream = Files.walk(sourceRoot, maxDepth)) {
                 files = stream
                     .filter(Files::isRegularFile)
                     .filter(p -> !HiddenPathFilter.hasHiddenPathSegment(sourceRoot, p))
                     .filter(p -> {
-                        String glob = mapping.getGlob();
+                        var glob = mapping.getGlob();
                         if (glob == null) return true;
                         // Pitfall 2: always relativize before passing to GlobMatcher
-                        Path rel = sourceRoot.relativize(p);
+                        var rel = sourceRoot.relativize(p);
                         return GlobMatcher.matches(glob, rel);
                     })
                     .sorted()
@@ -153,13 +149,13 @@ public class GeneratorService {
 
             for (Path sourcePath : files) {
                 // Compute dest path with optional template segment expansion (D-12)
-                Path relPath = sourceRoot.relativize(sourcePath);
-                Path destPath = destRoot;
+                var relPath = sourceRoot.relativize(sourcePath);
+                var destPath = destRoot;
                 Map<String, String> params = dest.getParameters();
-                boolean fileFailedDuringPathExpansion = false;
+                var fileFailedDuringPathExpansion = false;
 
-                for (int i = 0; i < relPath.getNameCount(); i++) {
-                    String seg = relPath.getName(i).toString();
+                for (var i = 0; i < relPath.getNameCount(); i++) {
+                    var seg = relPath.getName(i).toString();
                     String expanded;
                     if (source.isTemplates()) {
                         // Pitfall 3: catch IllegalArgumentException from expandSegment, increment failed, skip file
@@ -201,7 +197,7 @@ public class GeneratorService {
                         if (source.isTemplates()) {
                             // GEN-03, D-12: Template — expand file content
                             String rawContent = Files.readString(sourcePath, StandardCharsets.UTF_8);
-                            String expandedContent = pathExpander.expandSegment(rawContent, params);
+                            var expandedContent = pathExpander.expandSegment(rawContent, params);
                             Files.writeString(destPath, expandedContent, StandardCharsets.UTF_8);
                         } else {
                             // GEN-04, D-11: Binary byte-copy — no REPLACE_EXISTING; exists check already done

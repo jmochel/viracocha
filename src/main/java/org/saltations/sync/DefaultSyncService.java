@@ -5,10 +5,7 @@ import jakarta.inject.Singleton;
 import org.saltations.config.ConfigService;
 import org.saltations.infra.GlobMatcher;
 import org.saltations.infra.HiddenPathFilter;
-import org.saltations.model.DestinationEntry;
 import org.saltations.model.MappingEntry;
-import org.saltations.model.SourceEntry;
-import org.saltations.model.ViracochaConfig;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * v3 sync engine — copies changed source files to the destination using timestamp-based
@@ -38,29 +34,29 @@ public class DefaultSyncService implements SyncService {
     @Override
     public SyncResult sync(String destinationName, boolean dryRun, boolean verbose)
         throws IOException {
-        ViracochaConfig config = configService.load();
+        var config = configService.load();
 
         // Find destination by name (same pattern as GeneratorService)
-        DestinationEntry dest = config.getDestinations().stream()
+        var dest = config.getDestinations().stream()
             .filter(d -> d.getName().equals(destinationName))
             .findFirst()
             .orElseThrow(() -> new IllegalArgumentException(
                 "Destination '" + destinationName + "' not found."));
 
         // Tilde expansion (Phase 11 D-10 pattern)
-        String rawDestPath = dest.getPath();
+        var rawDestPath = dest.getPath();
         String resolvedDestPath = rawDestPath.startsWith("~")
             ? System.getProperty("user.home") + rawDestPath.substring(1)
             : rawDestPath;
         Path destRoot = Path.of(resolvedDestPath);
 
         // Accumulators
-        int copied = 0;
-        int skipped = 0;
-        int failed = 0;
-        int conflicts = 0;
-        List<String> verboseLines = new ArrayList<>();
-        List<SyncConflictRecord> conflictRecords = new ArrayList<>();
+        var copied = 0;
+        var skipped = 0;
+        var failed = 0;
+        var conflicts = 0;
+        var verboseLines = new ArrayList<String>();
+        var conflictRecords = new ArrayList<SyncConflictRecord>();
 
         for (MappingEntry mapping : dest.getMappings()) {
             // SYN-01: only process sync: true mappings
@@ -69,7 +65,7 @@ public class DefaultSyncService implements SyncService {
             }
 
             // Resolve source by sourceRef
-            SourceEntry source = config.getSources().stream()
+            var source = config.getSources().stream()
                 .filter(s -> s.getName().equals(mapping.getSourceRef()))
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException(
@@ -81,7 +77,7 @@ public class DefaultSyncService implements SyncService {
             }
 
             // Tilde expansion on source path
-            String rawSourcePath = source.getPath();
+            var rawSourcePath = source.getPath();
             String resolvedSourcePath = rawSourcePath.startsWith("~")
                 ? System.getProperty("user.home") + rawSourcePath.substring(1)
                 : rawSourcePath;
@@ -91,12 +87,12 @@ public class DefaultSyncService implements SyncService {
 
             // Walk source files (same pattern as GeneratorService)
             List<Path> files;
-            try (Stream<Path> stream = Files.walk(sourceRoot, maxDepth)) {
+            try (var stream = Files.walk(sourceRoot, maxDepth)) {
                 files = stream
                     .filter(Files::isRegularFile)
                     .filter(p -> !HiddenPathFilter.hasHiddenPathSegment(sourceRoot, p))
                     .filter(p -> {
-                        String glob = mapping.getGlob();
+                        var glob = mapping.getGlob();
                         if (glob == null) return true;
                         return GlobMatcher.matches(glob, sourceRoot.relativize(p));
                     })
@@ -105,8 +101,8 @@ public class DefaultSyncService implements SyncService {
             }
 
             for (Path sourcePath : files) {
-                Path relPath = sourceRoot.relativize(sourcePath);
-                Path destPath = destRoot.resolve(relPath);
+                var relPath = sourceRoot.relativize(sourcePath);
+                var destPath = destRoot.resolve(relPath);
 
                 try {
                     FileTime srcMtime = Files.getLastModifiedTime(sourcePath);
@@ -123,9 +119,9 @@ public class DefaultSyncService implements SyncService {
                         }
                     } else {
                         FileTime dstMtime = Files.getLastModifiedTime(destPath);
-                        int cmp = srcMtime.compareTo(dstMtime);
-                        long mismatch = Files.mismatch(sourcePath, destPath);
-                        boolean contentIdentical = (mismatch == -1L);
+                        var cmp = srcMtime.compareTo(dstMtime);
+                        var mismatch = Files.mismatch(sourcePath, destPath);
+                        var contentIdentical = (mismatch == -1L);
 
                         if (contentIdentical) {
                             // Content identical regardless of mtime — safe to skip (D-03)
@@ -146,7 +142,7 @@ public class DefaultSyncService implements SyncService {
                         } else {
                             // Destination newer AND content differs — CONFLICT (D-01)
                             conflicts++;
-                            String posixRelPath = relPath.toString().replace('\\', '/');
+                            var posixRelPath = relPath.toString().replace('\\', '/');
                             conflictRecords.add(new SyncConflictRecord(
                                 posixRelPath,
                                 SyncConflictKind.CONTENT_MISMATCH,

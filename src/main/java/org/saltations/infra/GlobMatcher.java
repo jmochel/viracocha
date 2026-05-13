@@ -2,7 +2,6 @@ package org.saltations.infra;
 
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.nio.file.PathMatcher;
 
 /**
  * Utility for matching paths against glob patterns.
@@ -22,7 +21,7 @@ public final class GlobMatcher {
      * @return true if the path matches the pattern
      */
     public static boolean matches(String glob, Path path) {
-        PathMatcher matcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
+        var matcher = FileSystems.getDefault().getPathMatcher("glob:" + glob);
         return matcher.matches(path);
     }
 }

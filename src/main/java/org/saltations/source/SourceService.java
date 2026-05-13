@@ -6,7 +6,6 @@ import org.saltations.config.ConfigNotInitializedException;
 import org.saltations.config.ConfigService;
 import org.saltations.infra.FreemarkerVariableExtractor;
 import org.saltations.model.SourceEntry;
-import org.saltations.model.ViracochaConfig;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -47,7 +46,7 @@ public class SourceService {
             throw new IllegalArgumentException("Path must not contain '..': " + rawPath);
         }
         // D-01.2 / D-14: resolve then check existence
-        Path p = Path.of(rawPath).toAbsolutePath().normalize();
+        var p = Path.of(rawPath).toAbsolutePath().normalize();
         if (!Files.exists(p)) {
             throw new IllegalArgumentException("Path does not exist: " + rawPath);
         }
@@ -56,8 +55,8 @@ public class SourceService {
             throw new IllegalArgumentException("Path is not a directory: " + rawPath);
         }
         // SRC-05 / D-12: duplicate name check (name, not path — two names may share a path)
-        ViracochaConfig config = configService.load();
-        boolean duplicate = config.getSources().stream()
+        var config = configService.load();
+        var duplicate = config.getSources().stream()
             .anyMatch(s -> s.getName().equals(name));
         if (duplicate) {
             throw new IllegalArgumentException("Source '" + name + "' already exists.");
@@ -67,7 +66,7 @@ public class SourceService {
             ? extractor.extractFromDirectory(p)
             : new ArrayList<>();
         // D-01.4: store absolute, normalized path as string
-        SourceEntry entry = new SourceEntry(name, p.toString(), templates, params);
+        var entry = new SourceEntry(name, p.toString(), templates, params);
         config.getSources().add(entry);
         configService.save(config);
         return entry;
@@ -103,8 +102,8 @@ public class SourceService {
      * @throws IOException if config cannot be read or written
      */
     public boolean removeSource(String name) throws IOException {
-        ViracochaConfig config = configService.load();
-        boolean removed = config.getSources().removeIf(s -> s.getName().equals(name));
+        var config = configService.load();
+        var removed = config.getSources().removeIf(s -> s.getName().equals(name));
         if (removed) {
             configService.save(config);
         }

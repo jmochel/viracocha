@@ -111,5 +111,5 @@
 
 ## Deferred Ideas
 
-- `--destination-name` as optional (generate all destinations when omitted) — reviewed, not selected; current required behavior preserved
+- `--dest` as optional (generate all destinations when omitted) — reviewed, not selected; current required behavior preserved
 - Per-mapping parameter overrides — out of scope per REQUIREMENTS.md Out of Scope table

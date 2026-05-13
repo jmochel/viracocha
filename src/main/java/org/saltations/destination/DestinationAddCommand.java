@@ -3,7 +3,6 @@ package org.saltations.destination;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigNotInitializedException;
-import org.saltations.model.DestinationEntry;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
@@ -15,8 +14,9 @@ import java.util.concurrent.Callable;
 /**
  * Command: vira destination add --name NAME --path PATH
  * Registers a named destination workspace path.
- * Exit codes: 0 = success, 1 = validation failure / config error / IO error.
- * D-04: no path existence check — destinations may not exist at registration time.
+ * Exit codes: 0 = success, 1 = validation failure, configuration error, or I/O error.
+ * Note: This command does not verify whether the specified path exists; 
+ * destinations can be registered even if the directory does not currently exist so that they can be generated.
  */
 @Command(
     name = "add",
@@ -47,17 +47,11 @@ public class DestinationAddCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         try {
-            DestinationEntry entry = destinationService.addDestination(name, path);
+            var entry = destinationService.addDestination(name, path);
             spec.commandLine().getOut().println("Destination '" + entry.getName() + "' added.");
             return 0;
-        } catch (ConfigNotInitializedException e) {
+        } catch (ConfigNotInitializedException | IllegalArgumentException |IOException e) {
             spec.commandLine().getErr().println(e.getMessage());
-            return 1;
-        } catch (IllegalArgumentException e) {
-            spec.commandLine().getErr().println(e.getMessage());
-            return 1;
-        } catch (IOException e) {
-            spec.commandLine().getErr().println("Error: " + e.getMessage());
             return 1;
         }
     }

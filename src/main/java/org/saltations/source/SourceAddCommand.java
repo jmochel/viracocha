@@ -2,14 +2,11 @@ package org.saltations.source;
 
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
-import org.saltations.config.ConfigNotInitializedException;
-import org.saltations.model.SourceEntry;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
 import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
-import java.io.IOException;
 import java.util.concurrent.Callable;
 
 /**
@@ -37,7 +34,7 @@ public class SourceAddCommand implements Callable<Integer> {
             description = "Absolute or relative path to the source directory.")
     private String path;
 
-    @Option(names = {"--templates"},
+    @Option(names = {"--has-templates","-ht"},
             description = "Extract Freemarker variable names from template files in this source.")
     private boolean templates;
 
@@ -51,18 +48,13 @@ public class SourceAddCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         try {
-            SourceEntry entry = sourceService.addSource(name, path, templates);
+            var entry = sourceService.addSource(name, path, templates);
             spec.commandLine().getOut().println("Source '" + entry.getName() + "' added.");
             return 0;
-        } catch (ConfigNotInitializedException e) {
+        } catch (Exception e) {
             spec.commandLine().getErr().println(e.getMessage());
-            return 1;
-        } catch (IllegalArgumentException e) {
-            spec.commandLine().getErr().println(e.getMessage());
-            return 1;
-        } catch (IOException e) {
-            spec.commandLine().getErr().println("Error: " + e.getMessage());
             return 1;
         }
+   
     }
 }

@@ -14,8 +14,8 @@ class ViracochaConfigV3Test {
 
     @Test
     void defaultConfigSerializesToYamlWithV3Fields() throws Exception {
-        ViracochaConfig config = new ViracochaConfig();
-        String serialized = yaml.writeValueAsString(config);
+        var config = new ViracochaConfig();
+        var serialized = yaml.writeValueAsString(config);
         assertTrue(serialized.contains("version: 3"), "Serialized YAML must contain 'version: 3'");
         assertTrue(serialized.contains("sources"), "Serialized YAML must contain 'sources'");
         assertTrue(serialized.contains("destinations"), "Serialized YAML must contain 'destinations'");
@@ -26,17 +26,17 @@ class ViracochaConfigV3Test {
 
     @Test
     void configRoundTripPreservesVersion() throws Exception {
-        ViracochaConfig original = new ViracochaConfig();
-        String serialized = yaml.writeValueAsString(original);
-        ViracochaConfig deserialized = yaml.readValue(serialized, ViracochaConfig.class);
+        var original = new ViracochaConfig();
+        var serialized = yaml.writeValueAsString(original);
+        var deserialized = yaml.readValue(serialized, ViracochaConfig.class);
         assertEquals(3, deserialized.getVersion(), "Round-trip must preserve version=3");
     }
 
     @Test
     void configRoundTripPreservesEmptyLists() throws Exception {
-        ViracochaConfig original = new ViracochaConfig();
-        String serialized = yaml.writeValueAsString(original);
-        ViracochaConfig deserialized = yaml.readValue(serialized, ViracochaConfig.class);
+        var original = new ViracochaConfig();
+        var serialized = yaml.writeValueAsString(original);
+        var deserialized = yaml.readValue(serialized, ViracochaConfig.class);
         assertNotNull(deserialized.getSources(), "sources must not be null after round-trip");
         assertNotNull(deserialized.getDestinations(), "destinations must not be null after round-trip");
         assertTrue(deserialized.getSources().isEmpty(), "sources must be empty after round-trip");

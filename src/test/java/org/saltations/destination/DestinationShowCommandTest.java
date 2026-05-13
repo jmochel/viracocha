@@ -34,17 +34,13 @@ class DestinationShowCommandTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
-            @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
-            @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
-        };
-        ConfigService configService = new ConfigService(xdgPaths);
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
+        var configService = new ConfigService(xdgPaths);
         configService.init();
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        var extractor = new FreemarkerVariableExtractor();
         sourceService = new SourceService(configService, extractor);
         destinationService = new DestinationService(configService);
-        DestinationShowCommand command = new DestinationShowCommand(destinationService);
+        var command = new DestinationShowCommand(destinationService);
         commandLine = new CommandLine(command);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
@@ -55,7 +51,7 @@ class DestinationShowCommandTest {
     @Test
     void showExistingDestinationExitsZeroAndPrintsName() throws Exception {
         destinationService.addDestination("my-ws", "/some/path");
-        int exit = commandLine.execute("my-ws");
+        var exit = commandLine.execute("my-ws");
         assertEquals(0, exit, "show existing destination must exit 0");
         assertTrue(stdout.toString().contains("Name:      my-ws"),
             "Output must contain 'Name:      my-ws'");
@@ -65,7 +61,7 @@ class DestinationShowCommandTest {
     void showOutputContainsPathLine() throws Exception {
         destinationService.addDestination("my-ws", "/some/path");
         commandLine.execute("my-ws");
-        String output = stdout.toString();
+        var output = stdout.toString();
         assertTrue(output.contains("Path:      /some/path"),
             "Output must contain 'Path:      /some/path'");
     }
@@ -93,7 +89,7 @@ class DestinationShowCommandTest {
         destinationService.addDestination("mapped-ws", "/some/path");
         destinationService.addMapping("mapped-ws", "some-source", null, false, false);
         commandLine.execute("mapped-ws");
-        String output = stdout.toString();
+        var output = stdout.toString();
         assertTrue(output.contains("Mapping 1:"), "Output must contain 'Mapping 1:'");
         assertTrue(output.contains("Source:  some-source"), "Output must contain 'Source:  some-source'");
         assertTrue(output.contains("Glob:    (all files)"), "Null glob must display as '(all files)' per D-13");
@@ -113,19 +109,8 @@ class DestinationShowCommandTest {
     }
 
     @Test
-    void showJsonOutputExitsZeroAndIsValidJsonObject() throws Exception {
-        destinationService.addDestination("json-ws", "/some/path");
-        int exit = commandLine.execute("--json", "json-ws");
-        assertEquals(0, exit, "show --json must exit 0");
-        String output = stdout.toString().trim();
-        assertTrue(output.startsWith("{"), "JSON output must start with '{'");
-        assertTrue(output.endsWith("}"), "JSON output must end with '}'");
-        assertTrue(output.contains("\"name\""), "JSON must contain 'name' key");
-    }
-
-    @Test
     void showUnknownDestinationExitsOneWithNotFoundError() {
-        int exit = commandLine.execute("x");
+        var exit = commandLine.execute("x");
         assertEquals(1, exit, "show unknown destination must exit 1");
         assertTrue(stderr.toString().contains("Destination 'x' not found."),
             "stderr must contain exact error: \"Destination 'x' not found.\"");

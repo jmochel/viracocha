@@ -7,7 +7,6 @@ import org.saltations.config.ConfigService;
 import org.saltations.destination.DestinationService;
 import org.saltations.infra.FreemarkerVariableExtractor;
 import org.saltations.infra.XdgPaths;
-import org.saltations.model.ViracochaConfig;
 import org.saltations.source.SourceService;
 
 import java.nio.file.Files;
@@ -34,14 +33,10 @@ class GeneratorServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
-            @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
-            @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
-        };
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
         configService = new ConfigService(xdgPaths);
         configService.init();
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        var extractor = new FreemarkerVariableExtractor();
         sourceService = new SourceService(configService, extractor);
         destinationService = new DestinationService(configService);
         pathExpander = new PathExpander();
@@ -64,7 +59,7 @@ class GeneratorServiceTest {
         destinationService.addMapping("flat-dest", "flat-src", null, false, false);
 
         // Run generate
-        GenerationResult result = generatorService.generate("flat-dest", false, false);
+        var result = generatorService.generate("flat-dest", false, false);
 
         // Assert both files exist in destination
         assertTrue(Files.exists(destDir.resolve("file1.txt")), "file1.txt should exist in destination");
@@ -89,7 +84,7 @@ class GeneratorServiceTest {
         destinationService.addMapping("recurse-dest", "recurse-src", null, true, false);
 
         // Run generate
-        GenerationResult result = generatorService.generate("recurse-dest", false, false);
+        var result = generatorService.generate("recurse-dest", false, false);
 
         // Assert subdirectory file exists in destination
         assertEquals(1, result.generated());
@@ -117,7 +112,7 @@ class GeneratorServiceTest {
         Files.writeString(sourceDir.resolve("existing.txt"), "modified content");
 
         // Generate again
-        GenerationResult secondResult = generatorService.generate("skip-dest", false, false);
+        var secondResult = generatorService.generate("skip-dest", false, false);
 
         // Destination file should still have original content (skip-existing)
         String destContent = Files.readString(destDir.resolve("existing.txt"));
@@ -141,7 +136,7 @@ class GeneratorServiceTest {
         // glob: only *.md files
         destinationService.addMapping("glob-dest", "glob-src", "*.md", false, false);
 
-        GenerationResult result = generatorService.generate("glob-dest", false, false);
+        var result = generatorService.generate("glob-dest", false, false);
 
         // Only readme.md should be in destination
         assertEquals(1, result.generated());
@@ -164,7 +159,7 @@ class GeneratorServiceTest {
         destinationService.addDestination("hidden-dest", destDir.toString());
         destinationService.addMapping("hidden-dest", "hidden-src", null, true, false);
 
-        GenerationResult result = generatorService.generate("hidden-dest", false, false);
+        var result = generatorService.generate("hidden-dest", false, false);
 
         // real.txt should be copied, .git directory should be skipped
         assertEquals(1, result.generated());
@@ -186,7 +181,7 @@ class GeneratorServiceTest {
         destinationService.addDestination("tmpl-dest", destDir.toString());
 
         // Set parameters on tmpl-dest: project -> myproj, name -> world
-        ViracochaConfig cfg = configService.load();
+        var cfg = configService.load();
         cfg.getDestinations().stream()
             .filter(d -> d.getName().equals("tmpl-dest"))
             .findFirst().get()
@@ -200,11 +195,11 @@ class GeneratorServiceTest {
         // Add mapping after setting parameters
         destinationService.addMapping("tmpl-dest", "tmpl-src", null, false, false);
 
-        GenerationResult result = generatorService.generate("tmpl-dest", false, false);
+        var result = generatorService.generate("tmpl-dest", false, false);
 
         // destDir/myproj.txt should exist with expanded content
         assertEquals(1, result.generated());
-        Path expandedFile = destDir.resolve("myproj.txt");
+        var expandedFile = destDir.resolve("myproj.txt");
         assertTrue(Files.exists(expandedFile), "Expanded file myproj.txt should exist");
         assertEquals("Hello world!", Files.readString(expandedFile), "Template content should be expanded");
     }
@@ -223,7 +218,7 @@ class GeneratorServiceTest {
         destinationService.addDestination("bin-dest", destDir.toString());
         destinationService.addMapping("bin-dest", "bin-src", null, false, false);
 
-        GenerationResult result = generatorService.generate("bin-dest", false, false);
+        var result = generatorService.generate("bin-dest", false, false);
 
         // Read destination bytes and assert exact byte equality
         assertEquals(1, result.generated());

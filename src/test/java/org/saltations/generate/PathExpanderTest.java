@@ -67,7 +67,7 @@ class PathExpanderTest {
 
     @Test
     void expandSegment_orderedKeysInLinkedHashMap() {
-        Map<String, String> m = new LinkedHashMap<>();
+        var m = new LinkedHashMap<String, String>();
         m.put("a", "first");
         m.put("b", "second");
         assertEquals("first-second", expander.expandSegment("${a}-${b}", m));

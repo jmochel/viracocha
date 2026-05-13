@@ -38,8 +38,8 @@ Implement `GeneratorService` for the v3 sources/destinations/mappings model: tra
 - **D-12:** For sources with `templates: true` — use `PathExpander.expandSegment()` on each path segment, and Freemarker template processing on file content. Both path expansion and content expansion use the destination's `parameters` map as the data model.
 - **D-13:** Per-mapping parameter overrides (`MappingEntry.params`) are **not** used for template expansion in this phase. Destination-level parameters only. (Consistent with REQUIREMENTS.md Out of Scope: "Per-mapping parameter overrides".)
 
-### `--destination-name` Behavior
-- **D-14:** Keep `--destination-name` as effectively required (current `GenerateCommand` behavior): exit 2 with `"Missing required option: '--destination-name'"` if omitted. This was not selected for discussion — preserve current behavior.
+### `--dest` Behavior
+- **D-14:** Keep `--dest` as effectively required (current `GenerateCommand` behavior): exit 2 with `"Missing required option: '--dest'"` if omitted. This was not selected for discussion — preserve current behavior.
 
 ### Output Format
 - **D-15:** Summary line always written to stdout: `"Generated: N files, Skipped: M files, Failed: K files"` — existing format, unchanged.
@@ -65,7 +65,7 @@ Implement `GeneratorService` for the v3 sources/destinations/mappings model: tra
 
 ### Key source files to implement or modify
 - `src/main/java/org/saltations/generate/GeneratorService.java` — stub to fully implement (v3 traversal logic goes here)
-- `src/main/java/org/saltations/generate/GenerateCommand.java` — existing CLI shell with --destination-name, --dry-run, --verbose; keep as-is unless a tweak is needed for the prompt
+- `src/main/java/org/saltations/generate/GenerateCommand.java` — existing CLI shell with --dest, --dry-run, --verbose; keep as-is unless a tweak is needed for the prompt
 - `src/main/java/org/saltations/generate/GenerationResult.java` — record with generated/skipped/failed/verboseLines; use as-is
 - `src/main/java/org/saltations/generate/PathExpander.java` — existing singleton; use for path segment expansion and file content expansion on template sources
 
@@ -90,7 +90,7 @@ Implement `GeneratorService` for the v3 sources/destinations/mappings model: tra
 ## Existing Code Insights
 
 ### Reusable Assets
-- `GenerateCommand` (`generate/`): CLI shell is complete — `--destination-name`, `--dry-run`, `--verbose` options wired; calls `generatorService.generate(name, dryRun, verbose)` and formats `GenerationResult`. No changes needed unless the destination-creation prompt requires a new code path.
+- `GenerateCommand` (`generate/`): CLI shell is complete — `--dest`, `--dry-run`, `--verbose` options wired; calls `generatorService.generate(name, dryRun, verbose)` and formats `GenerationResult`. No changes needed unless the destination-creation prompt requires a new code path.
 - `GenerationResult` (`generate/`): Record `(generated, skipped, failed, verboseLines)` — accumulate counts and lines in GeneratorService and return this.
 - `PathExpander` (`generate/`): `expandSegment(String segment, Map<String,String> model)` — call once per path segment during name expansion; call via Freemarker string template for file content.
 - `GlobMatcher` (`infra/`): `matches(String glob, Path path)` — pass the relative path from source root (not full absolute path); supports `**` patterns correctly via JDK `PathMatcher`.
@@ -124,7 +124,7 @@ Implement `GeneratorService` for the v3 sources/destinations/mappings model: tra
 <deferred>
 ## Deferred Ideas
 
-- **`--destination-name` as optional (generate all destinations)**: Discussed but not selected. The user chose not to revisit this — current behavior (required) is preserved. If generate-all is needed, that's a future phase.
+- **`--dest` as optional (generate all destinations)**: Discussed but not selected. The user chose not to revisit this — current behavior (required) is preserved. If generate-all is needed, that's a future phase.
 - **Per-mapping parameter overrides**: `MappingEntry.params` field exists but is explicitly out of scope per REQUIREMENTS.md. Deferred to a future enhancement if needed.
 
 </deferred>

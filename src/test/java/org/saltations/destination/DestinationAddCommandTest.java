@@ -32,15 +32,11 @@ class DestinationAddCommandTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
-            @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
-            @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
-        };
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
         configService = new ConfigService(xdgPaths);
         configService.init();
-        DestinationService destinationService = new DestinationService(configService);
-        DestinationAddCommand command = new DestinationAddCommand(destinationService);
+        var destinationService = new DestinationService(configService);
+        var command = new DestinationAddCommand(destinationService);
         commandLine = new CommandLine(command);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
@@ -50,7 +46,7 @@ class DestinationAddCommandTest {
 
     @Test
     void addValidDestinationExitsZeroAndPrintsConfirmation() {
-        int exit = commandLine.execute("--name", "my-ws", "--path", "/tmp/workspace");
+        var exit = commandLine.execute("--name", "my-ws", "--path", "/tmp/workspace");
         assertEquals(0, exit, "Valid destination add must exit 0");
         assertTrue(stdout.toString().contains("Destination 'my-ws' added."),
             "stdout must contain confirmation message");
@@ -65,7 +61,7 @@ class DestinationAddCommandTest {
 
     @Test
     void addWithShortAliasesExitsZero() {
-        int exit = commandLine.execute("-n", "alias-dest", "-p", "/tmp/workspace");
+        var exit = commandLine.execute("-n", "alias-dest", "-p", "/tmp/workspace");
         assertEquals(0, exit, "Short aliases -n/-p must exit 0");
         assertTrue(stdout.toString().contains("Destination 'alias-dest' added."),
             "stdout must contain confirmation message when using short aliases");
@@ -73,7 +69,7 @@ class DestinationAddCommandTest {
 
     @Test
     void addPathWithDotDotExitsOneWithTraversalError() {
-        int exit = commandLine.execute("--name", "x", "--path", "/tmp/../etc");
+        var exit = commandLine.execute("--name", "x", "--path", "/tmp/../etc");
         assertEquals(1, exit, "Path with '..' must exit 1");
         assertTrue(stderr.toString().contains("Path must not contain '..'"),
             "stderr must contain traversal error message");
@@ -83,7 +79,7 @@ class DestinationAddCommandTest {
     void addDuplicateNameExitsOneWithAlreadyExistsError() {
         commandLine.execute("--name", "dup-dest", "--path", "/tmp/ws1");
         stdout.reset();
-        int exit = commandLine.execute("--name", "dup-dest", "--path", "/tmp/ws2");
+        var exit = commandLine.execute("--name", "dup-dest", "--path", "/tmp/ws2");
         assertEquals(1, exit, "Duplicate name must exit 1");
         assertTrue(stderr.toString().contains("already exists"),
             "stderr must contain 'already exists' message");
@@ -91,7 +87,7 @@ class DestinationAddCommandTest {
 
     @Test
     void addTildePathExitsZeroPathStoredAsIs() {
-        int exit = commandLine.execute("--name", "tilde-dest", "--path", "~/workspace");
+        var exit = commandLine.execute("--name", "tilde-dest", "--path", "~/workspace");
         assertEquals(0, exit, "Tilde path must exit 0 (no existence check for destinations)");
         assertTrue(stdout.toString().contains("Destination 'tilde-dest' added."),
             "stdout must contain confirmation message for tilde path");
@@ -99,13 +95,13 @@ class DestinationAddCommandTest {
 
     @Test
     void missingNameOptionExitsNonZero() {
-        int exit = commandLine.execute("--path", "/tmp/workspace");
+        var exit = commandLine.execute("--path", "/tmp/workspace");
         assertNotEquals(0, exit, "Missing --name must exit non-zero");
     }
 
     @Test
     void missingPathOptionExitsNonZero() {
-        int exit = commandLine.execute("--name", "x");
+        var exit = commandLine.execute("--name", "x");
         assertNotEquals(0, exit, "Missing --path must exit non-zero");
     }
 }

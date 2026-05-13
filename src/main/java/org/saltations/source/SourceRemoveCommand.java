@@ -19,6 +19,7 @@ import java.util.concurrent.Callable;
  */
 @Command(
     name = "remove",
+    aliases = {"rm"},
     description = "Remove a named source from the configuration.",
     mixinStandardHelpOptions = true
 )
@@ -41,7 +42,7 @@ public class SourceRemoveCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         try {
-            boolean removed = sourceService.removeSource(name);
+            var removed = sourceService.removeSource(name);
             if (!removed) {
                 spec.commandLine().getErr().println("Source '" + name + "' not found.");
                 return 1;

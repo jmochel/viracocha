@@ -12,7 +12,7 @@ requires:
     provides: DefaultSyncService fully implemented (SYN-01 through SYN-07)
 provides:
   - "Enabled SyncCommandTest (7 tests, 0 skipped) proving SYN-02 through SYN-07"
-  - "Exit code 2 for missing --destination-name (SYN-03)"
+  - "Exit code 2 for missing --dest (SYN-03)"
   - "Exit code 1 on conflict via FileTime future mtime (SYN-02)"
   - "Dry-run: no files written, summary line present (SYN-04)"
   - "Verbose: per-file Copied/Skipped/Conflict lines + summary (SYN-05)"

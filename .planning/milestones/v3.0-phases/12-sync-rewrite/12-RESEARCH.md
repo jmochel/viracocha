@@ -42,7 +42,7 @@ Remove all `syncProject(...)` methods.
 
 **D-10:** Remove `--mapping-id` option from `SyncCommand` entirely.
 
-**D-11: `--destination-name` is required** (exit 2 if omitted, same pattern as `GenerateCommand`).
+**D-11: `--dest` is required** (exit 2 if omitted, same pattern as `GenerateCommand`).
 
 **D-12: Exit codes:** 0 on success (including all-skipped), 1 on conflict or IO error, 2 on missing required option.
 
@@ -64,7 +64,7 @@ Remove all `syncProject(...)` methods.
 ### Deferred Ideas (OUT OF SCOPE)
 
 - **Per-mapping filter (`--mapping-id`):** No SYN requirement; removed for v3 clean break.
-- **`--destination-name` optional (sync all destinations):** Chosen required for consistency with generate.
+- **`--dest` optional (sync all destinations):** Chosen required for consistency with generate.
 - **Template source sync:** Skipped entirely for Phase 12.
 
 </user_constraints>
@@ -76,7 +76,7 @@ Remove all `syncProject(...)` methods.
 |----|-------------|------------------|
 | SYN-01 | `vira sync` copies changed source files to the destination for all mappings with `sync: true` | D-01 timestamp logic; GeneratorService traversal pattern (walk destinations → mappings → filter `sync: true`) |
 | SYN-02 | `vira sync` detects conflicts (destination file newer than source) and aborts with exit 1 | D-01 mtime comparison; `Files.mismatch()` (D-03); D-12 exit codes |
-| SYN-03 | `vira sync` accepts `--destination-name` to target a single destination | D-11 required option, exit 2 if omitted |
+| SYN-03 | `vira sync` accepts `--dest` to target a single destination | D-11 required option, exit 2 if omitted |
 | SYN-04 | `vira sync` supports `--dry-run` | D-14 dry-run reporting pattern from GeneratorService |
 | SYN-05 | `vira sync` supports `--verbose` | D-14 per-file lines before summary |
 | SYN-06 | `vira sync` supports `--json` for machine-readable output | D-15 Jackson ObjectMapper on SyncResult |
@@ -302,7 +302,7 @@ if (json) {
 
 @BeforeEach
 void setUp() throws Exception {
-    XdgPaths xdgPaths = new XdgPaths() {
+    XdgPaths xdgPaths = new XdgPaths("") {
         @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
         @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
         @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
@@ -326,7 +326,7 @@ void setUp() throws Exception {
 - **Checking `Files.mismatch() != -1L` for conflict without mtime first:** Mismatch alone is not the conflict signal. Conflict requires `dest.mtime > src.mtime AND content differs`.
 - **Using `@MicronautTest`:** All generate tests use plain JUnit 5. Sync tests should follow the same pattern for speed and isolation.
 - **Iterating `sub.getVerboseLines()` from `SyncSubscriptionResult`:** Those v2 classes are deleted. `SyncResult.verboseLines()` is the v3 equivalent.
-- **Rooting `CommandLine` at `ViracochaCommand` in tests:** Tests root at `SyncCommand` directly, so `execute()` args are options only — NOT `"sync", "--destination-name"`.
+- **Rooting `CommandLine` at `ViracochaCommand` in tests:** Tests root at `SyncCommand` directly, so `execute()` args are options only — NOT `"sync", "--dest"`.
 
 ## Don't Hand-Roll
 
@@ -386,9 +386,9 @@ void setUp() throws Exception {
 
 ### Pitfall 6: Picocli `CommandLine` Root in Tests
 
-**What goes wrong:** Test does `commandLine.execute("sync", "--destination-name", "dest")` and gets an error because "sync" is not a recognized subcommand when the root IS `SyncCommand`.
+**What goes wrong:** Test does `commandLine.execute("sync", "--dest", "dest")` and gets an error because "sync" is not a recognized subcommand when the root IS `SyncCommand`.
 **Why it happens:** Tests for `GenerateCommand` root at `GenerateCommand` directly — `execute()` takes only flags.
-**How to avoid:** Root `CommandLine` at `new CommandLine(syncCommand)` and call `execute("--destination-name", "dest")`.
+**How to avoid:** Root `CommandLine` at `new CommandLine(syncCommand)` and call `execute("--dest", "dest")`.
 **Warning signs:** Picocli `UnmatchedArgumentException` for "sync" in test output.
 
 ### Pitfall 7: `SyncConflictRecord` Jackson Serialization with Record
@@ -456,7 +456,7 @@ spec.commandLine().getOut().println(om.writeValueAsString(result));
 |--------------|------------------|--------------|--------|
 | v2 `SyncEngineResult` + `SyncSubscriptionResult` (Lombok @Data) | `SyncResult` Java record (like `GenerationResult`) | Phase 12 | Simpler, immutable, no boilerplate |
 | v2 `SyncService.syncProject(projectName, subscriptionId, ...)` | `SyncService.sync(destinationName, dryRun, verbose)` | Phase 12 | v3 destinations model; drops subscription concept |
-| v2 `SyncCommand` with `--mapping-id` | `SyncCommand` without `--mapping-id`, `--destination-name` required | Phase 12 | Consistent with `GenerateCommand` |
+| v2 `SyncCommand` with `--mapping-id` | `SyncCommand` without `--mapping-id`, `--dest` required | Phase 12 | Consistent with `GenerateCommand` |
 
 **Deprecated/outdated:**
 - `SyncEngineResult`: replaced by `SyncResult` record
@@ -503,8 +503,8 @@ Step 2.6: SKIPPED — Phase 12 is a pure Java source code change with no externa
 | SYN-02 | Detects conflict (dest newer, content differs) → conflicts count increments | unit | `./mvnw test -Dtest="DefaultSyncServiceTest#syncDetectsConflictWhenDestNewer"` | Wave 0 |
 | SYN-02 | No conflict when dest newer but content identical | unit | `./mvnw test -Dtest="DefaultSyncServiceTest#syncNoConflictWhenContentIdentical" -q` | Wave 0 |
 | SYN-02 | Conflict causes exit code 1 at command level (D-12) | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandReturnsExitOneOnConflict" -q` | Wave 0 |
-| SYN-03 | `--destination-name` required; missing → exit 2 | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandRequiresDestinationName" -q` | Wave 0 |
-| SYN-03 | `--destination-name` routes to correct destination | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandWithDestinationNameRoutes" -q` | Wave 0 |
+| SYN-03 | `--dest` required; missing → exit 2 | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandRequiresDestinationName" -q` | Wave 0 |
+| SYN-03 | `--dest` routes to correct destination | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandWithDestinationNameRoutes" -q` | Wave 0 |
 | SYN-04 | `--dry-run` reports what would be copied without writing | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandDryRunReportsWithoutWriting" -q` | Wave 0 |
 | SYN-05 | `--verbose` prints per-file Copied/Skipped/Conflict lines | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandVerbosePrintsPerFileLines" -q` | Wave 0 |
 | SYN-06 | `--json` outputs machine-readable SyncResult JSON | integration | `./mvnw test -Dtest="SyncCommandTest#syncCommandJsonOutputsMachineReadable" -q` | Wave 0 |

@@ -81,7 +81,7 @@ Each task was committed atomically:
 ## Decisions Made
 
 - Dry-run should print "Would create" per-file lines directly to `out` (GEN-06) without requiring `--verbose`. The existing implementation only added lines to `verboseLines` (which require `--verbose` to appear). Fixed as Rule 1 auto-fix.
-- `CommandLine` in tests is built from the leaf `GenerateCommand` (not `ViracochaCommand`), so `execute()` args are options not subcommand names. Plan scaffolded tests with `execute("generate", "--destination-name", ...)` which would fail — fixed to `execute("--destination-name", ...)`.
+- `CommandLine` in tests is built from the leaf `GenerateCommand` (not `ViracochaCommand`), so `execute()` args are options not subcommand names. Plan scaffolded tests with `execute("generate", "--dest", ...)` which would fail — fixed to `execute("--dest", ...)`.
 
 ## Deviations from Plan
 
@@ -97,8 +97,8 @@ Each task was committed atomically:
 
 **2. [Rule 1 - Bug] Test execute() calls passed "generate" as first arg to leaf CommandLine**
 - **Found during:** Task 3 (analysis of test execute patterns)
-- **Issue:** Plan scaffolded `commandLine.execute("generate", "--destination-name", ...)` but `commandLine` is rooted at `GenerateCommand` directly. Passing "generate" would be treated as an unmatched argument, causing exit 2.
-- **Fix:** Changed all execute() calls in GenerateCommandTest to omit "generate" prefix: `commandLine.execute("--destination-name", ...)`.
+- **Issue:** Plan scaffolded `commandLine.execute("generate", "--dest", ...)` but `commandLine` is rooted at `GenerateCommand` directly. Passing "generate" would be treated as an unmatched argument, causing exit 2.
+- **Fix:** Changed all execute() calls in GenerateCommandTest to omit "generate" prefix: `commandLine.execute("--dest", ...)`.
 - **Files modified:** `src/test/java/org/saltations/generate/GenerateCommandTest.java`
 - **Verification:** All 6 GenerateCommandTest tests pass
 - **Committed in:** `1903873` (Task 3 commit)
@@ -119,7 +119,7 @@ None - no external service configuration required.
 ## Next Phase Readiness
 
 - All seven GEN requirements (GEN-01 through GEN-07) are now implemented and tested
-- `vira generate --destination-name <name>` works end-to-end: routing, dry-run, verbose, skip-existing, interactive destination-creation prompt
+- `vira generate --dest <name>` works end-to-end: routing, dry-run, verbose, skip-existing, interactive destination-creation prompt
 - Phase 11 generate-rewrite is complete (Plans 00, 01, 02 all done)
 - Ready for next milestone or feature phase
 

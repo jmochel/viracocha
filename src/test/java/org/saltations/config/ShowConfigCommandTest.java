@@ -12,7 +12,8 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration tests for ShowConfigCommand.
@@ -28,28 +29,15 @@ class ShowConfigCommandTest {
 
     @BeforeEach
     void setUp() {
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override
-            public Path configFile() {
-                return tempDir.resolve("viracocha").resolve("config.yaml");
-            }
-            @Override
-            public Path configDir() {
-                return tempDir.resolve("viracocha");
-            }
-            @Override
-            public Path dataDir() {
-                return tempDir.resolve("share").resolve("viracocha");
-            }
-        };
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
         configService = new ConfigService(xdgPaths);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
     }
 
     private CommandLine buildCommandLine() {
-        ShowConfigCommand command = new ShowConfigCommand(configService);
-        CommandLine cl = new CommandLine(command);
+        var command = new ShowConfigCommand(configService);
+        var cl = new CommandLine(command);
         cl.setOut(new PrintWriter(stdout, true));
         cl.setErr(new PrintWriter(stderr, true));
         return cl;
@@ -58,10 +46,10 @@ class ShowConfigCommandTest {
     @Test
     void showAfterInitPrintsConfigFileHeader() throws Exception {
         configService.init();
-        Path expectedFile = configService.xdgPaths().configFile();
-        int exitCode = buildCommandLine().execute();
+        var expectedFile = configService.xdgPaths().configFile();
+        var exitCode = buildCommandLine().execute();
         assertEquals(0, exitCode, "show after init must exit 0");
-        String out = stdout.toString();
+        var out = stdout.toString();
         assertTrue(out.startsWith("Configuration file:\n"),
             "Output must start with Configuration file header");
         assertTrue(out.contains(expectedFile.toAbsolutePath().normalize().toString()),
@@ -71,7 +59,7 @@ class ShowConfigCommandTest {
     @Test
     void showAfterInitContainsYamlVersion() throws Exception {
         configService.init();
-        int exitCode = buildCommandLine().execute();
+        var exitCode = buildCommandLine().execute();
         assertEquals(0, exitCode);
         assertTrue(stdout.toString().contains("version: 3"),
             "Output must contain 'version: 3' from raw YAML");
@@ -79,7 +67,7 @@ class ShowConfigCommandTest {
 
     @Test
     void showBeforeInitExitsOneAndPrintsToStderr() {
-        int exitCode = buildCommandLine().execute();
+        var exitCode = buildCommandLine().execute();
         assertEquals(1, exitCode, "show before init must exit 1");
         assertTrue(stderr.toString().contains("Config not initialized"),
             "Stderr must contain 'Config not initialized'");
@@ -88,14 +76,14 @@ class ShowConfigCommandTest {
     @Test
     void showPrintsVersionErrorForV2Config() throws IOException {
         // Write a v1 config file to simulate a developer's existing v2 config
-        Path configDir = configService.xdgPaths().configDir();
+        var configDir = configService.xdgPaths().configDir();
         Files.createDirectories(configDir);
-        Path configFile = configService.xdgPaths().configFile();
+        var configFile = configService.xdgPaths().configFile();
         Files.writeString(configFile, "version: 1\ncatalogs: []\n");
 
-        int exitCode = buildCommandLine().execute();
+        var exitCode = buildCommandLine().execute();
         assertEquals(1, exitCode, "show with v1 config must exit 1");
-        String err = stderr.toString();
+        var err = stderr.toString();
         assertTrue(err.contains("v3 format required"),
             "Stderr must contain 'v3 format required' for a v1 config file");
         assertTrue(err.contains("Error reading config:"),

@@ -34,16 +34,12 @@ class SourceAddCommandTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
-            @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
-            @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
-        };
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
         configService = new ConfigService(xdgPaths);
         configService.init();
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
-        SourceService sourceService = new SourceService(configService, extractor);
-        SourceAddCommand command = new SourceAddCommand(sourceService);
+        var extractor = new FreemarkerVariableExtractor();
+        var sourceService = new SourceService(configService, extractor);
+        var command = new SourceAddCommand(sourceService);
         commandLine = new CommandLine(command);
         stdout = new ByteArrayOutputStream();
         stderr = new ByteArrayOutputStream();
@@ -54,7 +50,7 @@ class SourceAddCommandTest {
     @Test
     void addValidSourceExitsZeroAndPrintsConfirmation() throws IOException {
         Path sourceDir = Files.createDirectory(tempDir.resolve("my-source"));
-        int exit = commandLine.execute("--name", "my-source", "--path", sourceDir.toString());
+        var exit = commandLine.execute("--name", "my-source", "--path", sourceDir.toString());
         assertEquals(0, exit, "Valid source add must exit 0");
         assertTrue(stdout.toString().contains("Source 'my-source' added."),
             "stdout must contain confirmation message");
@@ -74,8 +70,8 @@ class SourceAddCommandTest {
         Path templateDir = Files.createDirectory(tempDir.resolve("tmpl-dir"));
         Files.writeString(templateDir.resolve("template.md"),
             "# ${projectName}\nby ${authorName}", StandardCharsets.UTF_8);
-        int exit = commandLine.execute("--name", "tmpl", "--path", templateDir.toString(), "--templates");
-        assertEquals(0, exit, "source add --templates must exit 0");
+        var exit = commandLine.execute("--name", "tmpl", "--path", templateDir.toString(), "--has-templates");
+        assertEquals(0, exit, "source add --has-templates must exit 0");
         // Verify parameters appear in config
         String yaml = Files.readString(configService.xdgPaths().configFile());
         assertTrue(yaml.contains("projectName") || yaml.contains("authorName"),
@@ -85,7 +81,7 @@ class SourceAddCommandTest {
     @Test
     void addWithShortAliasesExitsZero() throws IOException {
         Path sourceDir = Files.createDirectory(tempDir.resolve("alias-source"));
-        int exit = commandLine.execute("-n", "alias-source", "-p", sourceDir.toString());
+        var exit = commandLine.execute("-n", "alias-source", "-p", sourceDir.toString());
         assertEquals(0, exit, "Short aliases -n/-p must exit 0");
         assertTrue(stdout.toString().contains("Source 'alias-source' added."),
             "stdout must contain confirmation message when using short aliases");
@@ -93,7 +89,7 @@ class SourceAddCommandTest {
 
     @Test
     void addPathWithDotDotExitsOneWithTraversalError() {
-        int exit = commandLine.execute("--name", "x", "--path", "/tmp/../etc");
+        var exit = commandLine.execute("--name", "x", "--path", "/tmp/../etc");
         assertEquals(1, exit, "Path with '..' must exit 1");
         assertTrue(stderr.toString().contains("Path must not contain '..'"),
             "stderr must contain traversal error message");
@@ -104,7 +100,7 @@ class SourceAddCommandTest {
         Path dir1 = Files.createDirectory(tempDir.resolve("dir1"));
         commandLine.execute("--name", "dup-source", "--path", dir1.toString());
         stdout.reset();
-        int exit = commandLine.execute("--name", "dup-source", "--path", dir1.toString());
+        var exit = commandLine.execute("--name", "dup-source", "--path", dir1.toString());
         assertEquals(1, exit, "Duplicate name must exit 1");
         assertTrue(stderr.toString().contains("already exists"),
             "stderr must contain 'already exists' message");
@@ -112,7 +108,7 @@ class SourceAddCommandTest {
 
     @Test
     void addNonExistentPathExitsOneWithDoesNotExistError() {
-        int exit = commandLine.execute("--name", "x", "--path", "/nonexistent/xyz/never");
+        var exit = commandLine.execute("--name", "x", "--path", "/nonexistent/xyz/never");
         assertEquals(1, exit, "Non-existent path must exit 1");
         assertTrue(stderr.toString().contains("Path does not exist:"),
             "stderr must contain 'Path does not exist:' message");
@@ -121,13 +117,13 @@ class SourceAddCommandTest {
     @Test
     void missingNameOptionExitsNonZero() throws IOException {
         Path dir = Files.createDirectory(tempDir.resolve("some-dir"));
-        int exit = commandLine.execute("--path", dir.toString());
+        var exit = commandLine.execute("--path", dir.toString());
         assertNotEquals(0, exit, "Missing --name must exit non-zero");
     }
 
     @Test
     void missingPathOptionExitsNonZero() {
-        int exit = commandLine.execute("--name", "x");
+        var exit = commandLine.execute("--name", "x");
         assertNotEquals(0, exit, "Missing --path must exit non-zero");
     }
 }

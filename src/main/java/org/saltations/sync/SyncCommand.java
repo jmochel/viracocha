@@ -1,6 +1,5 @@
 package org.saltations.sync;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Inject;
 import jakarta.inject.Singleton;
 import org.saltations.config.ConfigNotInitializedException;
@@ -14,7 +13,7 @@ import java.util.concurrent.Callable;
 
 /**
  * Command: vira sync — sync mapped files from sources to destinations (v3).
- * Per-mapping filter removed (D-10). --destination-name required (D-11).
+ * Per-mapping filter removed (D-10). --dest required (D-11).
  */
 @Command(
     name = "sync",
@@ -26,7 +25,7 @@ public class SyncCommand implements Callable<Integer> {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"--destination-name"}, description = "Destination name in configuration")
+    @Option(names = {"--dest", "-d"}, description = "Destination name in configuration")
     private String destinationName;
 
     @Option(names = {"--dry-run"}, description = "Analyze only; do not copy files")
@@ -34,9 +33,6 @@ public class SyncCommand implements Callable<Integer> {
 
     @Option(names = {"--verbose"}, description = "Print one line per file action")
     private boolean verbose;
-
-    @Option(names = {"--json"}, description = "Emit SyncResult as JSON on stdout")
-    private boolean json;
 
     private final SyncService syncService;
 
@@ -48,16 +44,12 @@ public class SyncCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         if (destinationName == null || destinationName.isBlank()) {
-            spec.commandLine().getErr().println("Missing required option: '--destination-name'");
+            spec.commandLine().getErr().println("Missing required option: '--dest'");
             return 2;
         }
         try {
-            SyncResult result = syncService.sync(destinationName, dryRun, verbose);
-            if (json) {
-                ObjectMapper om = new ObjectMapper();
-                spec.commandLine().getOut().println(om.writeValueAsString(result));
-                return result.conflicts() > 0 || result.failed() > 0 ? 1 : 0;
-            }
+            var result = syncService.sync(destinationName, dryRun, verbose);
+
             if (verbose) {
                 for (String line : result.verboseLines()) {
                     spec.commandLine().getOut().println(line);

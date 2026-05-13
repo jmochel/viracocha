@@ -1,16 +1,16 @@
-# Graph Report - viracocha  (2026-05-12)
+# Graph Report - viracocha  (2026-05-13)
 
 ## Corpus Check
-- 70 files · ~22,271 words
+- 70 files · ~21,221 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 443 nodes · 696 edges · 32 communities (13 shown, 19 thin omitted)
+- 446 nodes · 701 edges · 43 communities (12 shown, 31 thin omitted)
 - Extraction: 60% EXTRACTED · 40% INFERRED · 0% AMBIGUOUS · INFERRED: 279 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `968efd9c`
+- Built from commit: `ba9a6d8d`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -43,7 +43,18 @@
 - [[_COMMUNITY_Community 25|Community 25]]
 - [[_COMMUNITY_Community 26|Community 26]]
 - [[_COMMUNITY_Community 27|Community 27]]
+- [[_COMMUNITY_Community 28|Community 28]]
 - [[_COMMUNITY_Community 29|Community 29]]
+- [[_COMMUNITY_Community 30|Community 30]]
+- [[_COMMUNITY_Community 31|Community 31]]
+- [[_COMMUNITY_Community 32|Community 32]]
+- [[_COMMUNITY_Community 33|Community 33]]
+- [[_COMMUNITY_Community 34|Community 34]]
+- [[_COMMUNITY_Community 35|Community 35]]
+- [[_COMMUNITY_Community 36|Community 36]]
+- [[_COMMUNITY_Community 37|Community 37]]
+- [[_COMMUNITY_Community 38|Community 38]]
+- [[_COMMUNITY_Community 40|Community 40]]
 
 ## God Nodes (most connected - your core abstractions)
 1. `DestinationServiceTest` - 18 edges
@@ -60,67 +71,63 @@
 ## Surprising Connections (you probably didn't know these)
 - None detected - all connections are within the same source files.
 
-## Communities (32 total, 19 thin omitted)
+## Communities (43 total, 31 thin omitted)
 
 ### Community 0 - "Community 0"
-Cohesion: 0.08
-Nodes (6): DestinationListMappingsCommandTest, DestinationShowCommandTest, GenerateCommandTest, GeneratorServiceTest, DefaultSyncServiceTest, SyncCommandTest
+Cohesion: 0.06
+Nodes (7): ConfigService, ConfigServiceTest, InitCommand, ShowConfigCommandTest, XdgPaths, XdgPathsTest, SourceAddCommandTest
 
 ### Community 1 - "Community 1"
 Cohesion: 0.07
-Nodes (7): ConfigService, ConfigServiceTest, InitCommand, ShowConfigCommand, ShowConfigCommandTest, XdgPaths, XdgPathsTest
+Nodes (6): DestinationListMappingsCommandTest, DestinationShowCommandTest, GenerateCommandTest, GeneratorServiceTest, DefaultSyncServiceTest, SyncCommandTest
 
 ### Community 2 - "Community 2"
-Cohesion: 0.04
-Nodes (11): ConfigVersionException, DestinationAddCommand, DestinationAddCommandTest, DestinationAddMappingCommand, DestinationListCommand, GenerateCommand, GeneratorService, IOException (+3 more)
+Cohesion: 0.06
+Nodes (5): SourceListCommandTest, SourceRemoveCommandTest, SourceService, SourceServiceTest, SourceShowCommandTest
 
 ### Community 3 - "Community 3"
 Cohesion: 0.06
-Nodes (6): SourceListCommand, SourceRemoveCommand, SourceRemoveCommandTest, SourceService, SourceServiceTest, SourceShowCommand
+Nodes (5): DestinationRemoveCommandTest, DestinationRemoveMappingCommand, DestinationService, DestinationServiceTest, DestinationShowCommand
 
 ### Community 4 - "Community 4"
-Cohesion: 0.06
-Nodes (6): DestinationRemoveCommand, DestinationRemoveCommandTest, DestinationRemoveMappingCommand, DestinationService, DestinationServiceTest, DestinationShowCommand
-
-### Community 5 - "Community 5"
 Cohesion: 0.09
 Nodes (26): 1. Initialize and inspect config, 1. Initialize config, 2. Register catalogs and archetypes, 2. Register sources, 3. Define a project and mappings, 3. Register destinations and mappings, 4. Generate, 4. Generate into the workspace (+18 more)
 
-### Community 6 - "Community 6"
+### Community 5 - "Community 5"
 Cohesion: 0.1
 Nodes (6): FreemarkerVariableExtractor, GlobMatcher, GlobMatcherTest, HiddenPathFilter, DefaultSyncService, SyncService
 
-### Community 7 - "Community 7"
-Cohesion: 0.11
+### Community 6 - "Community 6"
+Cohesion: 0.09
 Nodes (3): DestinationAddMappingCommandTest, DestinationListMappingsCommand, DestinationRemoveMappingCommandTest
 
-### Community 8 - "Community 8"
+### Community 7 - "Community 7"
 Cohesion: 0.13
 Nodes (14): CLI Output UX — Rules, CLI Requirements, CLI UX, code:java, code:block2 (┌───────────────────────────────────────────────────────────), code:block3 (Archetype                                       Workspace), code:block4 (Catalog (LHS)                     Project (Subscriptions)   ), Command API (PicoCLI) (+6 more)
 
-### Community 13 - "Community 13"
+### Community 10 - "Community 10"
 Cohesion: 0.22
 Nodes (8): ai-idioms repo, Central Configuration, code:block1 (/home/jmochel/ai-idioms), code:block2 (/home/jmochel/sample-archetype), code:yaml (sources:), General Rules, Sample Sources, Viracocha
 
 ## Knowledge Gaps
 - **27 isolated node(s):** `ViracochaConfig`, `DestinationEntry`, `SourceEntry`, `MappingEntry`, `SyncConflictRecord` (+22 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **19 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **31 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DestinationService` connect `Community 4` to `Community 0`, `Community 7`?**
+- **Why does `DestinationService` connect `Community 3` to `Community 1`, `Community 6`?**
   _High betweenness centrality (0.033) - this node is a cross-community bridge._
 - **What connects `ViracochaConfig`, `DestinationEntry`, `SourceEntry` to the rest of the system?**
   _27 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `Community 0` be split into smaller, more focused modules?**
-  _Cohesion score 0.08 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
 - **Should `Community 1` be split into smaller, more focused modules?**
   _Cohesion score 0.07 - nodes in this community are weakly interconnected._
 - **Should `Community 2` be split into smaller, more focused modules?**
-  _Cohesion score 0.04 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
 - **Should `Community 3` be split into smaller, more focused modules?**
   _Cohesion score 0.06 - nodes in this community are weakly interconnected._
 - **Should `Community 4` be split into smaller, more focused modules?**
-  _Cohesion score 0.06 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09 - nodes in this community are weakly interconnected._

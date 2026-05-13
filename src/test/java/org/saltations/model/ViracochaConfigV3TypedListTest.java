@@ -19,13 +19,13 @@ class ViracochaConfigV3TypedListTest {
 
     @Test
     void sourceEntryRoundTrip() throws Exception {
-        SourceEntry src = new SourceEntry("s1", "/tmp/s", true, List.of("foo", "bar"));
-        ViracochaConfig cfg = new ViracochaConfig();
+        var src = new SourceEntry("s1", "/tmp/s", true, List.of("foo", "bar"));
+        var cfg = new ViracochaConfig();
         cfg.getSources().add(src);
-        String serialized = yaml.writeValueAsString(cfg);
-        ViracochaConfig deserialized = yaml.readValue(serialized, ViracochaConfig.class);
+        var serialized = yaml.writeValueAsString(cfg);
+        var deserialized = yaml.readValue(serialized, ViracochaConfig.class);
         assertEquals(1, deserialized.getSources().size());
-        SourceEntry got = deserialized.getSources().get(0);
+        var got = deserialized.getSources().get(0);
         assertEquals("s1", got.getName());
         assertEquals("/tmp/s", got.getPath());
         assertTrue(got.isTemplates(), "templates flag must be true after round-trip");
@@ -34,33 +34,33 @@ class ViracochaConfigV3TypedListTest {
 
     @Test
     void sourceEntryDefaultTemplatesFalse() throws Exception {
-        SourceEntry src = new SourceEntry();
+        var src = new SourceEntry();
         src.setName("s2");
         src.setPath("/tmp/s2");
         // templates not set — defaults to false
-        ViracochaConfig cfg = new ViracochaConfig();
+        var cfg = new ViracochaConfig();
         cfg.getSources().add(src);
-        String serialized = yaml.writeValueAsString(cfg);
-        ViracochaConfig deserialized = yaml.readValue(serialized, ViracochaConfig.class);
+        var serialized = yaml.writeValueAsString(cfg);
+        var deserialized = yaml.readValue(serialized, ViracochaConfig.class);
         assertFalse(deserialized.getSources().get(0).isTemplates(),
             "templates must default to false when not set in YAML");
     }
 
     @Test
     void mappingEntryRoundTripWithAllFields() throws Exception {
-        LinkedHashMap<String, String> params = new LinkedHashMap<>();
+        var params = new LinkedHashMap<String, String>();
         params.put("k", "v");
-        MappingEntry mapping = new MappingEntry("s1", "**/*.md", true, true, params);
-        DestinationEntry dest = new DestinationEntry("d1", "/tmp/d", new LinkedHashMap<>(),
+        var mapping = new MappingEntry("s1", "**/*.md", true, true, params);
+        var dest = new DestinationEntry("d1", "/tmp/d", new LinkedHashMap<>(),
             new ArrayList<>(List.of(mapping)));
-        ViracochaConfig cfg = new ViracochaConfig();
+        var cfg = new ViracochaConfig();
         cfg.getDestinations().add(dest);
-        String serialized = yaml.writeValueAsString(cfg);
-        ViracochaConfig deserialized = yaml.readValue(serialized, ViracochaConfig.class);
-        DestinationEntry gotDest = deserialized.getDestinations().get(0);
+        var serialized = yaml.writeValueAsString(cfg);
+        var deserialized = yaml.readValue(serialized, ViracochaConfig.class);
+        var gotDest = deserialized.getDestinations().get(0);
         assertEquals("d1", gotDest.getName());
         assertEquals(1, gotDest.getMappings().size());
-        MappingEntry gotMapping = gotDest.getMappings().get(0);
+        var gotMapping = gotDest.getMappings().get(0);
         assertEquals("s1", gotMapping.getSourceRef());
         assertEquals("**/*.md", gotMapping.getGlob());
         assertTrue(gotMapping.isRecurse());
@@ -71,11 +71,11 @@ class ViracochaConfigV3TypedListTest {
     @Test
     void mappingEntryDefaultsWhenFieldsAbsent() throws Exception {
         // Write minimal YAML with only sourceRef
-        String minimalYaml = "version: 3\nsources: []\ndestinations:\n" +
+        var minimalYaml = "version: 3\nsources: []\ndestinations:\n" +
             "  - name: d1\n    path: /tmp/d\n    mappings:\n" +
             "      - sourceRef: s1\n";
-        ViracochaConfig deserialized = yaml.readValue(minimalYaml, ViracochaConfig.class);
-        MappingEntry got = deserialized.getDestinations().get(0).getMappings().get(0);
+        var deserialized = yaml.readValue(minimalYaml, ViracochaConfig.class);
+        var got = deserialized.getDestinations().get(0).getMappings().get(0);
         assertNull(got.getGlob(), "glob must be null when not present in YAML");
         assertFalse(got.isRecurse(), "recurse must default to false");
         assertFalse(got.isSync(), "sync must default to false");
@@ -84,13 +84,13 @@ class ViracochaConfigV3TypedListTest {
 
     @Test
     void destinationEntryParametersRoundTrip() throws Exception {
-        LinkedHashMap<String, String> dParams = new LinkedHashMap<>();
+        var dParams = new LinkedHashMap<String, String>();
         dParams.put("key", "val");
-        DestinationEntry dest = new DestinationEntry("d1", "/tmp/d", dParams, new ArrayList<>());
-        ViracochaConfig cfg = new ViracochaConfig();
+        var dest = new DestinationEntry("d1", "/tmp/d", dParams, new ArrayList<>());
+        var cfg = new ViracochaConfig();
         cfg.getDestinations().add(dest);
-        String serialized = yaml.writeValueAsString(cfg);
-        ViracochaConfig deserialized = yaml.readValue(serialized, ViracochaConfig.class);
+        var serialized = yaml.writeValueAsString(cfg);
+        var deserialized = yaml.readValue(serialized, ViracochaConfig.class);
         assertEquals("val", deserialized.getDestinations().get(0).getParameters().get("key"));
     }
 }

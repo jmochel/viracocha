@@ -14,7 +14,8 @@ import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.time.Instant;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 /**
  * Unit tests for DefaultSyncService — all enabled with real assertions.
@@ -32,14 +33,14 @@ class DefaultSyncServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
+        var xdgPaths = new XdgPaths("") {
             @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
             @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
             @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
         };
         configService = new ConfigService(xdgPaths);
         configService.init();
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        var extractor = new FreemarkerVariableExtractor();
         sourceService = new SourceService(configService, extractor);
         destinationService = new DestinationService(configService);
         syncService = new DefaultSyncService(configService);
@@ -50,8 +51,8 @@ class DefaultSyncServiceTest {
     @Test
     void syncCopiesChangedFilesToDestination() throws Exception {
         // Set up source and dest directories
-        Path sourceDir = tempDir.resolve("copy-src-dir");
-        Path destDir = tempDir.resolve("copy-dest-dir");
+        var sourceDir = tempDir.resolve("copy-src-dir");
+        var destDir = tempDir.resolve("copy-dest-dir");
         Files.createDirectories(sourceDir);
         Files.createDirectories(destDir);
 
@@ -73,7 +74,7 @@ class DefaultSyncServiceTest {
         Files.setLastModifiedTime(sourceDir.resolve("file.txt"),
             FileTime.from(Instant.now().plusSeconds(10)));
 
-        SyncResult result = syncService.sync("copy-dest", false, false);
+        var result = syncService.sync("copy-dest", false, false);
 
         assertEquals(1, result.copied(), "Should report 1 copied");
         assertEquals(0, result.conflicts(), "Should report 0 conflicts");
@@ -85,8 +86,8 @@ class DefaultSyncServiceTest {
 
     @Test
     void syncSkipsContentIdenticalFiles() throws Exception {
-        Path sourceDir = tempDir.resolve("identical-src-dir");
-        Path destDir = tempDir.resolve("identical-dest-dir");
+        var sourceDir = tempDir.resolve("identical-src-dir");
+        var destDir = tempDir.resolve("identical-dest-dir");
         Files.createDirectories(sourceDir);
         Files.createDirectories(destDir);
 
@@ -102,7 +103,7 @@ class DefaultSyncServiceTest {
         Files.setLastModifiedTime(sourceDir.resolve("file.txt"),
             FileTime.from(Instant.now().plusSeconds(5)));
 
-        SyncResult result = syncService.sync("identical-dest", false, false);
+        var result = syncService.sync("identical-dest", false, false);
 
         assertEquals(1, result.skipped(), "Should report 1 skipped");
         assertEquals(0, result.copied(), "Should report 0 copied");
@@ -113,8 +114,8 @@ class DefaultSyncServiceTest {
 
     @Test
     void syncIgnoresNonSyncMappings() throws Exception {
-        Path sourceDir = tempDir.resolve("nosync-src-dir");
-        Path destDir = tempDir.resolve("nosync-dest-dir");
+        var sourceDir = tempDir.resolve("nosync-src-dir");
+        var destDir = tempDir.resolve("nosync-dest-dir");
         Files.createDirectories(sourceDir);
         Files.createDirectories(destDir);
 
@@ -125,7 +126,7 @@ class DefaultSyncServiceTest {
         // sync=false: mapping should be ignored
         destinationService.addMapping("nosync-dest", "nosync-src", null, false, false);
 
-        SyncResult result = syncService.sync("nosync-dest", false, false);
+        var result = syncService.sync("nosync-dest", false, false);
 
         assertEquals(0, result.copied(), "Should report 0 copied for non-sync mapping");
         assertEquals(0, result.skipped(), "Should report 0 skipped for non-sync mapping");
@@ -138,8 +139,8 @@ class DefaultSyncServiceTest {
 
     @Test
     void syncSkipsTemplateSources() throws Exception {
-        Path sourceDir = tempDir.resolve("tmpl-src-dir");
-        Path destDir = tempDir.resolve("tmpl-dest-dir");
+        var sourceDir = tempDir.resolve("tmpl-src-dir");
+        var destDir = tempDir.resolve("tmpl-dest-dir");
         Files.createDirectories(sourceDir);
         Files.createDirectories(destDir);
 
@@ -151,7 +152,7 @@ class DefaultSyncServiceTest {
         // sync=true: mapping wants to sync, but source.templates=true should block it
         destinationService.addMapping("tmpl-dest", "tmpl-src", null, false, true);
 
-        SyncResult result = syncService.sync("tmpl-dest", false, false);
+        var result = syncService.sync("tmpl-dest", false, false);
 
         assertEquals(0, result.copied(), "Should report 0 copied for template source");
         assertEquals(0, result.conflicts(), "Should report 0 conflicts for template source");
@@ -163,8 +164,8 @@ class DefaultSyncServiceTest {
 
     @Test
     void syncDetectsConflictWhenDestNewer() throws Exception {
-        Path sourceDir = tempDir.resolve("conflict-src-dir");
-        Path destDir = tempDir.resolve("conflict-dest-dir");
+        var sourceDir = tempDir.resolve("conflict-src-dir");
+        var destDir = tempDir.resolve("conflict-dest-dir");
         Files.createDirectories(sourceDir);
         Files.createDirectories(destDir);
 
@@ -180,7 +181,7 @@ class DefaultSyncServiceTest {
         destinationService.addDestination("conflict-dest", destDir.toString());
         destinationService.addMapping("conflict-dest", "conflict-src", null, false, true);
 
-        SyncResult result = syncService.sync("conflict-dest", false, false);
+        var result = syncService.sync("conflict-dest", false, false);
 
         assertEquals(1, result.conflicts(), "Should report 1 conflict");
         assertFalse(result.conflictRecords().isEmpty(), "conflictRecords should be non-empty");
@@ -192,8 +193,8 @@ class DefaultSyncServiceTest {
 
     @Test
     void syncNoConflictWhenContentIdentical() throws Exception {
-        Path sourceDir = tempDir.resolve("noconflict-src-dir");
-        Path destDir = tempDir.resolve("noconflict-dest-dir");
+        var sourceDir = tempDir.resolve("noconflict-src-dir");
+        var destDir = tempDir.resolve("noconflict-dest-dir");
         Files.createDirectories(sourceDir);
         Files.createDirectories(destDir);
 
@@ -209,7 +210,7 @@ class DefaultSyncServiceTest {
         destinationService.addDestination("noconflict-dest", destDir.toString());
         destinationService.addMapping("noconflict-dest", "noconflict-src", null, false, true);
 
-        SyncResult result = syncService.sync("noconflict-dest", false, false);
+        var result = syncService.sync("noconflict-dest", false, false);
 
         assertEquals(0, result.conflicts(), "Should report 0 conflicts when content identical");
         assertEquals(1, result.skipped(), "Should report 1 skipped when content identical");

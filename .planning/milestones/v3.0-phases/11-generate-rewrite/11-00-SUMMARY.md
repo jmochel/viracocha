@@ -97,7 +97,7 @@ Each task was committed atomically:
 
 - **Found during:** Task 2 (GenerateCommandTest - generateCommandRequiresDestinationName)
 - **Issue:** Plan specified `commandLine.execute("generate")` but when `new CommandLine(new GenerateCommand(...))` is the root, passing "generate" routes to a non-existent subcommand and fails with exit code 2 for wrong reason (unrecognized argument), not the missing-option check
-- **Fix:** Changed to `commandLine.execute()` (no arguments) so picocli calls `GenerateCommand.call()` directly, which then checks for missing `--destination-name`
+- **Fix:** Changed to `commandLine.execute()` (no arguments) so picocli calls `GenerateCommand.call()` directly, which then checks for missing `--dest`
 - **Files modified:** src/test/java/org/saltations/generate/GenerateCommandTest.java
 - **Verification:** Test passes with exit code 2 and correct stderr message
 - **Committed in:** `60e0c47` (Task 2 commit)

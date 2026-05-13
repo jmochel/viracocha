@@ -10,7 +10,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * Integration tests for InitCommand.
@@ -27,7 +28,7 @@ class InitCommandTest {
 
     @BeforeEach
     void setUp() {
-        XdgPaths xdgPaths = new XdgPaths() {
+        var xdgPaths = new XdgPaths("") {
             @Override
             public Path configFile() {
                 return tempDir.resolve("viracocha").resolve("config.yaml");
@@ -41,8 +42,8 @@ class InitCommandTest {
                 return tempDir.resolve("share").resolve("viracocha");
             }
         };
-        ConfigService configService = new ConfigService(xdgPaths);
-        InitCommand command = new InitCommand(configService);
+        var configService = new ConfigService(xdgPaths);
+        var command = new InitCommand(configService);
         commandLine = new CommandLine(command);
 
         stdout = new ByteArrayOutputStream();
@@ -53,7 +54,7 @@ class InitCommandTest {
 
     @Test
     void initOnFreshDirPrintsConfirmationAndExitsZero() {
-        int exitCode = commandLine.execute();
+        var exitCode = commandLine.execute();
         assertEquals(0, exitCode, "init on fresh dir must exit 0");
         assertTrue(stdout.toString().contains("Config initialized at"),
             "Output must contain 'Config initialized at'");
@@ -63,7 +64,7 @@ class InitCommandTest {
     void reInitPrintsAlreadyInitializedAndExitsZero() {
         commandLine.execute(); // first init
         stdout.reset();
-        int exitCode = commandLine.execute(); // second init
+        var exitCode = commandLine.execute(); // second init
         assertEquals(0, exitCode, "re-init must exit 0");
         assertTrue(stdout.toString().contains("Config already initialized at"),
             "Re-init output must contain 'Config already initialized at'");

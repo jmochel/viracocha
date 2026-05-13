@@ -9,7 +9,6 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.Spec;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.concurrent.Callable;
 
 /**
@@ -26,7 +25,7 @@ public class GenerateCommand implements Callable<Integer> {
     @Spec
     CommandSpec spec;
 
-    @Option(names = {"--destination-name"}, description = "Destination name in configuration")
+    @Option(names = {"--dest"}, description = "Destination name in configuration")
     private String projectName;
 
     @Option(names = {"--dry-run"}, description = "Show actions without writing files")
@@ -45,12 +44,12 @@ public class GenerateCommand implements Callable<Integer> {
     @Override
     public Integer call() {
         if (projectName == null || projectName.isBlank()) {
-            spec.commandLine().getErr().println("Missing required option: '--destination-name'");
+            spec.commandLine().getErr().println("Missing required option: '--dest'");
             return 2;
         }
         try {
-            PrintWriter out = spec.commandLine().getOut();
-            GenerationResult result = generatorService.generate(projectName, dryRun, verbose, out, System.in);
+            var out = spec.commandLine().getOut();
+            var result = generatorService.generate(projectName, dryRun, verbose, out, System.in);
             if (verbose) {
                 for (String line : result.verboseLines()) {
                     spec.commandLine().getOut().println(line);

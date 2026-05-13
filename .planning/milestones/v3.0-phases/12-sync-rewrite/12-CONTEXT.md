@@ -45,7 +45,7 @@ Rewrite `DefaultSyncService` for the v3 sources/destinations/mappings model: wal
 
 ### SyncCommand Options
 - **D-10:** Remove `--mapping-id` option from `SyncCommand` entirely — no SYN requirement covers per-mapping filtering and it was a v2 subscription artifact.
-- **D-11:** Keep `--destination-name` as **required** (exit 2 if omitted, same pattern as `GenerateCommand`). This is consistent across all destination-targeting commands.
+- **D-11:** Keep `--dest` as **required** (exit 2 if omitted, same pattern as `GenerateCommand`). This is consistent across all destination-targeting commands.
 - **D-12:** Exit codes: 0 on success (including all-skipped), 1 on conflict or IO error, 2 on missing required option.
 
 ### Output Format
@@ -74,7 +74,7 @@ Rewrite `DefaultSyncService` for the v3 sources/destinations/mappings model: wal
 ### Key source files to implement or modify
 - `src/main/java/org/saltations/sync/DefaultSyncService.java` — stub to fully implement (v3 traversal logic goes here)
 - `src/main/java/org/saltations/sync/SyncService.java` — interface to redesign for v3 method signature
-- `src/main/java/org/saltations/sync/SyncCommand.java` — existing CLI shell; remove --mapping-id, update to use new SyncResult, adjust for required --destination-name
+- `src/main/java/org/saltations/sync/SyncCommand.java` — existing CLI shell; remove --mapping-id, update to use new SyncResult, adjust for required --dest
 - `src/main/java/org/saltations/sync/SyncEngineResult.java` — DELETE (v2 artifact)
 - `src/main/java/org/saltations/sync/SyncSubscriptionResult.java` — DELETE (v2 artifact)
 - `src/main/java/org/saltations/sync/SyncConflictRecord.java` — ADAPT (remove subscriptionId field)
@@ -108,7 +108,7 @@ Rewrite `DefaultSyncService` for the v3 sources/destinations/mappings model: wal
 - `HiddenPathFilter` (`infra/`): `hasHiddenPathSegment(Path root, Path path)` — same usage as in GeneratorService.
 - `ConfigService` (`config/`): Already injected into `DefaultSyncService` stub.
 - `SyncConflictKind` (`sync/`): `CONTENT_MISMATCH`, `TYPE_MISMATCH`, `SYMLINK_UNSUPPORTED` — reusable as-is; `CONTENT_MISMATCH` covers timestamp-detected conflicts.
-- `SyncCommand` (`sync/`): CLI shell is partially aligned with v3 — has `--destination-name`, `--dry-run`, `--verbose`, `--json`; needs `--mapping-id` removed and result type updated.
+- `SyncCommand` (`sync/`): CLI shell is partially aligned with v3 — has `--dest`, `--dry-run`, `--verbose`, `--json`; needs `--mapping-id` removed and result type updated.
 
 ### Established Patterns
 - `@Singleton` + `@Inject` constructor injection on all services
@@ -139,7 +139,7 @@ Rewrite `DefaultSyncService` for the v3 sources/destinations/mappings model: wal
 ## Deferred Ideas
 
 - **Per-mapping filter (`--mapping-id`)**: No SYN requirement; removed for v3 clean break. Add in a future phase if needed.
-- **`--destination-name` optional (sync all destinations)**: SC3 wording could support this, but user chose required for consistency with generate. Revisit in a future phase if all-destination sync is needed.
+- **`--dest` optional (sync all destinations)**: SC3 wording could support this, but user chose required for consistency with generate. Revisit in a future phase if all-destination sync is needed.
 - **Template source sync**: Skipped entirely for Phase 12. If template re-expansion on sync is needed, that's a separate phase decision.
 
 </deferred>

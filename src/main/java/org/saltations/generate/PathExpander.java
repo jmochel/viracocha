@@ -2,7 +2,6 @@ package org.saltations.generate;
 
 import jakarta.inject.Singleton;
 import freemarker.template.Configuration;
-import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import freemarker.template.TemplateExceptionHandler;
 import freemarker.template.Version;
@@ -35,15 +34,15 @@ public final class PathExpander {
             throw new IllegalArgumentException("segment must not be null");
         }
         Map<String, String> root = model != null ? model : Map.of();
-        StringTemplateLoader loader = new StringTemplateLoader();
+        var loader = new StringTemplateLoader();
         loader.putTemplate("seg", segment);
-        Configuration cfg = new Configuration(FM_VERSION);
+        var cfg = new Configuration(FM_VERSION);
         cfg.setTemplateLoader(loader);
         cfg.setDefaultEncoding("UTF-8");
         cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
         try {
-            Template template = cfg.getTemplate("seg");
-            StringWriter out = new StringWriter();
+            var template = cfg.getTemplate("seg");
+            var out = new StringWriter();
             template.process(root, out);
             return out.toString();
         } catch (TemplateException | IOException e) {

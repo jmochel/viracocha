@@ -7,7 +7,6 @@ import org.saltations.config.ConfigService;
 import org.saltations.infra.FreemarkerVariableExtractor;
 import org.saltations.infra.XdgPaths;
 import org.saltations.model.DestinationEntry;
-import org.saltations.model.MappingEntry;
 import org.saltations.source.SourceService;
 
 import java.nio.file.Files;
@@ -33,14 +32,14 @@ class DestinationServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
+        var xdgPaths = new XdgPaths("") {
             @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
             @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
             @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
         };
         configService = new ConfigService(xdgPaths);
         configService.init();
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        var extractor = new FreemarkerVariableExtractor();
         sourceService = new SourceService(configService, extractor);
         destinationService = new DestinationService(configService);
     }
@@ -68,7 +67,7 @@ class DestinationServiceTest {
 
     @Test
     void addDestinationSuccessReturnsEntryWithCorrectFields() throws Exception {
-        DestinationEntry result = destinationService.addDestination("my-ws", "/home/user/workspace");
+        var result = destinationService.addDestination("my-ws", "/home/user/workspace");
         assertEquals("my-ws", result.getName());
         assertEquals("/home/user/workspace", result.getPath());
     }
@@ -77,7 +76,7 @@ class DestinationServiceTest {
 
     @Test
     void addDestinationStoresPathAsIs() throws Exception {
-        DestinationEntry result = destinationService.addDestination("tilde-ws", "~/workspace");
+        var result = destinationService.addDestination("tilde-ws", "~/workspace");
         assertEquals("~/workspace", result.getPath());
     }
 
@@ -108,7 +107,7 @@ class DestinationServiceTest {
     @Test
     void getDestinationReturnsPresentForKnownName() throws Exception {
         destinationService.addDestination("known", "/tmp/known");
-        Optional<DestinationEntry> result = destinationService.getDestination("known");
+        var result = destinationService.getDestination("known");
         assertTrue(result.isPresent());
         assertEquals("known", result.get().getName());
     }
@@ -156,9 +155,9 @@ class DestinationServiceTest {
         sourceService.addSource("my-src", srcDir.toString(), false);
         destinationService.addDestination("my-dest", "/tmp/my-dest");
         destinationService.addMapping("my-dest", "my-src", "**/*.md", true, false);
-        List<MappingEntry> mappings = destinationService.listMappings("my-dest");
+        var mappings = destinationService.listMappings("my-dest");
         assertEquals(1, mappings.size());
-        MappingEntry m = mappings.get(0);
+        var m = mappings.get(0);
         assertEquals("my-src", m.getSourceRef());
         assertEquals("**/*.md", m.getGlob());
         assertTrue(m.isRecurse());
@@ -192,7 +191,7 @@ class DestinationServiceTest {
         destinationService.addMapping("dest3", "src2", null, false, false);
         destinationService.addMapping("dest3", "src2", "*.md", false, false);
         assertTrue(destinationService.removeMapping("dest3", 0));
-        List<MappingEntry> remaining = destinationService.listMappings("dest3");
+        var remaining = destinationService.listMappings("dest3");
         assertEquals(1, remaining.size());
         assertEquals("*.md", remaining.get(0).getGlob());
     }

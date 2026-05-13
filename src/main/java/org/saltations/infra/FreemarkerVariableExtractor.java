@@ -10,10 +10,8 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Extracts Freemarker variable names from an archetype directory tree.
@@ -43,10 +41,10 @@ public class FreemarkerVariableExtractor {
      * @throws IOException if a file cannot be read or contains a malformed expression
      */
     public List<String> extractFromDirectory(Path root) throws IOException {
-        Set<String> vars = new LinkedHashSet<>();
+        var vars = new LinkedHashSet<String>();
 
-        try (Stream<Path> stream = Files.walk(root)) {
-            List<Path> paths = stream
+        try (var stream = Files.walk(root)) {
+            var paths = stream
                 .filter(p -> !HiddenPathFilter.hasHiddenPathSegment(root, p))
                 .collect(Collectors.toList());
 
@@ -63,13 +61,13 @@ public class FreemarkerVariableExtractor {
             }
         }
 
-        List<String> sorted = new ArrayList<>(vars);
+        var sorted = new ArrayList<String>(vars);
         Collections.sort(sorted);
         return sorted;
     }
 
     private void extractFromString(String text, Set<String> vars) {
-        Matcher m = VAR_PATTERN.matcher(text);
+        var m = VAR_PATTERN.matcher(text);
         while (m.find()) {
             vars.add(m.group(1));
         }

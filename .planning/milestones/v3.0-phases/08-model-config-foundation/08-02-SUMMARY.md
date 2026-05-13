@@ -78,8 +78,8 @@ Confirmed all v2 package deletion completed in Plan 01:
 Updated `ViracochaCommandTest` to add `assertFalse` assertions ensuring v2 command names are absent from `--help` output.
 
 Found that GenerateCommand and SyncCommand still used v2 terminology ("project mappings", "per subscriptions", `--project-name`, `--subscription` options) causing the `assertFalse(help.contains("project/subscription"))` assertions to fail. Updated both commands to v3 terminology:
-- GenerateCommand: description "Generate workspace files from sources to a destination." and `--destination-name` option
-- SyncCommand: description "Sync files from source directories to destination workspaces per mapping rules." and `--destination-name`/`--mapping-id` options
+- GenerateCommand: description "Generate workspace files from sources to a destination." and `--dest` option
+- SyncCommand: description "Sync files from source directories to destination workspaces per mapping rules." and `--dest`/`--mapping-id` options
 
 Also fixed a stale Javadoc `@link` in PathExpander pointing to the deleted `org.saltations.archetype.FreemarkerVariableExtractor` — updated to `org.saltations.infra.FreemarkerVariableExtractor`.
 

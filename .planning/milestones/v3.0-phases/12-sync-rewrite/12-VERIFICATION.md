@@ -26,7 +26,7 @@ All truths are drawn from the must_haves frontmatter across plans 00–03 and fr
 | 3  | SyncConflictRecord no longer has a subscriptionId field                                       | VERIFIED   | grep returns no match for subscriptionId in SyncConflictRecord.java                     |
 | 4  | SyncService interface has only the v3 sync() method signature                                 | VERIFIED   | File contains exactly `SyncResult sync(String destinationName, boolean dryRun, boolean verbose) throws IOException;` |
 | 5  | DefaultSyncService compiles with the new interface (full traversal, no UnsupportedOperationException) | VERIFIED | No UnsupportedOperationException in file; Files.getLastModifiedTime, Files.mismatch, REPLACE_EXISTING all present |
-| 6  | SyncCommand compiles with SyncResult; has --destination-name; no --mapping-id                 | VERIFIED   | File verified: destinationName field, no mapping-id, no subscriptionId                  |
+| 6  | SyncCommand compiles with SyncResult; has --dest; no --mapping-id                 | VERIFIED   | File verified: destinationName field, no mapping-id, no subscriptionId                  |
 | 7  | All DefaultSyncServiceTest tests pass with real assertions (0 @Disabled, 6 tests)             | VERIFIED   | Tests run: 6, Failures: 0, Skipped: 0; 18 real assertions; zero @Disabled               |
 | 8  | All SyncCommandTest tests pass with real assertions (0 @Disabled, 7 tests)                    | VERIFIED   | Tests run: 7, Failures: 0, Skipped: 0; 22 real assertions; zero @Disabled               |
 | 9  | vira sync copies a changed source file (newer mtime, different content) to the destination    | VERIFIED   | syncCopiesChangedFilesToDestination passes: result.copied()==1, dest content updated     |
@@ -47,7 +47,7 @@ All truths are drawn from the must_haves frontmatter across plans 00–03 and fr
 | `src/main/java/org/saltations/sync/SyncConflictRecord.java`          | Adapted conflict record without subscriptionId | VERIFIED | @Data Lombok class; relativePath, kind, message only; no subscriptionId |
 | `src/main/java/org/saltations/sync/SyncService.java`                 | v3 interface with sync() only                | VERIFIED   | Single method: SyncResult sync(String, boolean, boolean) throws IOException |
 | `src/main/java/org/saltations/sync/DefaultSyncService.java`          | Full traversal implementation                | VERIFIED   | Files.getLastModifiedTime, Files.mismatch, REPLACE_EXISTING, isSync(), isTemplates(), CONTENT_MISMATCH all present |
-| `src/main/java/org/saltations/sync/SyncCommand.java`                 | v3 command with --destination-name required  | VERIFIED   | destinationName field, exit-2 guard, --dry-run, --verbose, --json, summary line |
+| `src/main/java/org/saltations/sync/SyncCommand.java`                 | v3 command with --dest required  | VERIFIED   | destinationName field, exit-2 guard, --dry-run, --verbose, --json, summary line |
 | `src/test/java/org/saltations/sync/DefaultSyncServiceTest.java`      | Enabled tests for SYN-01 and SYN-02          | VERIFIED   | 6 tests, 0 @Disabled, 18 real assertions, all passing               |
 | `src/test/java/org/saltations/sync/SyncCommandTest.java`             | Enabled tests for SYN-02 exit code and SYN-03 through SYN-07 | VERIFIED | 7 tests, 0 @Disabled, 22 real assertions, all passing |
 
@@ -93,7 +93,7 @@ Deleted artifacts confirmed absent:
 |-------------|-----------------|--------------------------------------------------------------------------|-------------|-------------------------------------------------------------------|
 | SYN-01      | 00, 01, 02      | vira sync copies changed source files for all mappings with sync: true   | SATISFIED   | syncCopiesChangedFilesToDestination, syncSkipsContentIdenticalFiles, syncIgnoresNonSyncMappings, syncSkipsTemplateSources all pass |
 | SYN-02      | 00, 01, 02, 03  | vira sync detects conflicts; dest file content differs → exit 1          | SATISFIED   | syncDetectsConflictWhenDestNewer, syncNoConflictWhenContentIdentical, syncCommandReturnsExitOneOnConflict all pass |
-| SYN-03      | 00, 01, 03      | vira sync accepts --destination-name                                     | SATISFIED   | syncCommandRequiresDestinationName (exit 2 without it), syncCommandWithDestinationNameRoutes both pass |
+| SYN-03      | 00, 01, 03      | vira sync accepts --dest                                     | SATISFIED   | syncCommandRequiresDestinationName (exit 2 without it), syncCommandWithDestinationNameRoutes both pass |
 | SYN-04      | 00, 01, 03      | vira sync supports --dry-run                                             | SATISFIED   | syncCommandDryRunReportsWithoutWriting passes; no file written, counted in summary |
 | SYN-05      | 00, 01, 03      | vira sync supports --verbose                                             | SATISFIED   | syncCommandVerbosePrintsPerFileLines passes; "Copied " per-file and "Copied: " summary both present |
 | SYN-06      | 00, 01, 03      | vira sync supports --json for machine-readable output                    | SATISFIED   | syncCommandJsonOutputsMachineReadable passes; JSON starts with {, contains copied/skipped/conflicts keys |
@@ -130,7 +130,7 @@ The phase goal is fully achieved:
 3. SyncConflictRecord is adapted (subscriptionId removed)
 4. SyncService interface is redesigned for v3 API
 5. DefaultSyncService implements full traversal logic with timestamp-based conflict detection
-6. SyncCommand is updated with --destination-name required, correct exit codes, --dry-run, --verbose, --json, and summary output
+6. SyncCommand is updated with --dest required, correct exit codes, --dry-run, --verbose, --json, and summary output
 7. All 13 tests (6 DefaultSyncServiceTest + 7 SyncCommandTest) are enabled with real assertions and pass
 8. Full suite of 161 tests passes with BUILD SUCCESS
 

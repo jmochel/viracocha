@@ -30,14 +30,11 @@ class SourceServiceTest {
 
     @BeforeEach
     void setUp() throws Exception {
-        XdgPaths xdgPaths = new XdgPaths() {
-            @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
-            @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
-            @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
-        };
+        var xdgPaths = new XdgPaths(tempDir.toAbsolutePath().toString());
+
         configService = new ConfigService(xdgPaths);
         configService.init();  // create empty v3 config before each test
-        FreemarkerVariableExtractor extractor = new FreemarkerVariableExtractor();
+        var extractor = new FreemarkerVariableExtractor();
         sourceService = new SourceService(configService, extractor);
     }
 
@@ -64,7 +61,7 @@ class SourceServiceTest {
 
     @Test
     void addSourceRejectsFilePath() throws Exception {
-        Path file = tempDir.resolve("notadir.txt");
+        var file = tempDir.resolve("notadir.txt");
         Files.writeString(file, "content");
         IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
             () -> sourceService.addSource("x", file.toString(), false));
@@ -87,7 +84,7 @@ class SourceServiceTest {
     @Test
     void addSourceSuccessReturnsEntry() throws Exception {
         Path dir = Files.createDirectory(tempDir.resolve("src-dir"));
-        SourceEntry result = sourceService.addSource("my-src", dir.toString(), false);
+        var result = sourceService.addSource("my-src", dir.toString(), false);
         assertEquals("my-src", result.getName());
         assertEquals(dir.toAbsolutePath().normalize().toString(), result.getPath());
         assertFalse(result.isTemplates());
@@ -102,7 +99,7 @@ class SourceServiceTest {
         Files.writeString(templateDir.resolve("readme.md"),
             "# ${projectName}\nAuthor: ${authorName}",
             StandardCharsets.UTF_8);
-        SourceEntry result = sourceService.addSource("tmpl-src", templateDir.toString(), true);
+        var result = sourceService.addSource("tmpl-src", templateDir.toString(), true);
         assertTrue(result.isTemplates());
         List<String> params = result.getParameters();
         assertTrue(params.contains("projectName"), "Expected 'projectName' in parameters");
@@ -139,7 +136,7 @@ class SourceServiceTest {
     void getSourceReturnsPresentForKnownName() throws Exception {
         Path dir = Files.createDirectory(tempDir.resolve("src1"));
         sourceService.addSource("known", dir.toString(), false);
-        Optional<SourceEntry> result = sourceService.getSource("known");
+        var result = sourceService.getSource("known");
         assertTrue(result.isPresent());
         assertEquals("known", result.get().getName());
     }

@@ -303,7 +303,7 @@ Every command test uses this exact setup structure (copied from Phase 9):
 @TempDir Path tempDir;
 
 @BeforeEach void setUp() throws Exception {
-    XdgPaths xdgPaths = new XdgPaths() {
+    XdgPaths xdgPaths = new XdgPaths("") {
         @Override public Path configFile() { return tempDir.resolve("viracocha").resolve("config.yaml"); }
         @Override public Path configDir()  { return tempDir.resolve("viracocha"); }
         @Override public Path dataDir()    { return tempDir.resolve("share").resolve("viracocha"); }
